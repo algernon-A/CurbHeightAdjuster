@@ -229,6 +229,9 @@ namespace CurbHeightAdjuster
         /// <param name="adjustment">Upwards adjustment to final y height (if any)</param>
         private static void RaiseMesh(Mesh mesh, float adjustment = 0f)
         {
+            // Adjusted vertex counter.
+            int changedVertices = 0;
+
             // Create new vertices array (changing individual elements within the existing array won't work with locked meshes).
             Vector3[] newVertices = new Vector3[mesh.vertices.Length];
             mesh.vertices.CopyTo(newVertices, 0);
@@ -239,11 +242,16 @@ namespace CurbHeightAdjuster
                 if (newVertices[j].y < 0.0f && newVertices[j].y > -0.31f)
                 {
                     newVertices[j].y = (newVertices[j].y * newCurbMultiplier) + adjustment;
+                    ++changedVertices;
                 }
             }
 
-            // Assign new vertices to mesh.
-            mesh.vertices = newVertices;
+            // If we changed at least four vertices, assign new vertices to mesh.
+            // Don't change the mesh if we didn't get at least one quad, to avoid minor rendering glitches with flat LODs.
+            if (changedVertices > 3)
+            {
+                mesh.vertices = newVertices;
+            }
         }
     }
 }
