@@ -8,11 +8,33 @@ namespace CurbHeightAdjuster
     /// </summary>
     public static class CurbHeight
     {
-
-        // New curb height.
+        // Original and default new curb heights.
         private const float OriginalCurbHeight = -0.30f;
-        private const float NewCurbMultiplier = 0.5f;
-        private const float NewCurbHeight = OriginalCurbHeight * NewCurbMultiplier;
+        private const float DefaultNewCurbHeight = -0.15f;
+
+        // Maximum bounds.
+        internal const float MinCurbHeight = 0.01f;
+        internal const float MaxCurbHeight = 0.29f;
+
+        // Curb height multiiplier.
+        private static float newCurbMultiplier = DefaultNewCurbHeight / OriginalCurbHeight;
+
+        
+        /// <summary>
+        /// New curb height to apply (positive figure, in cm).
+        /// </summary>
+        internal static float NewCurbHeight
+        {
+            get => -newCurbHeight;
+
+            set
+            {
+                // Update multiplier with change in value.
+                newCurbHeight = -Mathf.Clamp(value, MinCurbHeight, MaxCurbHeight);
+                newCurbMultiplier = newCurbHeight / OriginalCurbHeight;
+            }
+        }
+        private static float newCurbHeight = DefaultNewCurbHeight;
 
 
         /// <summary>
@@ -41,7 +63,7 @@ namespace CurbHeightAdjuster
                     // Raise network surface level.
                     if (network.m_surfaceLevel == -0.3f)
                     {
-                        network.m_surfaceLevel = NewCurbHeight;
+                        network.m_surfaceLevel = newCurbHeight;
                     }
 
                     // Raise segments - iterate through each segment in net.
@@ -101,7 +123,7 @@ namespace CurbHeightAdjuster
                         {
                             if (lane.m_verticalOffset == OriginalCurbHeight)
                             {
-                                lane.m_verticalOffset = NewCurbHeight;
+                                lane.m_verticalOffset = newCurbHeight;
                             }
                         }
                     }
@@ -192,7 +214,7 @@ namespace CurbHeightAdjuster
                         // Raise props in building.
                         foreach (BuildingInfo.Prop prop in building.m_props)
                         {
-                            prop.m_position.y -= (OriginalCurbHeight - NewCurbHeight);
+                            prop.m_position.y -= (OriginalCurbHeight - newCurbHeight);
                         }
                     }
                 }
@@ -216,7 +238,7 @@ namespace CurbHeightAdjuster
             {
                 if (newVertices[j].y < 0.0f && newVertices[j].y > -0.31f)
                 {
-                    newVertices[j].y = (newVertices[j].y * NewCurbMultiplier) + adjustment;
+                    newVertices[j].y = (newVertices[j].y * newCurbMultiplier) + adjustment;
                 }
             }
 
