@@ -1,8 +1,41 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 
 namespace CurbHeightAdjuster
 {
+    /// <summary>
+    /// Class to hold original data for networks (prior to curb height alteration).
+    /// </summary>
+    public class CurbRecord
+    {
+        // Network surface level.
+        public float surfaceLevel;
+
+        // Network segment vertices.
+        public Dictionary<NetInfo.Segment, Vector3[]> segmentDict = new Dictionary<NetInfo.Segment, Vector3[]>();
+
+        // Network node vertices.
+        public Dictionary<NetInfo.Node, Vector3[]> nodeDict = new Dictionary<NetInfo.Node, Vector3[]>();
+
+        // Network lane vertical offsets.
+        public Dictionary<NetInfo.Lane, float> laneDict = new Dictionary<NetInfo.Lane, float>();
+    }
+
+
+    /// <summary>
+    /// Class to hold original data for parking assets (prior to curb height alteration).
+    /// </summary>
+    public class ParkingRecord
+    {
+        // Building mesh vertices.
+        public Vector3[] vertices;
+
+        // Prop heights.
+        public Dictionary<BuildingInfo.Prop, float> propHeights = new Dictionary<BuildingInfo.Prop, float>();
+    }
+
+
     /// <summary>
     /// Harmony patch to change curb hights on net load.
     /// </summary>
@@ -16,10 +49,19 @@ namespace CurbHeightAdjuster
         internal const float MinCurbHeight = 0.01f;
         internal const float MaxCurbHeight = 0.29f;
 
+        // Additional adjustment for parking lot raising.
+        private const float ParkingAdjustment = 0.005f;
+
         // Curb height multiiplier.
         private static float newCurbMultiplier = DefaultNewCurbHeight / OriginalCurbHeight;
 
-        
+        // Dictionary of altered nets.
+        private readonly static Dictionary<NetInfo, CurbRecord> curbRecords = new Dictionary<NetInfo, CurbRecord>();
+
+        // Dictionary of altered parking buildings.
+        private readonly static Dictionary<BuildingInfo, ParkingRecord> parkingRecords = new Dictionary<BuildingInfo, ParkingRecord>();
+
+
         /// <summary>
         /// New curb height to apply (positive figure, in cm).
         /// </summary>
@@ -35,6 +77,12 @@ namespace CurbHeightAdjuster
             }
         }
         private static float newCurbHeight = DefaultNewCurbHeight;
+
+
+        /// <summary>
+        /// Determines if lods are also adjusted.
+        /// </summary>
+        internal static bool RaiseLods { get; set; } = false;
 
 
         /// <summary>
@@ -60,9 +108,21 @@ namespace CurbHeightAdjuster
                 NetAI netAI = network.m_netAI;
                 if (netAI is RoadAI || netAI is RoadBridgeAI || netAI is RoadTunnelAI)
                 {
+                    // Dirty flag.
+                    bool netAltered = false;
+
+                    // Curb record for this prefab.
+                    CurbRecord curbRecord = new CurbRecord();
+
+
                     // Raise network surface level.
                     if (network.m_surfaceLevel == -0.3f)
                     {
+                        // Record original value.
+                        netAltered = true;
+                        curbRecord.surfaceLevel = network.m_surfaceLevel;
+
+                        // Set new value.
                         network.m_surfaceLevel = newCurbHeight;
                     }
 
@@ -104,9 +164,16 @@ namespace CurbHeightAdjuster
                         {
                             if (count15 < 8)
                             {
-                                // Eligibile target; raise vertices.
+                                // Eligibile target; record original value.
+                                netAltered = true;
+                                curbRecord.segmentDict.Add(segment, vertices);
+                                
+                                // Raise vertices.
                                 RaiseMesh(segment.m_segmentMesh);
-                                RaiseMesh(segment.m_lodMesh);
+                                if (RaiseLods)
+                                {
+                                    RaiseMesh(segment.m_lodMesh);
+                                }
                             }
                             else
                             {
@@ -123,6 +190,11 @@ namespace CurbHeightAdjuster
                         {
                             if (lane.m_verticalOffset == OriginalCurbHeight)
                             {
+                                // Record original value.
+                                netAltered = true;
+                                curbRecord.laneDict.Add(lane, lane.m_verticalOffset);
+
+                                // Apply new curb height.
                                 lane.m_verticalOffset = newCurbHeight;
                             }
                         }
@@ -166,15 +238,28 @@ namespace CurbHeightAdjuster
                         {
                             if (count15 < 20)
                             {
-                                // Eligibile target; raise vertices.
+                                // Eligibile target; record original value.
+                                netAltered = true;
+                                curbRecord.nodeDict.Add(node, vertices);
+
+                                // Raise vertices.
                                 RaiseMesh(node.m_nodeMesh);
-                                RaiseMesh(node.m_lodMesh);
+                                if (RaiseLods)
+                                {
+                                    RaiseMesh(node.m_lodMesh);
+                                }
                             }
                             else
                             {
                                 Logging.Message("node vertices filter failed with count15 ", count15);
                             }
                         }
+                    }
+
+                    // If the net was altered, record the created curbRecord.
+                    if (netAltered)
+                    {
+                        curbRecords.Add(network, curbRecord);
                     }
                 }
             }
@@ -183,6 +268,7 @@ namespace CurbHeightAdjuster
 
         /// <summary>
         /// Raises 'parking lot roads' parking lot 'buildings' from -30cm to -15cm.
+        /// Called via transpiler insert.
         /// </summary>
         public static void RaiseParkingLots()
         {
@@ -208,14 +294,134 @@ namespace CurbHeightAdjuster
                     {
                         // Found a match - raise the mesh (including a 5mm adjustment to ensure we're clear of raised road surface and to avoid z-fighting, especially at oblique angles).
                         Logging.Message("raising parking lot ", building.name);
-                        RaiseMesh(building.m_mesh, 0.005f);
-                        RaiseMesh(building.m_lodMesh, 0.005f);
+
+                        // Record original vertices.
+                        ParkingRecord parkingRecord = new ParkingRecord
+                        {
+                            vertices = building.m_mesh.vertices
+                        };
+
+                        // Raise mesh.
+                        RaiseMesh(building.m_mesh, ParkingAdjustment);
+                        if (RaiseLods)
+                        {
+                            RaiseMesh(building.m_lodMesh, ParkingAdjustment);
+                        }
 
                         // Raise props in building.
                         foreach (BuildingInfo.Prop prop in building.m_props)
                         {
+                            parkingRecord.propHeights.Add(prop, prop.m_position.y);
                             prop.m_position.y -= (OriginalCurbHeight - newCurbHeight);
                         }
+
+                        // Add original data record to dictionary.
+                        parkingRecords.Add(building, parkingRecord);
+                    }
+                }
+            }
+        }
+
+
+        /// <summary>
+        /// Reverts curb height changes (back to original).
+        /// </summary>
+        internal static void Revert()
+        {
+            // Iterate through all curb records in dictionary.
+            foreach (KeyValuePair<NetInfo, CurbRecord> netEntry in curbRecords)
+            {
+                CurbRecord curbRecord = netEntry.Value;
+
+                // Restore net surface level.
+                netEntry.Key.m_surfaceLevel = curbRecord.surfaceLevel;
+                
+                // Restore segment vertices.
+                foreach (KeyValuePair<NetInfo.Segment, Vector3[]> segmentEntry in curbRecord.segmentDict)
+                {
+                    segmentEntry.Key.m_segmentMesh.vertices = segmentEntry.Value;
+                }
+
+                // Restore node vertices.
+                foreach (KeyValuePair<NetInfo.Node, Vector3[]> nodeEntry in curbRecord.nodeDict)
+                {
+                    nodeEntry.Key.m_nodeMesh.vertices = nodeEntry.Value;
+                }
+
+                // Restore lanes.
+                foreach (KeyValuePair<NetInfo.Lane, float> laneEntry in curbRecord.laneDict)
+                {
+                    laneEntry.Key.m_verticalOffset = laneEntry.Value;
+                }
+            }
+
+            // Iterate through all parking records in dictionary.
+            {
+
+                foreach (KeyValuePair<BuildingInfo, ParkingRecord> buildingEntry in parkingRecords)
+                {
+                    // Restore building vertices.
+                    buildingEntry.Key.m_mesh.vertices = buildingEntry.Value.vertices;
+
+                    // Restore prop heights.
+                    foreach (KeyValuePair<BuildingInfo.Prop, float> propEntry in buildingEntry.Value.propHeights)
+                    {
+                        propEntry.Key.m_position.y = propEntry.Value;
+                    }
+                }
+            }
+        }
+
+
+        /// <summary>
+        /// Applies updated curb height changes.
+        /// </summary>
+        internal static void Apply()
+        {
+            // Iterate through all curb records in dictionary.
+            foreach (KeyValuePair<NetInfo, CurbRecord> netEntry in curbRecords)
+            {
+                CurbRecord curbRecord = netEntry.Value;
+
+                // Change net surface level.
+                netEntry.Key.m_surfaceLevel = newCurbHeight;
+
+                // Update segment vertices.
+                foreach (KeyValuePair<NetInfo.Segment, Vector3[]> segmentEntry in curbRecord.segmentDict)
+                {
+                    // Restore original vertices and then raise mesh.
+                    segmentEntry.Key.m_segmentMesh.vertices = segmentEntry.Value;
+                    RaiseMesh(segmentEntry.Key.m_segmentMesh);
+                }
+
+                // Update node vertices.
+                foreach (KeyValuePair<NetInfo.Node, Vector3[]> nodeEntry in curbRecord.nodeDict)
+                {
+                    // Restore original vertices and then raise mesh.
+                    nodeEntry.Key.m_nodeMesh.vertices = nodeEntry.Value;
+                    RaiseMesh(nodeEntry.Key.m_nodeMesh);
+                }
+
+                // Change lanes.
+                foreach (KeyValuePair<NetInfo.Lane, float> laneEntry in curbRecord.laneDict)
+                {
+                    laneEntry.Key.m_verticalOffset = newCurbHeight;
+                }
+            }
+
+            // Iterate through all parking records in dictionary.
+            {
+
+                foreach (KeyValuePair<BuildingInfo, ParkingRecord> buildingEntry in parkingRecords)
+                {
+                    // Restore building vertices and then re-adjust mesh.
+                    buildingEntry.Key.m_mesh.vertices = buildingEntry.Value.vertices;
+                    RaiseMesh(buildingEntry.Key.m_mesh, ParkingAdjustment);
+
+                    // Adjust prop heights.
+                    foreach (KeyValuePair<BuildingInfo.Prop, float> propEntry in buildingEntry.Value.propHeights)
+                    {
+                        propEntry.Key.m_position.y = propEntry.Value - (OriginalCurbHeight - newCurbHeight);
                     }
                 }
             }

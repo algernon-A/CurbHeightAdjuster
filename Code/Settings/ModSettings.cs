@@ -30,6 +30,13 @@ namespace CurbHeightAdjuster
         [XmlElement("CurbHeight")]
         public float XMLCurbHeight { get => CurbHeight.NewCurbHeight; set => CurbHeight.NewCurbHeight = value; }
 
+        
+        /// <summary>
+        /// Whether or not LODs are raised as well.
+        /// </summary>
+        [XmlElement("RaiseLODs")]
+        public bool XMLUpdateLods { get => CurbHeight.RaiseLods; set => CurbHeight.RaiseLods = value; }
+
 
         /// <summary>
         /// Load settings from XML file.

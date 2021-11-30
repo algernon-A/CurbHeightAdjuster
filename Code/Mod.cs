@@ -53,19 +53,30 @@ namespace CurbHeightAdjuster
         public void OnSettingsUI(UIHelperBase helper)
         {
             // Language.
-            helper.AddDropdown (Translations.Translate("TRN_CHOICE"), Translations.LanguageList, Translations.Index, (index) =>
+            UIDropDown languageDrop = helper.AddDropdown (Translations.Translate("TRN_CHOICE"), Translations.LanguageList, Translations.Index, (index) =>
             {
                 Translations.Index = index;
                 ModSettings.Save();
-            });
+            }) as UIDropDown;
+            languageDrop.width += 100f;
 
             // Curb depth slider.
             UISlider depthSlider = helper.AddSlider(Translations.Translate("CHA_HEIGHT"), CurbHeight.MinCurbHeight, CurbHeight.MaxCurbHeight, 0.01f, CurbHeight.NewCurbHeight, (value) => DepthSliderChange(value)) as UISlider;
 
             // Curb depth slider value label.
+            (depthSlider.parent as UIPanel).autoLayout = false;
             depthLabel = depthSlider.parent.AddUIComponent<UILabel>();
-            depthLabel.relativePosition = new Vector2(0f, depthSlider.parent.height);
+            depthLabel.relativePosition = new Vector2(depthSlider.relativePosition.x + depthSlider.width + 5f, depthSlider.relativePosition.y);
             SetDepthLabel(CurbHeight.NewCurbHeight);
+
+            // Adjust LODs.
+            helper.AddCheckbox(Translations.Translate("CHA_LOD"), CurbHeight.RaiseLods, (isChecked) => { CurbHeight.RaiseLods = isChecked; ModSettings.Save(); });
+
+            // Apply button.
+            helper.AddButton(Translations.Translate("CHA_APPLY"), () => CurbHeight.Apply());
+
+            // Undo button.
+            helper.AddButton(Translations.Translate("CHA_REVERT"), () => CurbHeight.Revert());
         }
 
         /// <summary>
