@@ -46,7 +46,7 @@ namespace CurbHeightAdjuster
         private const float DefaultNewCurbHeight = -0.15f;
 
         // Maximum bounds.
-        internal const float MinCurbHeight = 0.01f;
+        internal const float MinCurbHeight = 0.10f;
         internal const float MaxCurbHeight = 0.29f;
 
         // Additional adjustment for parking lot raising.
@@ -429,7 +429,7 @@ namespace CurbHeightAdjuster
 
 
         /// <summary>
-        /// Raises the vertices of the given mesh in line with curb height adjustment.
+        /// Proportionally raises the vertices of the given mesh in line with curb height adjustment.
         /// </summary>
         /// <param name="mesh">Mesh to modify</param>
         /// <param name="adjustment">Upwards adjustment to final y height (if any)</param>
@@ -442,12 +442,12 @@ namespace CurbHeightAdjuster
             Vector3[] newVertices = new Vector3[mesh.vertices.Length];
             mesh.vertices.CopyTo(newVertices, 0);
 
-            // Raise verticies; anything below ground level (but above -31cm - allow for bridges etc.) has its y-value adjusted.
-            for (int j = 0; j < newVertices.Length; ++j)
+            // Raise verticies; anything below ground level (but above -31cm - allow for bridges etc.) has its y-value multiplied for proportional adjustment.
+            for (int i = 0; i < newVertices.Length; ++i)
             {
-                if (newVertices[j].y < 0.0f && newVertices[j].y > -0.31f)
+                if (newVertices[i].y < 0.0f && newVertices[i].y > -0.31f)
                 {
-                    newVertices[j].y = (newVertices[j].y * newCurbMultiplier) + adjustment;
+                    newVertices[i].y = (newVertices[i].y * newCurbMultiplier) + adjustment;
                     ++changedVertices;
                 }
             }
