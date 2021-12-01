@@ -45,6 +45,11 @@ namespace CurbHeightAdjuster
         private const float OriginalCurbHeight = -0.30f;
         private const float DefaultNewCurbHeight = -0.15f;
 
+        // Depth trigger - segments/nets need to have depths within these bounds to be adjusted.
+        // Vanilla tram rails have tops at -0.225.
+        private const float MinDepthTrigger = -0.22f;
+        private const float MaxDepthTrigger = -0.31f;
+
         // Maximum bounds.
         internal const float MinCurbHeight = 0.07f;
         internal const float MaxCurbHeight = 0.29f;
@@ -145,7 +150,7 @@ namespace CurbHeightAdjuster
                         int count15 = 0, count30 = 0;
                         for (int j = 0; j < vertices.Length; ++j)
                         {
-                            if (vertices[j].y < -0.24f && vertices[j].y > -0.31f)
+                            if (vertices[j].y < MinDepthTrigger && vertices[j].y > MaxDepthTrigger)
                             {
                                 count30++;
                             }
@@ -219,7 +224,7 @@ namespace CurbHeightAdjuster
                         int count15 = 0, count30 = 0;
                         for (int j = 0; j < vertices.Length; ++j)
                         {
-                            if (vertices[j].y < -0.24f && vertices[j].y > -0.31f)
+                            if (vertices[j].y < MinDepthTrigger && vertices[j].y > MaxDepthTrigger)
                             {
                                 count30++;
                             }
