@@ -46,11 +46,8 @@ namespace CurbHeightAdjuster
         private const float DefaultNewCurbHeight = -0.15f;
 
         // Maximum bounds.
-        internal const float MinCurbHeight = 0.10f;
+        internal const float MinCurbHeight = 0.07f;
         internal const float MaxCurbHeight = 0.29f;
-
-        // Additional adjustment for parking lot raising.
-        private const float ParkingAdjustment = 0.005f;
 
         // Curb height multiiplier.
         private static float newCurbMultiplier = DefaultNewCurbHeight / OriginalCurbHeight;
@@ -169,10 +166,10 @@ namespace CurbHeightAdjuster
                                 curbRecord.segmentDict.Add(segment, vertices);
                                 
                                 // Raise vertices.
-                                RaiseMesh(segment.m_segmentMesh);
+                                AdjustMesh(segment.m_segmentMesh);
                                 if (RaiseLods)
                                 {
-                                    RaiseMesh(segment.m_lodMesh);
+                                    AdjustMesh(segment.m_lodMesh);
                                 }
                             }
                             else
@@ -243,10 +240,10 @@ namespace CurbHeightAdjuster
                                 curbRecord.nodeDict.Add(node, vertices);
 
                                 // Raise vertices.
-                                RaiseMesh(node.m_nodeMesh);
+                                AdjustMesh(node.m_nodeMesh);
                                 if (RaiseLods)
                                 {
-                                    RaiseMesh(node.m_lodMesh);
+                                    AdjustMesh(node.m_lodMesh);
                                 }
                             }
                             else
@@ -272,6 +269,9 @@ namespace CurbHeightAdjuster
         /// </summary>
         public static void RaiseParkingLots()
         {
+            // Hashlist of already processed vertices (so we don't double-adjust a mesh due to Loading Screen Mod mesh sharing).
+            HashSet<Vector3[]> processedMeshes = new HashSet<Vector3[]>();
+
             Logging.KeyMessage("raising parking lots");
 
             // Iterate through all networks in list.
@@ -292,20 +292,34 @@ namespace CurbHeightAdjuster
                     string steamID = building.name.Substring(0, periodIndex);
                     if (steamID.Equals("1285201733") || steamID.Equals("1293870311") || steamID.Equals("1293869603"))
                     {
-                        // Found a match - raise the mesh (including a 5mm adjustment to ensure we're clear of raised road surface and to avoid z-fighting, especially at oblique angles).
+                        // Local reference.
+                        Mesh mesh = building.m_mesh;
+                        Vector3[] vertices = mesh.vertices;
+
+                        // Found a match - check for any previously processed (duplicate, due to LSM mesh sharing) meshes.
+                        if (processedMeshes.Contains(vertices))
+                        {
+                            Logging.Message("skipping already-processed mesh for ", building.name);
+                            continue;
+                        }
+
+                        // New mesh - add it to processedMeshes.
+                        processedMeshes.Add(vertices);
+
+                        // Raise the mesh.
                         Logging.Message("raising parking lot ", building.name);
 
                         // Record original vertices.
                         ParkingRecord parkingRecord = new ParkingRecord
                         {
-                            vertices = building.m_mesh.vertices
+                            vertices = vertices
                         };
 
                         // Raise mesh.
-                        RaiseMesh(building.m_mesh, ParkingAdjustment);
+                        RaiseMesh(mesh);
                         if (RaiseLods)
                         {
-                            RaiseMesh(building.m_lodMesh, ParkingAdjustment);
+                            RaiseMesh(building.m_lodMesh);
                         }
 
                         // Raise props in building.
@@ -328,6 +342,8 @@ namespace CurbHeightAdjuster
         /// </summary>
         internal static void Revert()
         {
+            Logging.KeyMessage("reverting custom curbs");
+
             // Iterate through all curb records in dictionary.
             foreach (KeyValuePair<NetInfo, CurbRecord> netEntry in curbRecords)
             {
@@ -378,6 +394,8 @@ namespace CurbHeightAdjuster
         /// </summary>
         internal static void Apply()
         {
+            Logging.KeyMessage("applying custom curbs");
+
             // Iterate through all curb records in dictionary.
             foreach (KeyValuePair<NetInfo, CurbRecord> netEntry in curbRecords)
             {
@@ -391,7 +409,7 @@ namespace CurbHeightAdjuster
                 {
                     // Restore original vertices and then raise mesh.
                     segmentEntry.Key.m_segmentMesh.vertices = segmentEntry.Value;
-                    RaiseMesh(segmentEntry.Key.m_segmentMesh);
+                    AdjustMesh(segmentEntry.Key.m_segmentMesh);
                 }
 
                 // Update node vertices.
@@ -399,7 +417,7 @@ namespace CurbHeightAdjuster
                 {
                     // Restore original vertices and then raise mesh.
                     nodeEntry.Key.m_nodeMesh.vertices = nodeEntry.Value;
-                    RaiseMesh(nodeEntry.Key.m_nodeMesh);
+                    AdjustMesh(nodeEntry.Key.m_nodeMesh);
                 }
 
                 // Change lanes.
@@ -416,7 +434,7 @@ namespace CurbHeightAdjuster
                 {
                     // Restore building vertices and then re-adjust mesh.
                     buildingEntry.Key.m_mesh.vertices = buildingEntry.Value.vertices;
-                    RaiseMesh(buildingEntry.Key.m_mesh, ParkingAdjustment);
+                    RaiseMesh(buildingEntry.Key.m_mesh);
 
                     // Adjust prop heights.
                     foreach (KeyValuePair<BuildingInfo.Prop, float> propEntry in buildingEntry.Value.propHeights)
@@ -432,8 +450,7 @@ namespace CurbHeightAdjuster
         /// Proportionally raises the vertices of the given mesh in line with curb height adjustment.
         /// </summary>
         /// <param name="mesh">Mesh to modify</param>
-        /// <param name="adjustment">Upwards adjustment to final y height (if any)</param>
-        private static void RaiseMesh(Mesh mesh, float adjustment = 0f)
+        private static void AdjustMesh(Mesh mesh)
         {
             // Adjusted vertex counter.
             int changedVertices = 0;
@@ -447,7 +464,7 @@ namespace CurbHeightAdjuster
             {
                 if (newVertices[i].y < 0.0f && newVertices[i].y > -0.31f)
                 {
-                    newVertices[i].y = (newVertices[i].y * newCurbMultiplier) + adjustment;
+                    newVertices[i].y = (newVertices[i].y * newCurbMultiplier);
                     ++changedVertices;
                 }
             }
@@ -458,6 +475,30 @@ namespace CurbHeightAdjuster
             {
                 mesh.vertices = newVertices;
             }
+        }
+
+
+        /// <summary>
+        /// Raises the vertices of the given mesh by the current curb height adjustment.
+        /// </summary>
+        /// <param name="mesh">Mesh to modify</param>
+        private static void RaiseMesh(Mesh mesh)
+        {
+            // Amount to raise up from original height.
+            float adjustment = OriginalCurbHeight - newCurbHeight;
+
+            // Create new vertices array (changing individual elements within the existing array won't work with locked meshes).
+            Vector3[] newVertices = new Vector3[mesh.vertices.Length];
+            mesh.vertices.CopyTo(newVertices, 0);
+
+            // Raise verticies.
+            for (int i = 0; i < newVertices.Length; ++i)
+            {
+                newVertices[i].y -= adjustment;
+            }
+
+            // Assign new vertices to mesh.
+            mesh.vertices = newVertices;
         }
     }
 }
