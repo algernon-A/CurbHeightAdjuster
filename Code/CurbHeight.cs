@@ -13,13 +13,23 @@ namespace CurbHeightAdjuster
         public float surfaceLevel;
 
         // Network segment vertices.
-        public Dictionary<NetInfo.Segment, Vector3[]> segmentDict = new Dictionary<NetInfo.Segment, Vector3[]>();
+        public Dictionary<NetInfo.Segment, OriginalVerts> segmentDict = new Dictionary<NetInfo.Segment, OriginalVerts>();
 
         // Network node vertices.
-        public Dictionary<NetInfo.Node, Vector3[]> nodeDict = new Dictionary<NetInfo.Node, Vector3[]>();
+        public Dictionary<NetInfo.Node, OriginalVerts> nodeDict = new Dictionary<NetInfo.Node, OriginalVerts>();
 
         // Network lane vertical offsets.
         public Dictionary<NetInfo.Lane, float> laneDict = new Dictionary<NetInfo.Lane, float>();
+    }
+
+
+    /// <summary>
+    /// Struct to hold references to original vertex arrays (main and LOD).
+    /// </summary>
+    public struct OriginalVerts
+    {
+        public Vector3[] mainVerts;
+        public Vector3[] lodVerts;
     }
 
 
@@ -161,7 +171,7 @@ namespace CurbHeightAdjuster
                         {
                             // Eligibile target; record original value.
                             netAltered = true;
-                            curbRecord.segmentDict.Add(segment, vertices);
+                            curbRecord.segmentDict.Add(segment, new OriginalVerts { mainVerts = vertices, lodVerts = segment.m_lodMesh.vertices });
 
                             // Raise vertices.
                             AdjustMesh(segment.m_segmentMesh);
@@ -223,7 +233,7 @@ namespace CurbHeightAdjuster
                         {
                             // Eligibile target; record original value.
                             netAltered = true;
-                            curbRecord.nodeDict.Add(node, vertices);
+                            curbRecord.nodeDict.Add(node, new OriginalVerts { mainVerts = vertices, lodVerts = node.m_lodMesh.vertices });
 
                             // Raise vertices.
                             AdjustMesh(node.m_nodeMesh);
@@ -322,15 +332,17 @@ namespace CurbHeightAdjuster
                 netEntry.Key.m_surfaceLevel = curbRecord.surfaceLevel;
                 
                 // Restore segment vertices.
-                foreach (KeyValuePair<NetInfo.Segment, Vector3[]> segmentEntry in curbRecord.segmentDict)
+                foreach (KeyValuePair<NetInfo.Segment, OriginalVerts> segmentEntry in curbRecord.segmentDict)
                 {
-                    segmentEntry.Key.m_segmentMesh.vertices = segmentEntry.Value;
+                    segmentEntry.Key.m_segmentMesh.vertices = segmentEntry.Value.mainVerts;
+                    segmentEntry.Key.m_lodMesh.vertices = segmentEntry.Value.lodVerts;
                 }
 
                 // Restore node vertices.
-                foreach (KeyValuePair<NetInfo.Node, Vector3[]> nodeEntry in curbRecord.nodeDict)
+                foreach (KeyValuePair<NetInfo.Node, OriginalVerts> nodeEntry in curbRecord.nodeDict)
                 {
-                    nodeEntry.Key.m_nodeMesh.vertices = nodeEntry.Value;
+                    nodeEntry.Key.m_nodeMesh.vertices = nodeEntry.Value.mainVerts;
+                    nodeEntry.Key.m_lodMesh.vertices = nodeEntry.Value.lodVerts;
                 }
 
                 // Restore lanes.
@@ -374,19 +386,29 @@ namespace CurbHeightAdjuster
                 netEntry.Key.m_surfaceLevel = newCurbHeight;
 
                 // Update segment vertices.
-                foreach (KeyValuePair<NetInfo.Segment, Vector3[]> segmentEntry in curbRecord.segmentDict)
+                foreach (KeyValuePair<NetInfo.Segment, OriginalVerts> segmentEntry in curbRecord.segmentDict)
                 {
                     // Restore original vertices and then raise mesh.
-                    segmentEntry.Key.m_segmentMesh.vertices = segmentEntry.Value;
+                    segmentEntry.Key.m_segmentMesh.vertices = segmentEntry.Value.mainVerts;
+                    segmentEntry.Key.m_lodMesh.vertices = segmentEntry.Value.lodVerts;
                     AdjustMesh(segmentEntry.Key.m_segmentMesh);
+                    if (RaiseLods)
+                    {
+                        AdjustMesh(segmentEntry.Key.m_lodMesh);
+                    }
                 }
 
                 // Update node vertices.
-                foreach (KeyValuePair<NetInfo.Node, Vector3[]> nodeEntry in curbRecord.nodeDict)
+                foreach (KeyValuePair<NetInfo.Node, OriginalVerts> nodeEntry in curbRecord.nodeDict)
                 {
                     // Restore original vertices and then raise mesh.
-                    nodeEntry.Key.m_nodeMesh.vertices = nodeEntry.Value;
+                    nodeEntry.Key.m_nodeMesh.vertices = nodeEntry.Value.mainVerts;
+                    nodeEntry.Key.m_lodMesh.vertices = nodeEntry.Value.lodVerts;
                     AdjustMesh(nodeEntry.Key.m_nodeMesh);
+                    if (RaiseLods)
+                    {
+                        AdjustMesh(nodeEntry.Key.m_lodMesh);
+                    }
                 }
 
                 // Change lanes.
