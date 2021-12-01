@@ -145,41 +145,29 @@ namespace CurbHeightAdjuster
                         }
 
                         // Check to see if this segment is a viable target.
-                        // Iterate through each vertex in segment mesh, counting how many are approx -30cm and how many are approx -15cm.
+                        // Iterate through each vertex in segment mesh, counting how many meet our trigger height range.
                         Vector3[] vertices = segment.m_segmentMesh.vertices;
-                        int count15 = 0, count30 = 0;
+                        int count30 = 0;
                         for (int j = 0; j < vertices.Length; ++j)
                         {
                             if (vertices[j].y < MinDepthTrigger && vertices[j].y > MaxDepthTrigger)
                             {
                                 count30++;
                             }
-                            else if (vertices[j].y < -0.145f && vertices[j].y > -0.155f)
-                            {
-                                count15++;
-                            }
                         }
 
-                        // Check final counts; less than eight -15cm vertices and more than eight -30cm verticies means the segment passes our filter.
-                        // Eight or more -15cm verticies implies a primary -15cm curb height.
+                        // Check final counts; more than eight eligible verticies means the segment passes our filter.
                         if (count30 > 8)
                         {
-                            if (count15 < 8)
+                            // Eligibile target; record original value.
+                            netAltered = true;
+                            curbRecord.segmentDict.Add(segment, vertices);
+
+                            // Raise vertices.
+                            AdjustMesh(segment.m_segmentMesh);
+                            if (RaiseLods)
                             {
-                                // Eligibile target; record original value.
-                                netAltered = true;
-                                curbRecord.segmentDict.Add(segment, vertices);
-                                
-                                // Raise vertices.
-                                AdjustMesh(segment.m_segmentMesh);
-                                if (RaiseLods)
-                                {
-                                    AdjustMesh(segment.m_lodMesh);
-                                }
-                            }
-                            else
-                            {
-                                Logging.Message("segment vertices filter failed with count15 ", count15, " for network ", network.name);
+                                AdjustMesh(segment.m_lodMesh);
                             }
                         }
                     }
@@ -219,41 +207,29 @@ namespace CurbHeightAdjuster
                         }
 
                         // Check to see if this segment is a viable target.
-                        // Iterate through each vertex in segment mesh, counting how many are approx -30cm and how many are approx -15cm.
+                        // Iterate through each vertex in segment mesh, counting how many meet our trigger height range.
                         Vector3[] vertices = node.m_nodeMesh.vertices;
-                        int count15 = 0, count30 = 0;
+                        int count30 = 0;
                         for (int j = 0; j < vertices.Length; ++j)
                         {
                             if (vertices[j].y < MinDepthTrigger && vertices[j].y > MaxDepthTrigger)
                             {
                                 count30++;
                             }
-                            else if (vertices[j].y < -0.145f && vertices[j].y > -0.155f)
-                            {
-                                count15++;
-                            }
                         }
 
-                        // Check final counts; less than twenty -15cm vertices and more than four -30cm verticies means the node passes our filter.
-                        // Twenty or more -15cm verticies implies a primary -15cm curb height.
+                        // Check final counts; more than four -30cm verticies means the node passes our filter.
                         if (count30 > 4)
                         {
-                            if (count15 < 20)
-                            {
-                                // Eligibile target; record original value.
-                                netAltered = true;
-                                curbRecord.nodeDict.Add(node, vertices);
+                            // Eligibile target; record original value.
+                            netAltered = true;
+                            curbRecord.nodeDict.Add(node, vertices);
 
-                                // Raise vertices.
-                                AdjustMesh(node.m_nodeMesh);
-                                if (RaiseLods)
-                                {
-                                    AdjustMesh(node.m_lodMesh);
-                                }
-                            }
-                            else
+                            // Raise vertices.
+                            AdjustMesh(node.m_nodeMesh);
+                            if (RaiseLods)
                             {
-                                Logging.Message("node vertices filter failed with count15 ", count15);
+                                AdjustMesh(node.m_lodMesh);
                             }
                         }
                     }
@@ -441,6 +417,7 @@ namespace CurbHeightAdjuster
 
         /// <summary>
         /// Proportionally raises the vertices of the given mesh in line with curb height adjustment.
+        /// Includes a filter to exclude meshes with fewer than four vertices.
         /// </summary>
         /// <param name="mesh">Mesh to modify</param>
         private static void AdjustMesh(Mesh mesh)
@@ -499,8 +476,6 @@ namespace CurbHeightAdjuster
                 // Raise vertex.
                 newVertices[i].y -= adjustment;
             }
-
-            Logging.Message("minHeight was ", minHeight);
 
             // Assign new vertices to mesh if minimum height check was passed (parking lot road parking lot minHeight will be -0.2794001).
             if (minHeight < 0.279)
