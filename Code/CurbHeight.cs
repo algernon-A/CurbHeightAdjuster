@@ -57,7 +57,8 @@ namespace CurbHeightAdjuster
 
         // Depth trigger - segments/nets need to have depths within these bounds to be adjusted.
         // Vanilla tram rails have tops at -0.225.
-        private const float MinDepthTrigger = -0.22f;
+        // LRT tram rails have bases at -0.5.
+        private const float MinDepthTrigger = -0.21f;
         private const float MaxDepthTrigger = -0.31f;
 
         // Maximum bounds.
@@ -99,7 +100,7 @@ namespace CurbHeightAdjuster
 
         /// <summary>
         /// Iterates through all loaded NetInfos and tries to raise curbs from -30cm to -15cm.
-        /// Original script by Ronyx69, adapted to mod form by krzychu124, rewritten and optimised by algernon.
+        /// Original script by Ronyx69, adapted to mod form by krzychu124, redesigned, rewritten, optimised and extended by algernon.
         /// </summary>
         public static void RaiseCurbHeights()
         {
@@ -451,10 +452,10 @@ namespace CurbHeightAdjuster
             Vector3[] newVertices = new Vector3[mesh.vertices.Length];
             mesh.vertices.CopyTo(newVertices, 0);
 
-            // Raise verticies; anything below ground level (but above -31cm - allow for bridges etc.) has its y-value multiplied for proportional adjustment.
+            // Raise verticies; anything below ground level (but above the maximum depth tirgger - allow for bridges etc.) has its y-value multiplied for proportional adjustment.
             for (int i = 0; i < newVertices.Length; ++i)
             {
-                if (newVertices[i].y < 0.0f && newVertices[i].y > -0.31f)
+                if (newVertices[i].y < 0.0f && newVertices[i].y > MaxDepthTrigger)
                 {
                     newVertices[i].y = (newVertices[i].y * newCurbMultiplier);
                     ++changedVertices;
