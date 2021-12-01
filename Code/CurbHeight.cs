@@ -269,9 +269,6 @@ namespace CurbHeightAdjuster
         /// </summary>
         public static void RaiseParkingLots()
         {
-            // Hashlist of already processed vertices (so we don't double-adjust a mesh due to Loading Screen Mod mesh sharing).
-            HashSet<Vector3[]> processedMeshes = new HashSet<Vector3[]>();
-
             Logging.KeyMessage("raising parking lots");
 
             // Iterate through all networks in list.
@@ -296,17 +293,7 @@ namespace CurbHeightAdjuster
                         Mesh mesh = building.m_mesh;
                         Vector3[] vertices = mesh.vertices;
 
-                        // Found a match - check for any previously processed (duplicate, due to LSM mesh sharing) meshes.
-                        if (processedMeshes.Contains(vertices))
-                        {
-                            Logging.Message("skipping already-processed mesh for ", building.name);
-                            continue;
-                        }
-
-                        // New mesh - add it to processedMeshes.
-                        processedMeshes.Add(vertices);
-
-                        // Raise the mesh.
+                        // Found a match - raise the mesh.
                         Logging.Message("raising parking lot ", building.name);
 
                         // Record original vertices.
@@ -319,6 +306,7 @@ namespace CurbHeightAdjuster
                         RaiseMesh(mesh);
                         if (RaiseLods)
                         {
+                            Logging.Message("raising LOD");
                             RaiseMesh(building.m_lodMesh);
                         }
 
@@ -491,14 +479,29 @@ namespace CurbHeightAdjuster
             Vector3[] newVertices = new Vector3[mesh.vertices.Length];
             mesh.vertices.CopyTo(newVertices, 0);
 
-            // Raise verticies.
+            // Minimum height check, to avoid double-processing vertices.
+            float minHeight = 0f;
+
+            // Iterate through all vertices to raise them.
             for (int i = 0; i < newVertices.Length; ++i)
             {
+                // If this vertex is lower than our current stored minimum, update the stored minimum height.
+                if (newVertices[i].y < minHeight)
+                {
+                    minHeight = newVertices[i].y;
+                }
+
+                // Raise vertex.
                 newVertices[i].y -= adjustment;
             }
 
-            // Assign new vertices to mesh.
-            mesh.vertices = newVertices;
+            Logging.Message("minHeight was ", minHeight);
+
+            // Assign new vertices to mesh if minimum height check was passed (parking lot road parking lot minHeight will be -0.2794001).
+            if (minHeight < 0.279)
+            {
+                mesh.vertices = newVertices;
+            }
         }
     }
 }
