@@ -43,6 +43,7 @@ namespace CurbHeightAdjuster
 
             // Curb depth slider.
             UISlider depthSlider = AddDepthSlider(ref currentY, "CHA_HEIGHT", CurbHeight.NewCurbHeight);
+            depthSlider.eventValueChanged += (control, value) => CurbHeight.NewCurbHeight = value;
 
             UICheckBox lodCheck = UIControls.AddPlainCheckBox(this, Margin, currentY, Translations.Translate("CHA_LOD"));
             lodCheck.eventCheckChanged += (control, isChecked) => { CurbHeight.RaiseLods = isChecked; };
