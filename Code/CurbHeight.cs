@@ -74,6 +74,11 @@ namespace CurbHeightAdjuster
         // Dictionary of altered parking buildings.
         private readonly static Dictionary<BuildingInfo, ParkingRecord> parkingRecords = new Dictionary<BuildingInfo, ParkingRecord>();
 
+        // Hashset of currently processed network meshes.
+        private readonly static HashSet<Mesh> processedMeshes = new HashSet<Mesh>();
+
+
+
 
         /// <summary>
         /// New curb height to apply (positive figure, in cm).
@@ -378,6 +383,9 @@ namespace CurbHeightAdjuster
         {
             Logging.KeyMessage("applying custom curbs");
 
+            // Clear processed mesh list.
+            processedMeshes.Clear();
+
             // Iterate through all curb records in dictionary.
             foreach (KeyValuePair<NetInfo, CurbRecord> netEntry in curbRecords)
             {
@@ -445,6 +453,13 @@ namespace CurbHeightAdjuster
         /// <param name="mesh">Mesh to modify</param>
         private static void AdjustMesh(Mesh mesh)
         {
+            // Check if we've already done this one.
+            if (processedMeshes.Contains(mesh))
+            {
+                Logging.Message("skipping duplicate network mesh ", mesh.name ?? "null");
+                return;
+            }
+
             // Adjusted vertex counter.
             int changedVertices = 0;
 
@@ -467,6 +482,10 @@ namespace CurbHeightAdjuster
             if (changedVertices > 3)
             {
                 mesh.vertices = newVertices;
+
+                // Record mesh as being altered.
+                processedMeshes.Add(mesh);
+
             }
         }
 
@@ -477,6 +496,13 @@ namespace CurbHeightAdjuster
         /// <param name="mesh">Mesh to modify</param>
         private static void RaiseMesh(Mesh mesh)
         {
+            // Check if we've already done this one.
+            if (processedMeshes.Contains(mesh))
+            {
+                Logging.Message("skipping duplicate parking mesh ", mesh.name ?? "null");
+                return;
+            }
+
             // Amount to raise up from original height.
             float adjustment = OriginalCurbHeight - newCurbHeight;
 
@@ -504,6 +530,9 @@ namespace CurbHeightAdjuster
             if (minHeight < 0.279)
             {
                 mesh.vertices = newVertices;
+
+                // Record mesh as being altered.
+                processedMeshes.Add(mesh);
             }
         }
     }
