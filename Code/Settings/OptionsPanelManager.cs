@@ -100,18 +100,8 @@ namespace CurbHeightAdjuster
                 {
                     // Give it a unique name for easy finding with ModTools.
                     optionsGameObject = new GameObject("CHAOptionsPanel");
-
-                    Logging.Message("mouse");
-
                     optionsGameObject.transform.parent = optionsPanel.transform;
-
-                    Logging.Message("dog");
-
                     panel = optionsGameObject.AddComponent<CHAOptionsPanel>();
-
-                    Logging.Message("cat");
-
-
                     // Set up and show panel.
                     Panel.Setup(optionsPanel.width, optionsPanel.height);
                 }
