@@ -82,7 +82,7 @@ namespace CurbHeightAdjuster
             newSlider.eventValueChanged += SetDepthLabel;
 
             // Increment y position indicator.
-            yPos += newSlider.parent.height + depthLabel.height + Margin;
+            yPos += newSlider.parent.height + depthLabel.height + GroupMargin;
 
             return newSlider;
         }
