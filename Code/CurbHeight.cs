@@ -59,7 +59,7 @@ namespace CurbHeightAdjuster
         // Vanilla tram rails have tops at -0.225.
         // LRT tram rails have bases at -0.5.
         private const float MinDepthTrigger = -0.21f;
-        private const float MaxDepthTrigger = -0.31f;
+        private const float MaxDepthTrigger = -0.32f;
 
         // Maximum bounds.
         internal const float MinCurbHeight = 0.07f;
