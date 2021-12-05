@@ -2,10 +2,10 @@
 <Language UniqueName="en" ReadableName="English">
   <Translations>
     <Translation ID="CHA_NAM" String="Curb Height Adjuster" />
-    <Translation ID="CHA_DESC" String="Adjusts the hieght of road curbs." />
+    <Translation ID="CHA_DESC" String="Reduces the height of default road curbs." />
     <Translation ID="CHA_HEIGHT" String="New curb height" />
     <Translation ID="CHA_LOD" String="Also adjust LODs" />
-    <Translation ID="CHA_REVERT" String="Revert to game curb heights" />
+    <Translation ID="CHA_REVERT" String="Remove custom curb heights" />
     <Translation ID="CHA_APPLY" String="Apply" />
     <Translation ID="TRN_CHOICE" String="Set language" />
     <Translation ID="TRN_SYS" String="Use game language" />
