@@ -78,8 +78,6 @@ namespace CurbHeightAdjuster
         private readonly static HashSet<Mesh> processedMeshes = new HashSet<Mesh>();
 
 
-
-
         /// <summary>
         /// New curb height to apply (positive figure, in cm).
         /// </summary>
