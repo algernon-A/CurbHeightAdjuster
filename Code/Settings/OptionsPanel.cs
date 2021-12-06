@@ -13,7 +13,7 @@ namespace CurbHeightAdjuster
         private const float Margin = 5f;
         private const float LeftMargin = 24f;
         private const float GroupMargin = 40f;
-        private const float ButtonWidth = 350f;
+        private const float ButtonWidth = 400f;
 
 
         /// <summary>
