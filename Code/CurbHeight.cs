@@ -51,6 +51,26 @@ namespace CurbHeightAdjuster
     /// </summary>
     public static class CurbHeight
     {
+        // List of excluded networks (Steam IDs).
+        private readonly static HashSet<string> excludedNets = new HashSet<string>
+        {
+            // Prague curb roads.
+            "2643462494",
+            "2643463468",
+            "2643464569",
+            "2643465478",
+            "2643466243",
+            "2643467084",
+            "2643468733",
+            "2643467962",
+            "2643469133",
+            "2643470190",
+            "2643469678",
+            "2643470754",
+            "2643471147"
+        };
+
+
         // Original and default new curb heights.
         private const float OriginalCurbHeight = -0.30f;
         private const float DefaultNewCurbHeight = -0.15f;
@@ -124,6 +144,17 @@ namespace CurbHeightAdjuster
                 NetAI netAI = network.m_netAI;
                 if (netAI is RoadAI || netAI is RoadBridgeAI || netAI is RoadTunnelAI)
                 {
+                    // Skip excluded networks.
+                    int periodIndex = network.name.IndexOf(".");
+                    if (periodIndex > 0)
+                    {
+                        string steamID = network.name.Substring(0, periodIndex);
+                        if (excludedNets.Contains(steamID))
+                        {
+                            continue;
+                        }
+                    }
+
                     // Dirty flag.
                     bool netAltered = false;
 
@@ -192,14 +223,14 @@ namespace CurbHeightAdjuster
                         // Iterate through each lane in network, replacing 30cm depths with our new curb height.
                         foreach (NetInfo.Lane lane in network.m_lanes)
                         {
-                            if (lane.m_verticalOffset == OriginalCurbHeight)
+                            if (lane.m_verticalOffset < MinDepthTrigger && lane.m_verticalOffset > MaxDepthTrigger)
                             {
                                 // Record original value.
                                 netAltered = true;
                                 curbRecord.laneDict.Add(lane, lane.m_verticalOffset);
 
                                 // Apply new curb height.
-                                lane.m_verticalOffset = newCurbHeight;
+                                lane.m_verticalOffset *= newCurbMultiplier;
                             }
                         }
                     }
@@ -470,7 +501,7 @@ namespace CurbHeightAdjuster
             {
                 if (newVertices[i].y < 0.0f && newVertices[i].y > MaxDepthTrigger)
                 {
-                    newVertices[i].y = (newVertices[i].y * newCurbMultiplier);
+                    newVertices[i].y *= newCurbMultiplier;
                     ++changedVertices;
                 }
             }
