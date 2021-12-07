@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using ColossalFramework;
 
 
 namespace CurbHeightAdjuster
@@ -286,6 +287,9 @@ namespace CurbHeightAdjuster
                     }
                 }
             }
+
+            // Clear processed mesh list once done.
+            processedMeshes.Clear();
         }
 
 
@@ -365,7 +369,7 @@ namespace CurbHeightAdjuster
 
                 // Restore net surface level.
                 netEntry.Key.m_surfaceLevel = curbRecord.surfaceLevel;
-                
+
                 // Restore segment vertices.
                 foreach (KeyValuePair<NetInfo.Segment, OriginalVerts> segmentEntry in curbRecord.segmentDict)
                 {
@@ -402,6 +406,9 @@ namespace CurbHeightAdjuster
                     }
                 }
             }
+
+            // Recalulate lanes on map with new height.
+            RecalculateLanes();
         }
 
 
@@ -412,7 +419,7 @@ namespace CurbHeightAdjuster
         {
             Logging.KeyMessage("applying custom curbs");
 
-            // Clear processed mesh list.
+            // Ensure processed mesh list is clear, just in case.
             processedMeshes.Clear();
 
             // Iterate through all curb records in dictionary.
@@ -472,6 +479,12 @@ namespace CurbHeightAdjuster
                     }
                 }
             }
+
+            // Recalulate lanes on map with new height.
+            RecalculateLanes();
+
+            // Clear processed mesh list once done.
+            processedMeshes.Clear();
         }
 
 
@@ -563,6 +576,46 @@ namespace CurbHeightAdjuster
                 // Record mesh as being altered.
                 processedMeshes.Add(mesh);
             }
+        }
+
+
+        /// <summary>
+        /// Recalculates network segment lanes after a height change (via simulation thread action).
+        /// </summary>
+        private static void RecalculateLanes() => Singleton<SimulationManager>.instance.AddAction(RecalculateLaneAction);
+
+
+        /// <summary>
+        /// Recalculates network segment lanes after a height change.
+        /// Should only be called via simulation thread action.
+        /// </summary>
+        private static void RecalculateLaneAction()
+        {
+            // Local references.
+            NetManager netManager = Singleton<NetManager>.instance;
+            NetSegment[] segments = netManager.m_segments.m_buffer;
+
+            /// Add action via simulation thread.
+            Singleton<SimulationManager>.instance.AddAction(delegate
+            {
+                // Iterate through all segments on map.
+                for (ushort i = 0; i < segments.Length; ++i)
+                {
+                    // Skip empty segments or segments with null infos.
+                    if ((segments[i].m_flags & NetSegment.Flags.Created) == NetSegment.Flags.None)
+                    {
+                        continue;
+                    }
+
+                    // Only look at nets that we've altered.
+                    NetInfo netInfo = segments[i].Info;
+                    if (netInfo != null && curbRecords.ContainsKey(netInfo))
+                    {
+                        // Update lanes in this segment.
+                        segments[i].Info.m_netAI.UpdateLanes(i, ref segments[i], loading: false);
+                    }
+                }
+            });
         }
     }
 }
