@@ -82,6 +82,7 @@
     <Content Include="License.txt" />
     <Content Include="Translations\de.xml" />
     <Content Include="Translations\en.xml" />
+    <Content Include="Translations\ja.xml" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
