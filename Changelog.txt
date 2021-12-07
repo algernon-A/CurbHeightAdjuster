@@ -1,0 +1,5 @@
+﻿Version 1.0.1
+
+- Exclude siudowski's 0.1m sunken + Prague Curbs roads from curb height modification (were being incorrectly detected as having default curb heights due to mesh shape)
+- Improve handling of lanes with slightly off-nominal vertical offsets
+- Force immediate update of all existing segments on map when their NetInfo has been altered
