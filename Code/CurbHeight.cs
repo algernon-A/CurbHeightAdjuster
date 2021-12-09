@@ -143,7 +143,7 @@ namespace CurbHeightAdjuster
 
                 // Only looking at road prefabs.
                 NetAI netAI = network.m_netAI;
-                if (netAI is RoadAI || netAI is RoadBridgeAI || netAI is RoadTunnelAI)
+                if (netAI is RoadAI || netAI is RoadBridgeAI || netAI is RoadTunnelAI || netAI is DamAI)
                 {
                     // Skip excluded networks.
                     int periodIndex = network.name.IndexOf(".");

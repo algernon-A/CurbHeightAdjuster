@@ -1,4 +1,7 @@
-﻿Version 1.0.1.1 hotfix
+﻿- Add support for dam roads
+
+
+Version 1.0.1.1 hotfix
 
 - Fix options panel LOD checkbox initialization
 
