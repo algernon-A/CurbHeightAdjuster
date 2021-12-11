@@ -190,6 +190,13 @@ namespace CurbHeightAdjuster
                             continue;
                         }
 
+                        // If mesh isn't readable, skip it.
+                        if (!segment.m_segmentMesh.isReadable)
+                        {
+                            Logging.Message("unreadable segment mesh for network ", network.name);
+                            continue;
+                        }
+
                         // Check to see if this segment is a viable target.
                         // Iterate through each vertex in segment mesh, counting how many meet our trigger height range.
                         Vector3[] vertices = segment.m_segmentMesh.vertices;
@@ -249,6 +256,13 @@ namespace CurbHeightAdjuster
                         string shaderName = node.m_nodeMaterial.shader.name;
                         if (shaderName != "Custom/Net/Road" && shaderName != "Custom/Net/RoadBridge" && shaderName != "Custom/Net/TrainBridge")
                         {
+                            continue;
+                        }
+
+                        // If mesh isn't readable, skip it.
+                        if (!node.m_nodeMesh.isReadable)
+                        {
+                            Logging.Message("unreadable node mesh for network ", network.name);
                             continue;
                         }
 
