@@ -1,4 +1,6 @@
-﻿- Add support for Bridges and Piers Content Creator Pack
+﻿Version 1.1
+
+- Add support for Bridges and Piers Content Creator Pack
 - Improve handling of malformed networks
 
 
