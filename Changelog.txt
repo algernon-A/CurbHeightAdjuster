@@ -1,4 +1,8 @@
-﻿Version 1.0.2
+﻿- Add support for Bridges and Piers Content Creator Pack
+- Improve handling of malformed networks
+
+
+Version 1.0.2
 
 - Add support for dam roads
 

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 using ColossalFramework;
 
@@ -135,175 +136,206 @@ namespace CurbHeightAdjuster
             {
                 NetInfo network = PrefabCollection<NetInfo>.GetLoaded(i);
 
-                // Skip any null prefabs.
-                if (network?.m_netAI == null)
+                try
                 {
-                    continue;
-                }
-
-                // Only looking at road prefabs.
-                NetAI netAI = network.m_netAI;
-                if (netAI is RoadAI || netAI is RoadBridgeAI || netAI is RoadTunnelAI || netAI is DamAI)
-                {
-                    // Skip excluded networks.
-                    int periodIndex = network.name.IndexOf(".");
-                    if (periodIndex > 0)
+                    // Skip any null prefabs.
+                    if (network?.m_netAI == null || network.name == null || network.m_segments == null || network.m_nodes == null)
                     {
-                        string steamID = network.name.Substring(0, periodIndex);
-                        if (excludedNets.Contains(steamID))
-                        {
-                            continue;
-                        }
+                        continue;
                     }
 
-                    // Dirty flag.
-                    bool netAltered = false;
-
-                    // Curb record for this prefab.
-                    CurbRecord curbRecord = new CurbRecord();
-
-
-                    // Raise network surface level.
-                    if (network.m_surfaceLevel == -0.3f)
+                    // Only looking at road prefabs.
+                    NetAI netAI = network.m_netAI;
+                    if (netAI is RoadAI || netAI is RoadBridgeAI || netAI is RoadTunnelAI || netAI is DamAI)
                     {
-                        // Record original value.
-                        netAltered = true;
-                        curbRecord.surfaceLevel = network.m_surfaceLevel;
-
-                        // Set new value.
-                        network.m_surfaceLevel = newCurbHeight;
-                    }
-
-                    // Raise segments - iterate through each segment in net.
-                    foreach (NetInfo.Segment segment in network.m_segments)
-                    {
-                        // Skip segments with no mesh or material.
-                        if (segment?.m_segmentMesh == null || segment.m_segmentMaterial?.shader == null)
+                        // Skip excluded networks.
+                        int periodIndex = network.name.IndexOf(".");
+                        if (periodIndex > 0)
                         {
-                            continue;
-                        }
-
-                        // Only interested in segments using road shaders.
-                        string shaderName = segment.m_segmentMaterial.shader.name;
-                        if (shaderName != "Custom/Net/Road" && shaderName != "Custom/Net/RoadBridge" && shaderName != "Custom/Net/TrainBridge")
-                        {
-                            continue;
-                        }
-
-                        // If mesh isn't readable, skip it.
-                        if (!segment.m_segmentMesh.isReadable)
-                        {
-                            Logging.Message("unreadable segment mesh for network ", network.name);
-                            continue;
-                        }
-
-                        // Check to see if this segment is a viable target.
-                        // Iterate through each vertex in segment mesh, counting how many meet our trigger height range.
-                        Vector3[] vertices = segment.m_segmentMesh.vertices;
-                        int count30 = 0;
-                        for (int j = 0; j < vertices.Length; ++j)
-                        {
-                            if (vertices[j].y < MinDepthTrigger && vertices[j].y > MaxDepthTrigger)
+                            string steamID = network.name.Substring(0, periodIndex);
+                            if (excludedNets.Contains(steamID))
                             {
-                                count30++;
+                                continue;
                             }
                         }
 
-                        // Check final counts; more than eight eligible verticies means the segment passes our filter.
-                        if (count30 > 8)
+                        // Dirty flag.
+                        bool netAltered = false;
+
+                        // Curb record for this prefab.
+                        CurbRecord curbRecord = new CurbRecord();
+
+
+                        // Raise network surface level.
+                        if (network.m_surfaceLevel == -0.3f)
                         {
-                            // Eligibile target; record original value.
+                            // Record original value.
                             netAltered = true;
-                            curbRecord.segmentDict.Add(segment, new OriginalVerts { mainVerts = vertices, lodVerts = segment.m_lodMesh.vertices });
+                            curbRecord.surfaceLevel = network.m_surfaceLevel;
 
-                            // Raise vertices.
-                            AdjustMesh(segment.m_segmentMesh);
-                            if (RaiseLods)
-                            {
-                                AdjustMesh(segment.m_lodMesh);
-                            }
+                            // Set new value.
+                            network.m_surfaceLevel = newCurbHeight;
                         }
-                    }
 
-                    // Check lanes, if we've passed checks.
-                    if (network.m_lanes != null)
-                    {
-                        // Iterate through each lane in network, replacing 30cm depths with our new curb height.
-                        foreach (NetInfo.Lane lane in network.m_lanes)
+                        // Raise segments - iterate through each segment in net.
+                        foreach (NetInfo.Segment segment in network.m_segments)
                         {
-                            if (lane.m_verticalOffset < MinDepthTrigger && lane.m_verticalOffset > MaxDepthTrigger)
+                            // Skip segments with no mesh or material.
+                            if (segment?.m_segmentMesh?.name == null || segment.m_segmentMaterial?.shader?.name == null)
                             {
-                                // Record original value.
+                                continue;
+                            }
+
+                            // Only interested in segments using road shaders.
+                            string shaderName = segment.m_segmentMaterial.shader.name;
+                            if (shaderName != "Custom/Net/Road" && shaderName != "Custom/Net/RoadBridge" && shaderName != "Custom/Net/TrainBridge")
+                            {
+                                continue;
+                            }
+
+                            // Is mesh readable?
+                            if (!segment.m_segmentMesh.isReadable)
+                            {
+                                // Unreadable mesh - see if we've got a replacement serialized mesh.
+                                Logging.Message("unreadable segment mesh for network ", network.name);
+                                Mesh replacementMesh = MeshHandler.LoadMesh(segment.m_segmentMesh.name);
+                                if (replacementMesh == null)
+                                {
+                                    // No replacement mesh found - skip this segment, as we can't do anything more.
+                                    Logging.Message("skipping unreadable segment mesh for network ", network.name);
+                                    continue;
+                                }
+
+                                // Replace unreadable segment mesh with replacment mesh.
+                                Logging.Message("substituting unreadable segment mesh for network ", network.name);
+                                segment.m_segmentMesh = replacementMesh;
+                            }
+
+                            // Check to see if this segment is a viable target.
+                            // Iterate through each vertex in segment mesh, counting how many meet our trigger height range.
+                            Vector3[] vertices = segment.m_segmentMesh.vertices;
+                            int count30 = 0;
+                            for (int j = 0; j < vertices.Length; ++j)
+                            {
+                                if (vertices[j].y < MinDepthTrigger && vertices[j].y > MaxDepthTrigger)
+                                {
+                                    count30++;
+                                }
+                            }
+
+                            // Check final counts; more than eight eligible verticies means the segment passes our filter.
+                            if (count30 > 8)
+                            {
+                                // Eligibile target; record original value.
                                 netAltered = true;
-                                curbRecord.laneDict.Add(lane, lane.m_verticalOffset);
+                                curbRecord.segmentDict.Add(segment, new OriginalVerts { mainVerts = vertices, lodVerts = segment.m_lodMesh.vertices });
 
-                                // Apply new curb height.
-                                lane.m_verticalOffset *= newCurbMultiplier;
+                                // Raise vertices.
+                                AdjustMesh(segment.m_segmentMesh);
+                                if (RaiseLods)
+                                {
+                                    AdjustMesh(segment.m_lodMesh);
+                                }
                             }
                         }
-                    }
 
-                    // Update nodes.
-                    foreach (NetInfo.Node node in network.m_nodes)
-                    {
-                        // Skip nodes with no mesh or material.
-                        if (node?.m_nodeMesh == null || node.m_nodeMaterial?.shader == null)
+                        // Check lanes, if we've passed checks.
+                        if (network.m_lanes != null)
                         {
-                            continue;
-                        }
-
-                        // Only interested in nodes using road shaders.
-                        string shaderName = node.m_nodeMaterial.shader.name;
-                        if (shaderName != "Custom/Net/Road" && shaderName != "Custom/Net/RoadBridge" && shaderName != "Custom/Net/TrainBridge")
-                        {
-                            continue;
-                        }
-
-                        // If mesh isn't readable, skip it.
-                        if (!node.m_nodeMesh.isReadable)
-                        {
-                            Logging.Message("unreadable node mesh for network ", network.name);
-                            continue;
-                        }
-
-                        // Check to see if this segment is a viable target.
-                        // Iterate through each vertex in segment mesh, counting how many meet our trigger height range.
-                        Vector3[] vertices = node.m_nodeMesh.vertices;
-                        int count30 = 0;
-                        for (int j = 0; j < vertices.Length; ++j)
-                        {
-                            if (vertices[j].y < MinDepthTrigger && vertices[j].y > MaxDepthTrigger)
+                            // Iterate through each lane in network, replacing 30cm depths with our new curb height.
+                            foreach (NetInfo.Lane lane in network.m_lanes)
                             {
-                                count30++;
+                                if (lane.m_verticalOffset < MinDepthTrigger && lane.m_verticalOffset > MaxDepthTrigger)
+                                {
+                                    // Record original value.
+                                    netAltered = true;
+                                    curbRecord.laneDict.Add(lane, lane.m_verticalOffset);
+
+                                    // Apply new curb height.
+                                    lane.m_verticalOffset *= newCurbMultiplier;
+                                }
                             }
                         }
 
-                        // Check final counts; more than four -30cm verticies means the node passes our filter.
-                        if (count30 > 4)
+                        // Update nodes.
+                        foreach (NetInfo.Node node in network.m_nodes)
                         {
-                            // Eligibile target; record original value.
-                            netAltered = true;
-                            curbRecord.nodeDict.Add(node, new OriginalVerts { mainVerts = vertices, lodVerts = node.m_lodMesh.vertices });
-
-                            // Raise vertices.
-                            AdjustMesh(node.m_nodeMesh);
-                            if (RaiseLods)
+                            // Skip nodes with no mesh or material.
+                            if (node?.m_nodeMesh?.name == null || node.m_nodeMaterial?.shader?.name == null)
                             {
-                                AdjustMesh(node.m_lodMesh);
+                                continue;
+                            }
+
+                            // Only interested in nodes using road shaders.
+                            string shaderName = node.m_nodeMaterial.shader.name;
+                            if (shaderName != "Custom/Net/Road" && shaderName != "Custom/Net/RoadBridge" && shaderName != "Custom/Net/TrainBridge")
+                            {
+                                continue;
+                            }
+
+                            // Is mesh readable?
+                            if (!node.m_nodeMesh.isReadable)
+                            {
+                                // Unreadable mesh - see if we've got a replacement serialized mesh.
+                                Mesh replacementMesh = MeshHandler.LoadMesh(node.m_nodeMesh.name);
+                                if (replacementMesh == null)
+                                {
+                                    // No replacement mesh found - skip this segment, as we can't do anything more.
+                                    Logging.Message("skipping unreadable node mesh for network ", network.name);
+                                    continue;
+                                }
+                                Logging.Message("substituting unreadable node mesh for network ", network.name);
+                                node.m_nodeMesh = replacementMesh;
+                            }
+
+                            // Check to see if this segment is a viable target.
+                            // Iterate through each vertex in segment mesh, counting how many meet our trigger height range.
+                            Vector3[] vertices = node.m_nodeMesh.vertices;
+                            int count30 = 0;
+                            for (int j = 0; j < vertices.Length; ++j)
+                            {
+                                if (vertices[j].y < MinDepthTrigger && vertices[j].y > MaxDepthTrigger)
+                                {
+                                    count30++;
+                                }
+                            }
+
+                            // Check final counts; more than four -30cm verticies means the node passes our filter.
+                            if (count30 > 4)
+                            {
+                                // Eligibile target; record original value.
+                                netAltered = true;
+                                curbRecord.nodeDict.Add(node, new OriginalVerts { mainVerts = vertices, lodVerts = node.m_lodMesh.vertices });
+
+                                // Raise vertices.
+                                AdjustMesh(node.m_nodeMesh);
+                                if (RaiseLods)
+                                {
+                                    AdjustMesh(node.m_lodMesh);
+                                }
                             }
                         }
-                    }
 
-                    // If the net was altered, record the created curbRecord.
-                    if (netAltered)
-                    {
-                        curbRecords.Add(network, curbRecord);
+                        // If the net was altered, record the created curbRecord.
+                        if (netAltered)
+                        {
+                            curbRecords.Add(network, curbRecord);
+                        }
                     }
+                }
+                catch (Exception e)
+                {
+                    // Don't let one exception stop everything - skip this network and carry on.
+                    Logging.LogException(e, "exception reading network ", network?.name ?? "null");
+                    continue;
                 }
             }
 
             // Clear processed mesh list once done.
             processedMeshes.Clear();
+
+
+            Logging.KeyMessage("finished reducing curb heights");
         }
 
 

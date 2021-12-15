@@ -14,7 +14,7 @@ namespace CurbHeightAdjuster
     {
         // Settings file name.
         [XmlIgnore]
-        private static readonly string SettingsFileName = ColossalFramework.IO.DataLocation.localApplicationData + Path.DirectorySeparatorChar + "CurbHeightAdjuster.xml";
+        private static readonly string SettingsFilePath = Path.Combine(ColossalFramework.IO.DataLocation.localApplicationData, "CurbHeightAdjuster.xml");
 
 
         /// <summary>
@@ -46,10 +46,10 @@ namespace CurbHeightAdjuster
             try
             {
                 // Check to see if configuration file exists.
-                if (File.Exists(SettingsFileName))
+                if (File.Exists(SettingsFilePath))
                 {
                     // Read it.
-                    using (StreamReader reader = new StreamReader(SettingsFileName))
+                    using (StreamReader reader = new StreamReader(SettingsFilePath))
                     {
                         XmlSerializer xmlSerializer = new XmlSerializer(typeof(ModSettings));
                         if (!(xmlSerializer.Deserialize(reader) is ModSettings settingsFile))
@@ -78,7 +78,7 @@ namespace CurbHeightAdjuster
             try
             {
                 // Pretty straightforward.  Serialisation is within GBRSettingsFile class.
-                using (StreamWriter writer = new StreamWriter(SettingsFileName))
+                using (StreamWriter writer = new StreamWriter(SettingsFilePath))
                 {
                     XmlSerializer xmlSerializer = new XmlSerializer(typeof(ModSettings));
                     xmlSerializer.Serialize(writer, new ModSettings());

@@ -356,7 +356,7 @@ namespace CurbHeightAdjuster
             languages.Clear();
 
             // Get the current assembly path and append our locale directory name.
-            string assemblyPath = ModUtils.GetAssemblyPath();
+            string assemblyPath = ModUtils.AssemblyPath;
             if (!assemblyPath.IsNullOrWhiteSpace())
             {
                 string localePath = Path.Combine(assemblyPath, "Translations");

@@ -59,6 +59,8 @@
   <ItemGroup>
     <Compile Include="Code\CurbHeight.cs" />
     <Compile Include="Code\Loading.cs" />
+    <Compile Include="Code\MeshHandler\MeshHandler.cs" />
+    <Compile Include="Code\MeshHandler\SerializableMeshInfo.cs" />
     <Compile Include="Code\Patches\BuildingDeserializePatch.cs" />
     <Compile Include="Code\Patches\NetDeserializePatch.cs" />
     <Compile Include="Code\Patches\Patcher.cs" />
@@ -86,8 +88,158 @@
     <Content Include="Translations\ja.xml" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Data\Euro2Lane_basic_node01.dat" />
+    <None Include="Data\Euro2Lane_basic_segm01.dat" />
+    <None Include="Data\Euro2Lane_basic_segm01_LOD.dat" />
+    <None Include="Data\Euro2Lane_basic_segm05.dat" />
+    <None Include="Data\Euro2Lane_basic_segm05_LOD.dat" />
+    <None Include="Data\Euro2Lane_basic_segm06.dat" />
+    <None Include="Data\Euro2Lane_basic_segm06_LOD.dat" />
+    <None Include="Data\Euro2Lane_elev_node00.dat" />
+    <None Include="Data\Euro2Lane_elev_node00_LOD.dat" />
+    <None Include="Data\Euro2Lane_elev_node01.dat" />
+    <None Include="Data\Euro2Lane_elev_node01_LOD.dat" />
+    <None Include="Data\Euro2Lane_elev_node04.dat" />
+    <None Include="Data\Euro2Lane_elev_node04_LOD.dat" />
+    <None Include="Data\Euro2Lane_elev_node05.dat" />
+    <None Include="Data\Euro2Lane_elev_node05_LOD.dat" />
+    <None Include="Data\Euro2Lane_elev_segm00.dat" />
+    <None Include="Data\Euro2Lane_elev_segm00_LOD.dat" />
+    <None Include="Data\Euro2Lane_elev_segm01.dat" />
+    <None Include="Data\Euro2Lane_elev_segm01_LOD.dat" />
+    <None Include="Data\Euro2Lane_elev_segm04.dat" />
+    <None Include="Data\Euro2Lane_elev_segm04.fbx.dat" />
+    <None Include="Data\Euro4Lane_basic_node01.dat" />
+    <None Include="Data\Euro4Lane_basic_node01_LOD.dat" />
+    <None Include="Data\Euro4Lane_basic_segm01.dat" />
+    <None Include="Data\Euro4Lane_basic_segm01_LOD.dat" />
+    <None Include="Data\Euro4Lane_basic_segm05.dat" />
+    <None Include="Data\Euro4Lane_basic_segm05_LOD.dat" />
+    <None Include="Data\Euro4Lane_basic_segm06.dat" />
+    <None Include="Data\Euro4Lane_basic_segm06_LOD.dat" />
+    <None Include="Data\Euro4Lane_elev_node00.dat" />
+    <None Include="Data\Euro4Lane_elev_node00_LOD.001.dat" />
+    <None Include="Data\Euro4Lane_elev_node00_LOD.dat" />
+    <None Include="Data\Euro4Lane_elev_node01.dat" />
+    <None Include="Data\Euro4Lane_elev_node01_LOD.dat" />
+    <None Include="Data\Euro4Lane_elev_node02.dat" />
+    <None Include="Data\Euro4Lane_elev_node02_LOD.dat" />
+    <None Include="Data\Euro4Lane_elev_node04.dat" />
+    <None Include="Data\Euro4Lane_elev_node04_LOD.dat" />
+    <None Include="Data\Euro4Lane_elev_node05.dat" />
+    <None Include="Data\Euro4Lane_elev_segm00.dat" />
+    <None Include="Data\Euro4Lane_elev_segm00_LOD.dat" />
+    <None Include="Data\Euro4Lane_elev_segm01.dat" />
+    <None Include="Data\Euro4Lane_elev_segm01_LOD.dat" />
+    <None Include="Data\Euro4Lane_elev_segm04.dat" />
+    <None Include="Data\Euro4Lane_elev_segm04_LOD.dat" />
+    <None Include="Data\Euro6Lane_basic_node01.dat" />
+    <None Include="Data\Euro6Lane_basic_node01_LOD.dat" />
+    <None Include="Data\Euro6Lane_basic_node04.dat" />
+    <None Include="Data\Euro6Lane_basic_node04_LOD.dat" />
+    <None Include="Data\Euro6Lane_basic_segm01.dat" />
+    <None Include="Data\Euro6Lane_basic_segm01_LOD.dat" />
+    <None Include="Data\Euro6Lane_basic_segm05.dat" />
+    <None Include="Data\Euro6Lane_basic_segm05_LOD.dat" />
+    <None Include="Data\Euro6Lane_basic_segm06.dat" />
+    <None Include="Data\Euro6Lane_basic_segm06_LOD.dat" />
+    <None Include="Data\Euro6Lane_elev_node00.dat" />
+    <None Include="Data\Euro6Lane_elev_node00e.dat" />
+    <None Include="Data\Euro6Lane_elev_node00e_LOD.dat" />
+    <None Include="Data\Euro6Lane_elev_node00_LOD.dat" />
+    <None Include="Data\Euro6Lane_elev_node01.dat" />
+    <None Include="Data\Euro6Lane_elev_node01_LOD.dat" />
+    <None Include="Data\Euro6Lane_elev_node02.dat" />
+    <None Include="Data\Euro6Lane_elev_node02_LOD.dat" />
+    <None Include="Data\Euro6Lane_elev_node04.dat" />
+    <None Include="Data\Euro6Lane_elev_node04_LOD.dat" />
+    <None Include="Data\Euro6Lane_elev_node05.dat" />
+    <None Include="Data\Euro6Lane_elev_node05_LOD.dat" />
+    <None Include="Data\Euro6Lane_elev_node06.dat" />
+    <None Include="Data\Euro6Lane_elev_node06e.dat" />
+    <None Include="Data\Euro6Lane_elev_node06e_LOD.dat" />
+    <None Include="Data\Euro6Lane_elev_node06_LOD.dat" />
+    <None Include="Data\Euro6Lane_elev_segm00.dat" />
+    <None Include="Data\Euro6Lane_elev_segm00e.dat" />
+    <None Include="Data\Euro6Lane_elev_segm00e_LOD.dat" />
+    <None Include="Data\Euro6Lane_elev_segm00_LOD.dat" />
+    <None Include="Data\Euro6Lane_elev_segm01.dat" />
+    <None Include="Data\Euro6Lane_elev_segm01_LOD.dat" />
+    <None Include="Data\Euro6Lane_elev_segm04.dat" />
+    <None Include="Data\Euro6Lane_elev_segm04_LOD.dat" />
+    <None Include="Data\Highway_node00.dat" />
+    <None Include="Data\Highway_node00_LOD.dat" />
+    <None Include="Data\Highway_node01.dat" />
+    <None Include="Data\Highway_node01_LOD.dat" />
+    <None Include="Data\NA2Lane_basic_node01.dat" />
+    <None Include="Data\NA2Lane_basic_node01_LOD.dat" />
+    <None Include="Data\NA2Lane_basic_segm01.dat" />
+    <None Include="Data\NA2Lane_basic_segm01_LOD.dat" />
+    <None Include="Data\NA2Lane_basic_segm05.dat" />
+    <None Include="Data\NA2Lane_basic_segm05_LOD.dat" />
+    <None Include="Data\NA2Lane_basic_segm06.dat" />
+    <None Include="Data\NA2Lane_basic_segm06_LOD.dat" />
+    <None Include="Data\NA2Lane_elev_node00.dat" />
+    <None Include="Data\NA2Lane_elev_node00_LOD.dat" />
+    <None Include="Data\NA2Lane_elev_node01.dat" />
+    <None Include="Data\NA2Lane_elev_node01_LOD.dat" />
+    <None Include="Data\NA2Lane_elev_node02.dat" />
+    <None Include="Data\NA2Lane_elev_node02_LOD.dat" />
+    <None Include="Data\NA2Lane_elev_segm00.dat" />
+    <None Include="Data\NA2Lane_elev_segm00_LOD.dat" />
+    <None Include="Data\NA2Lane_elev_segm01.dat" />
+    <None Include="Data\NA2Lane_elev_segm01_LOD.dat" />
+    <None Include="Data\NA2Lane_elev_segm04.dat" />
+    <None Include="Data\NA2Lane_elev_segm04_LOD.dat" />
+    <None Include="Data\NA4Lane_basic_node01.dat" />
+    <None Include="Data\NA4Lane_basic_node01_LOD.dat" />
+    <None Include="Data\NA4Lane_basic_segm01.dat" />
+    <None Include="Data\NA4Lane_basic_segm01_LOD.dat" />
+    <None Include="Data\NA4Lane_basic_segm05.dat" />
+    <None Include="Data\NA4Lane_basic_segm05_LOD.dat" />
+    <None Include="Data\NA4Lane_basic_segm06.dat" />
+    <None Include="Data\NA4Lane_basic_segm06_LOD.dat" />
+    <None Include="Data\NA4Lane_elev_node00.dat" />
+    <None Include="Data\NA4Lane_elev_node01.dat" />
+    <None Include="Data\NA4Lane_elev_node01_LOD.dat" />
+    <None Include="Data\NA4Lane_elev_node02.dat" />
+    <None Include="Data\NA4Lane_elev_node02_LOD.dat" />
+    <None Include="Data\NA4Lane_elev_node04.dat" />
+    <None Include="Data\NA4Lane_elev_node04_LOD.dat" />
+    <None Include="Data\NA4Lane_elev_node05.dat" />
+    <None Include="Data\NA4Lane_elev_node05_LOD.dat" />
+    <None Include="Data\NA4Lane_elev_segm00.dat" />
+    <None Include="Data\NA4Lane_elev_segm00_LOD.dat" />
+    <None Include="Data\NA4Lane_elev_segm01.dat" />
+    <None Include="Data\NA4Lane_elev_segm01_LOD.dat" />
+    <None Include="Data\NA4Lane_elev_segm04.dat" />
+    <None Include="Data\NA4Lane_elev_segm04_LOD.dat" />
+    <None Include="Data\NA6Lane_basic_node01.dat" />
+    <None Include="Data\NA6Lane_basic_node01_LOD.dat" />
+    <None Include="Data\NA6Lane_basic_segm01.dat" />
+    <None Include="Data\NA6Lane_basic_segm01_LOD.dat" />
+    <None Include="Data\NA6Lane_basic_segm05.dat" />
+    <None Include="Data\NA6Lane_basic_segm05_LOD.dat" />
+    <None Include="Data\NA6Lane_basic_segm06.dat" />
+    <None Include="Data\NA6Lane_basic_segm06_LOD.dat" />
+    <None Include="Data\NA6Lane_elev_node00.dat" />
+    <None Include="Data\NA6Lane_elev_node00_LOD.dat" />
+    <None Include="Data\NA6Lane_elev_node01.dat" />
+    <None Include="Data\NA6Lane_elev_node02.dat" />
+    <None Include="Data\NA6Lane_elev_node02_LOD.dat" />
+    <None Include="Data\NA6Lane_elev_node04.dat" />
+    <None Include="Data\NA6Lane_elev_node04_LOD.dat" />
+    <None Include="Data\NA6Lane_elev_node05.dat" />
+    <None Include="Data\NA6Lane_elev_node05_lod.dat" />
+    <None Include="Data\NA6Lane_elev_segm00.dat" />
+    <None Include="Data\NA6Lane_elev_segm00_LOD.dat" />
+    <None Include="Data\NA6Lane_elev_segm01.dat" />
+    <None Include="Data\NA6Lane_elev_segm01_LOD.dat" />
+    <None Include="Data\NA6Lane_elev_segm04.dat" />
+    <None Include="Data\NA6Lane_elev_segm04_LOD.dat" />
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>mkdir "%25LOCALAPPDATA%25\Colossal Order\Cities_Skylines\Addons\Mods\$(ProjectName)"
@@ -98,6 +250,10 @@ xcopy /y "$(SolutionDir)packages\CitiesHarmony.API.2.0.0\lib\net35\CitiesHarmony
 
 mkdir "$(LOCALAPPDATA)\Colossal Order\Cities_Skylines\Addons\Mods\$(ProjectName)\Translations"
 del "%25LOCALAPPDATA%25\Colossal Order\Cities_Skylines\Addons\Mods\$(ProjectName)\Translations\*"
-xcopy /y "$(ProjectDir)\Translations\" "$(LOCALAPPDATA)\Colossal Order\Cities_Skylines\Addons\Mods\$(ProjectName)\Translations" /s /e</PostBuildEvent>
+xcopy /y "$(ProjectDir)\Translations\" "$(LOCALAPPDATA)\Colossal Order\Cities_Skylines\Addons\Mods\$(ProjectName)\Translations" /s /e
+
+mkdir "$(LOCALAPPDATA)\Colossal Order\Cities_Skylines\Addons\Mods\$(ProjectName)\Data"
+del "%25LOCALAPPDATA%25\Colossal Order\Cities_Skylines\Addons\Mods\$(ProjectName)\Data\*"
+xcopy /y "$(ProjectDir)\Data\" "$(LOCALAPPDATA)\Colossal Order\Cities_Skylines\Addons\Mods\$(ProjectName)\Data" /s /e</PostBuildEvent>
   </PropertyGroup>
 </Project>
