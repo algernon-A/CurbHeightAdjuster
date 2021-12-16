@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -43,60 +44,12 @@ namespace CurbHeightAdjuster
 
 
         /// <summary>
-        /// Constructor - converts the provided mesh to seralizable format.
+        /// Constructor - loads a serializable mesh from the specified file.
         /// </summary>
-        /// <param name="mesh">Mesh to serialize</param>
-        public SerializableMeshInfo(Mesh mesh)
-        {
-            // Vertices; serialise each Vector3 mesh vertex into three sequential floats.
-            vertices = new float[mesh.vertexCount * 3];
-            int index = 0;
-            for (int i = 0; i < mesh.vertexCount; ++i)
-            {
-                vertices[index++] = mesh.vertices[i].x;
-                vertices[index++] = mesh.vertices[i].y;
-                vertices[index++] = mesh.vertices[i].z;
-            }
+        /// <param name="filename">Filename to load</param>
+        public SerializableMeshInfo(string filename) => Deserialize(filename);
 
-            // Triangles; simple arrray of sequential ints storing the indices of the verticies (in order) forming each triangle.
-            triangles = new int[mesh.triangles.Length];
-            for (int i = 0; i < mesh.triangles.Length; ++i)
-            {
-                triangles[i] = mesh.triangles[i];
-            }
 
-            // UVs; serialise each Vector2 UV coordinate into two sequential floats.
-            uv = new float[mesh.uv.Length * 2];
-            index = 0;
-            for (int i = 0; i < mesh.uv.Length; ++i)
-            {
-                uv[index++] = mesh.uv[i].x;
-                uv[index++] = mesh.uv[i].y;
-            }
-
-            // Normals; Vector3s serialised as per vertices. 
-            normals = new float[mesh.normals.Length * 3];
-            index = 0;
-            for (int i = 0; i < mesh.normals.Length; ++i)
-            {
-                normals[index++] = mesh.normals[i].x;
-                normals[index++] = mesh.normals[i].y;
-                normals[index++] = mesh.normals[i].z;
-            }
-
-            // Colors; serialised as four sequential floats.
-            colors = new float[mesh.colors.Length * 4];
-            index = 0;
-            for (int i = 0; i < mesh.colors.Length; ++i)
-            {
-                colors[index++] = mesh.colors[i].r;
-                colors[index++] = mesh.colors[i].g;
-                colors[index++] = mesh.colors[i].b;
-                colors[index++] = mesh.colors[i].a;
-            }
-        }
-
-        
         /// <summary>
         /// Deserialization: returns a new mesh created from the current serializable data.
         /// </summary>
@@ -107,45 +60,106 @@ namespace CurbHeightAdjuster
             Mesh mesh = new Mesh();
 
             // Deserialize vertices; three sequential floats into each Vector3.
-            List<Vector3> verticesList = new List<Vector3>();
-            int index = 0;
-            for (int i = 0; i < vertices.Length; i += 3)
+            if (vertices != null)
             {
-                verticesList.Add(new Vector3(vertices[index++], vertices[index++], vertices[index++]));
+                List<Vector3> verticesList = new List<Vector3>();
+                int index = 0;
+                for (int i = 0; i < vertices.Length; i += 3)
+                {
+                    verticesList.Add(new Vector3(vertices[index++], vertices[index++], vertices[index++]));
+                }
+                mesh.SetVertices(verticesList);
             }
-            mesh.SetVertices(verticesList);
 
             // Deserialize triangles; this is already a sequential list of ints, no further work needed.
             mesh.triangles = triangles;
 
             // Deserialize UVs; two sequential floats into each Vector2.
-            List<Vector2>uvList = new List<Vector2>();
-            index = 0;
-            for (int i = 0; i < uv.Length; i += 2)
+            if (uv != null)
             {
-                uvList.Add(new Vector2(uv[index++], uv[index++]));
+                List<Vector2> uvList = new List<Vector2>();
+                int index = 0;
+                for (int i = 0; i < uv.Length; i += 2)
+                {
+                    uvList.Add(new Vector2(uv[index++], uv[index++]));
+                }
+                mesh.SetUVs(0, uvList);
             }
-            mesh.SetUVs(0, uvList);
 
             // Deserialize normals; three sequential floats into each Vector3.
-            List<Vector3> normalsList = new List<Vector3>();
-            index = 0;
-            for (int i = 0; i < normals.Length; i += 3)
+            if (normals != null)
             {
-                normalsList.Add(new Vector3(normals[index++], normals[index++], normals[index++]));
+                List<Vector3> normalsList = new List<Vector3>();
+                int index = 0;
+                for (int i = 0; i < normals.Length; i += 3)
+                {
+                    normalsList.Add(new Vector3(normals[index++], normals[index++], normals[index++]));
+                }
+                mesh.SetNormals(normalsList);
             }
-            mesh.SetNormals(normalsList);
 
             // Deserialize colors; four sequential floats into each color.
             List<Color> colorsList = new List<Color>();
-            index = 0;
-            for (int i = 0; i < colors.Length; i += 4)
+            if (colorsList != null)
             {
-                colorsList.Add(new Color(colors[index++], colors[index++], colors[index++], colors[index++]));
+                int index = 0;
+                for (int i = 0; i < colors.Length; i += 4)
+                {
+                    colorsList.Add(new Color(colors[index++], colors[index++], colors[index++], colors[index++]));
+                }
+                mesh.SetColors(colorsList);
             }
-            mesh.SetColors(colorsList);
 
             return mesh;
+        }
+
+
+        /// <summary>
+        /// Deserializes a mesh from file.
+        /// </summary>
+        /// <param name="fileName"></param>
+        public void Deserialize(string fileName)
+        {
+            // Don't do anything if filename is null or file doesn't exist.
+            if (string.IsNullOrEmpty(fileName) || !File.Exists(fileName))
+            {
+                return;
+            }
+
+            // Read from file.
+            FileStream fileStream = new FileStream(fileName, FileMode.Open, FileAccess.Read);
+            using (BinaryReader reader = new BinaryReader(fileStream))
+            {
+                // Header - read component sizes and initialize arrays.
+                vertices = new float[reader.ReadInt32()];
+                triangles = new int[reader.ReadInt32()];
+                uv = new float[reader.ReadInt32()];
+                normals = new float[reader.ReadInt32()];
+                colors = new float[reader.ReadInt32()];
+
+                // Read arrays.
+                for (int i = 0; i < vertices.Length; ++i)
+                {
+                    vertices[i] = reader.ReadSingle();
+                }
+                for (int i = 0; i < triangles.Length; ++i)
+                {
+                    triangles[i] = reader.ReadInt32();
+                }
+                for (int i = 0; i < uv.Length; ++i)
+                {
+                    uv[i] = reader.ReadSingle();
+                }
+                for (int i = 0; i < normals.Length; ++i)
+                {
+                    normals[i] = reader.ReadSingle();
+                }
+                for (int i = 0; i < colors.Length; ++i)
+                {
+                    colors[i] = reader.ReadSingle();
+                }
+            }
+            fileStream.Close();
         }
     }
 }

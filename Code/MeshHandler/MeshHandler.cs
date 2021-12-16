@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine;
 
 
@@ -11,7 +10,7 @@ namespace CurbHeightAdjuster
     /// </summary>
     internal static class MeshHandler
     {
-        // Location to store meshes.
+        // Mesh data location.
         private static string pathName = Path.Combine(ModUtils.AssemblyPath, "Data");
 
 
@@ -22,42 +21,14 @@ namespace CurbHeightAdjuster
         /// <returns>New mesh from binary data (null if error)</returns>
         internal static Mesh LoadMesh(string meshName)
         {
-            // Null check.
-            if (string.IsNullOrEmpty(meshName))
-            {
-                return null;
-            }    
-
             // Read mesh as <meshname>.dat.
             string fileName = meshName + ".dat";
             string filePath = Path.Combine(pathName, fileName);
 
-            // Check file exists before doing anything.
-            if (!File.Exists(filePath))
-            {
-                Logging.Message("meshFile ", fileName, " not found");
-                return null;
-            }
-
             try
             {
-                // Open file for reading.
-                FileStream filesStream = new FileStream(filePath, FileMode.Open);
-
-                // Check for empty file.
-                if (filesStream.Length == 0)
-                {
-                    Logging.Error("meshfile ", fileName, " had zero length");
-                    filesStream.Close();
-                    return null;
-                }
-
-                // Read serialzed mesh from file via binary formatter.
-                BinaryFormatter formatter = new BinaryFormatter();
-                SerializableMeshInfo serializedMesh = (SerializableMeshInfo)formatter.Deserialize(filesStream);
-                filesStream.Close();
-
-                // Deserialize mesh,.
+                // Deserialize mesh.
+                SerializableMeshInfo serializedMesh = new SerializableMeshInfo(filePath);
                 Mesh mesh = serializedMesh.GetMesh();
                 return mesh;
             }

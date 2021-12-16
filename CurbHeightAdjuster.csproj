@@ -171,6 +171,8 @@
     <None Include="Data\Highway_node00_LOD.dat" />
     <None Include="Data\Highway_node01.dat" />
     <None Include="Data\Highway_node01_LOD.dat" />
+    <None Include="Data\Highway_segm00.dat" />
+    <None Include="Data\Highway_segm00_LOD.dat" />
     <None Include="Data\NA2Lane_basic_node01.dat" />
     <None Include="Data\NA2Lane_basic_node01_LOD.dat" />
     <None Include="Data\NA2Lane_basic_segm01.dat" />

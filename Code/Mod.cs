@@ -41,6 +41,8 @@ namespace CurbHeightAdjuster
                 // Otherwise, queue the hook for when the intro's finished loading.
                 LoadingManager.instance.m_introLoaded += OptionsPanelManager.OptionsEventHook;
             }
+
+            MeshHandler.LoadMesh("Euro2Lane_basic_node01");
         }
 
 
