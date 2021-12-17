@@ -89,6 +89,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Data\Euro2Lane_basic_node01.dat" />
+    <None Include="Data\Euro2Lane_basic_node01_LOD.dat" />
     <None Include="Data\Euro2Lane_basic_segm01.dat" />
     <None Include="Data\Euro2Lane_basic_segm01_LOD.dat" />
     <None Include="Data\Euro2Lane_basic_segm05.dat" />
@@ -202,6 +203,7 @@
     <None Include="Data\NA4Lane_basic_segm06.dat" />
     <None Include="Data\NA4Lane_basic_segm06_LOD.dat" />
     <None Include="Data\NA4Lane_elev_node00.dat" />
+    <None Include="Data\NA4Lane_elev_node00_LOD.dat" />
     <None Include="Data\NA4Lane_elev_node01.dat" />
     <None Include="Data\NA4Lane_elev_node01_LOD.dat" />
     <None Include="Data\NA4Lane_elev_node02.dat" />
@@ -227,6 +229,7 @@
     <None Include="Data\NA6Lane_elev_node00.dat" />
     <None Include="Data\NA6Lane_elev_node00_LOD.dat" />
     <None Include="Data\NA6Lane_elev_node01.dat" />
+    <None Include="Data\NA6Lane_elev_node01_LOD.dat" />
     <None Include="Data\NA6Lane_elev_node02.dat" />
     <None Include="Data\NA6Lane_elev_node02_LOD.dat" />
     <None Include="Data\NA6Lane_elev_node04.dat" />
