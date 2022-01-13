@@ -11,7 +11,7 @@ namespace CurbHeightAdjuster
     public class CHAMod : IUserMod
     {
         public static string ModName => "Curb Height Adjuster";
-        public static string Version => "1.1";
+        public static string Version => "1.1.1";
 
         public string Name => ModName + " " + Version;
         public string Description => Translations.Translate("CHA_DESC");
@@ -41,8 +41,6 @@ namespace CurbHeightAdjuster
                 // Otherwise, queue the hook for when the intro's finished loading.
                 LoadingManager.instance.m_introLoaded += OptionsPanelManager.OptionsEventHook;
             }
-
-            MeshHandler.LoadMesh("Euro2Lane_basic_node01");
         }
 
 
