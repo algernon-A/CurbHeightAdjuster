@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Language UniqueName="ko" ReadableName="한국어">
+  <Translations>
+    <Translation ID="CHA_NAM" String="Curb Height Adjuster" />
+    <Translation ID="CHA_DESC" String="도로 연석의 높이를 낮춥니다." />
+    <Translation ID="CHA_HEIGHT" String="새 연석 높이" />
+    <Translation ID="CHA_LOD" String="LOD에도 적용" />
+    <Translation ID="CHA_REVERT" String="커스텀 높이 삭제" />
+    <Translation ID="CHA_APPLY" String="적용" />
+    <Translation ID="TRN_CHOICE" String="언어 설정" />
+    <Translation ID="TRN_SYS" String="게임 언어 사용" />
+  </Translations>
+</Language>
