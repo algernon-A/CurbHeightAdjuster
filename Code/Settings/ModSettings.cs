@@ -21,7 +21,7 @@ namespace CurbHeightAdjuster
         /// Language setting.
         /// </summary>
         [XmlElement("Language")]
-        public string XMLLanguage { get => Translations.Language; set => Translations.Language = value; }
+        public string XMLLanguage { get => Translations.CurrentLanguage; set => Translations.CurrentLanguage = value; }
 
 
         /// <summary>
