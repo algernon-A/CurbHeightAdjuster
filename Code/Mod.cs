@@ -11,7 +11,7 @@ namespace CurbHeightAdjuster
     public class CHAMod : IUserMod
     {
         public static string ModName => "Curb Height Adjuster";
-        public static string Version => "1.1.1";
+        public static string Version => "1.2";
 
         public string Name => ModName + " " + Version;
         public string Description => Translations.Translate("CHA_DESC");

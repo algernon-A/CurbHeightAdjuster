@@ -1,6 +1,7 @@
-﻿Version 1.1.1
+﻿Version 1.2
 
 - Add support for Big Parking Lots parking marker heights
+- Convert translation framework to CSV (for CrowdIn)
 
 
 Version 1.1
