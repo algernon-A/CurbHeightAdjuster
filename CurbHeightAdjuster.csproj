@@ -239,10 +239,12 @@
     <None Include="Data\NA6Lane_elev_segm04.dat" />
     <None Include="Data\NA6Lane_elev_segm04_LOD.dat" />
     <None Include="packages.config" />
-    <None Include="Translations\de.csv" />
-    <None Include="Translations\ja.csv" />
-    <None Include="Translations\ko.csv" />
-    <None Include="Translations\zh.csv" />
+    <None Include="Translations\de-DE.csv" />
+    <None Include="Translations\es-ES.csv" />
+    <None Include="Translations\fr-FR.csv" />
+    <None Include="Translations\ja-JP.csv" />
+    <None Include="Translations\ko-KR.csv" />
+    <None Include="Translations\zh-CN.csv" />
     <None Include="Translations\en.csv" />
   </ItemGroup>
   <ItemGroup />
