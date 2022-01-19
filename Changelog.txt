@@ -1,4 +1,6 @@
-﻿- Add additional checks for malformed building assets when changing parking lot heights.
+﻿Version 1.2.1
+
+- Add additional checks for malformed building assets when changing parking lot heights.
 
 
 Version 1.2
