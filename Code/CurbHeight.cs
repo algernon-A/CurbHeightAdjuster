@@ -358,73 +358,81 @@ namespace CurbHeightAdjuster
                     continue;
                 }
 
-                // Check for parking lot road prefab prefixes.
-                int periodIndex = building.name.IndexOf(".");
-                if (periodIndex > 0)
+                try
                 {
-                    string steamID = building.name.Substring(0, periodIndex);
-
-                    // Parking lot roads.
-                    if (steamID.Equals("1285201733") || steamID.Equals("1293870311") || steamID.Equals("1293869603"))
+                    // Check for parking lot road prefab prefixes.
+                    int periodIndex = building.name.IndexOf(".");
+                    if (periodIndex > 0)
                     {
-                        // Local reference.
-                        Mesh mesh = building.m_mesh;
-                        Vector3[] vertices = mesh.vertices;
+                        string steamID = building.name.Substring(0, periodIndex);
 
-                        // Found a match - raise the mesh.
-                        Logging.Message("raising Parking Lot Road ", building.name);
-
-                        // Record original vertices.
-                        ParkingRecord parkingRecord = new ParkingRecord
+                        // Parking lot roads.
+                        if (steamID.Equals("1285201733") || steamID.Equals("1293870311") || steamID.Equals("1293869603"))
                         {
-                            vertices = vertices
-                        };
+                            // Local reference.
+                            Mesh mesh = building.m_mesh;
+                            Vector3[] vertices = mesh.vertices;
 
-                        // Raise mesh.
-                        RaiseMesh(mesh);
-                        if (RaiseLods)
-                        {
-                            Logging.Message("raising LOD");
-                            RaiseMesh(building.m_lodMesh);
-                        }
+                            // Found a match - raise the mesh.
+                            Logging.Message("raising Parking Lot Road ", building.name);
 
-                        // Raise props in building.
-                        foreach (BuildingInfo.Prop prop in building.m_props)
-                        {
-                            parkingRecord.propHeights.Add(prop, prop.m_position.y);
-                            prop.m_position.y -= (OriginalCurbHeight - newCurbHeight);
-                        }
+                            // Record original vertices.
+                            ParkingRecord parkingRecord = new ParkingRecord
+                            {
+                                vertices = vertices
+                            };
 
-                        // Add original data record to dictionary.
-                        parkingRecords.Add(building, parkingRecord);
-                    }
-                    // Big Parking Lots.
-                    else if ((steamID.Equals("2115188517") || steamID.Equals("2121900156") || steamID.Equals("2116510188")) && building.m_props != null)
-                    {
-                        // Create new parkingRecord with original vertices (which will remain unaltered).
-                        ParkingRecord parkingRecord = new ParkingRecord
-                        {
-                            vertices = building.m_mesh.vertices
-                        };
+                            // Raise mesh.
+                            RaiseMesh(mesh);
+                            if (RaiseLods)
+                            {
+                                Logging.Message("raising LOD");
+                                RaiseMesh(building.m_lodMesh);
+                            }
 
-                        // Raise invisible parking space markers in building.
-                        foreach (BuildingInfo.Prop prop in building.m_props)
-                        {
-                            if (prop.m_prop.name.Equals("Invisible Parking Space"))
+                            // Raise props in building.
+                            foreach (BuildingInfo.Prop prop in building.m_props)
                             {
                                 parkingRecord.propHeights.Add(prop, prop.m_position.y);
                                 prop.m_position.y -= (OriginalCurbHeight - newCurbHeight);
                             }
-                        }
 
-                        // If we raised any invisible parking lot markers, add the parkingRecord to our list.
-                        if (parkingRecord.propHeights.Count > 0)
-                        {
-                            // Found a match - raise the mesh.
-                            Logging.Message("raised Big Parking Lot ", building.name);
+                            // Add original data record to dictionary.
                             parkingRecords.Add(building, parkingRecord);
                         }
+                        // Big Parking Lots.
+                        else if ((steamID.Equals("2115188517") || steamID.Equals("2121900156") || steamID.Equals("2116510188")) && building.m_props != null)
+                        {
+                            // Create new parkingRecord with original vertices (which will remain unaltered).
+                            ParkingRecord parkingRecord = new ParkingRecord
+                            {
+                                vertices = building.m_mesh?.vertices
+                            };
+
+                            // Raise invisible parking space markers in building.
+                            foreach (BuildingInfo.Prop prop in building.m_props)
+                            {
+                                if (prop.m_prop.name.Equals("Invisible Parking Space"))
+                                {
+                                    parkingRecord.propHeights.Add(prop, prop.m_position.y);
+                                    prop.m_position.y -= (OriginalCurbHeight - newCurbHeight);
+                                }
+                            }
+
+                            // If we raised any invisible parking lot markers, add the parkingRecord to our list.
+                            if (parkingRecord.propHeights.Count > 0)
+                            {
+                                // Found a match - raise the mesh.
+                                Logging.Message("raised Big Parking Lot ", building.name);
+                                parkingRecords.Add(building, parkingRecord);
+                            }
+                        }
                     }
+                }
+                catch (Exception e)
+                {
+                    // Don't let a single failure stop us.
+                    Logging.LogException(e, "exception checking building ", building.name);
                 }
             }
         }
@@ -540,12 +548,14 @@ namespace CurbHeightAdjuster
 
             // Iterate through all parking records in dictionary.
             {
-
                 foreach (KeyValuePair<BuildingInfo, ParkingRecord> buildingEntry in parkingRecords)
                 {
                     // Restore building vertices and then re-adjust mesh.
-                    buildingEntry.Key.m_mesh.vertices = buildingEntry.Value.vertices;
-                    RaiseMesh(buildingEntry.Key.m_mesh);
+                    if (buildingEntry.Key.m_mesh != null && buildingEntry.Value.vertices != null)
+                    {
+                        buildingEntry.Key.m_mesh.vertices = buildingEntry.Value.vertices;
+                        RaiseMesh(buildingEntry.Key.m_mesh);
+                    }
 
                     // Adjust prop heights.
                     foreach (KeyValuePair<BuildingInfo.Prop, float> propEntry in buildingEntry.Value.propHeights)
