@@ -25,6 +25,7 @@ namespace CurbHeightAdjuster
 
             // Curb depth slider.
             UISlider depthSlider = OptionsPanelUtils.AddDepthSlider(panel, ref currentY, "CHA_HEIGHT", CurbHeight.MinCurbHeight, CurbHeight.MaxCurbHeight, CurbHeight.NewCurbHeight);
+            depthSlider.eventValueChanged += (control, value) => CurbHeight.NewCurbHeight = value;
 
             // Apply button.
             UIButton applyButton = UIControls.AddButton(panel, OptionsPanelUtils.Margin, currentY, Translations.Translate("CHA_APPLY"), OptionsPanelUtils.ButtonWidth);
