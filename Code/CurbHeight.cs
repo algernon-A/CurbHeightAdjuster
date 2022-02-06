@@ -15,10 +15,10 @@ namespace CurbHeightAdjuster
         public float surfaceLevel;
 
         // Network segment vertices.
-        public Dictionary<NetInfo.Segment, OriginalVerts> segmentDict = new Dictionary<NetInfo.Segment, OriginalVerts>();
+        public Dictionary<NetInfo.Segment, NetRecord> segmentDict = new Dictionary<NetInfo.Segment, NetRecord>();
 
         // Network node vertices.
-        public Dictionary<NetInfo.Node, OriginalVerts> nodeDict = new Dictionary<NetInfo.Node, OriginalVerts>();
+        public Dictionary<NetInfo.Node, NetRecord> nodeDict = new Dictionary<NetInfo.Node, NetRecord>();
 
         // Network lane vertical offsets.
         public Dictionary<NetInfo.Lane, float> laneDict = new Dictionary<NetInfo.Lane, float>();
@@ -26,10 +26,12 @@ namespace CurbHeightAdjuster
 
 
     /// <summary>
-    /// Struct to hold references to original vertex arrays (main and LOD).
+    /// Struct to hold references to original vertex arrays (main and LOD) and flags to indicate eligibility.
     /// </summary>
-    public struct OriginalVerts
+    public struct NetRecord
     {
+        public bool eligibleCurbs;
+        public bool eligibleBridge;
         public Vector3[] mainVerts;
         public Vector3[] lodVerts;
     }
@@ -80,12 +82,17 @@ namespace CurbHeightAdjuster
         // Depth trigger - segments/nets need to have depths within these bounds to be adjusted.
         // Vanilla tram rails have tops at -0.225.
         // LRT tram rails have bases at -0.5.
-        private const float MinDepthTrigger = -0.21f;
-        private const float MaxDepthTrigger = -0.32f;
+        private const float MinCurbDepthTrigger = -0.21f;
+        private const float MaxCurbDepthTrigger = -0.32f;
 
         // Maximum bounds.
         internal const float MinCurbHeight = 0.07f;
         internal const float MaxCurbHeight = 0.29f;
+        internal const float MinBridgeThreshold = 0.35f;
+        internal const float MaxBridgeThreshold = 2.0f;
+        internal const float MinBridgeScale = 0.1f;
+        internal const float MaxBridgeScale = 1f;
+        internal const float BridgeDepthCutoff = -5f;
 
         // Curb height multiiplier.
         private static float newCurbMultiplier = DefaultNewCurbHeight / OriginalCurbHeight;
@@ -115,6 +122,36 @@ namespace CurbHeightAdjuster
             }
         }
         private static float newCurbHeight = DefaultNewCurbHeight;
+
+
+        /// <summary>
+        /// Bridge height threshold to apply (positive figure, in cm).
+        /// </summary>
+        internal static float BridgeHeightThreshold
+        {
+            get => -bridgeHeightThreshold;
+
+            set
+            {
+                bridgeHeightThreshold = -Mathf.Clamp(value, MinBridgeThreshold, MaxBridgeThreshold);
+            }
+        }
+        private static float bridgeHeightThreshold = -0.4f;
+
+
+        /// <summary>
+        /// Bridge height multiplier.
+        /// </summary>
+        internal static float BridgeHeightScale
+        {
+            get => bridgeHeightScale;
+
+            set
+            {
+                bridgeHeightScale = Mathf.Clamp(value, MinBridgeScale, MaxBridgeScale);
+            }
+        }
+        private static float bridgeHeightScale = 0.2f;
 
 
         /// <summary>
@@ -212,25 +249,13 @@ namespace CurbHeightAdjuster
                             }
 
                             // Check to see if this segment is a viable target.
-                            // Iterate through each vertex in segment mesh, counting how many meet our trigger height range.
-                            Vector3[] vertices = segment.m_segmentMesh.vertices;
-                            int count30 = 0;
-                            for (int j = 0; j < vertices.Length; ++j)
-                            {
-                                if (vertices[j].y < MinDepthTrigger && vertices[j].y > MaxDepthTrigger)
-                                {
-                                    count30++;
-                                }
-                            }
-
-                            // Check final counts; more than eight eligible verticies means the segment passes our filter.
-                            if (count30 > 8)
+                            if (IsEligibleMesh(segment.m_segmentMesh.vertices, 9, out bool hasCurbs, out bool hasBridge))
                             {
                                 // Eligibile target; record original value.
                                 netAltered = true;
-                                curbRecord.segmentDict.Add(segment, new OriginalVerts { mainVerts = vertices, lodVerts = segment.m_lodMesh.vertices });
+                                curbRecord.segmentDict.Add(segment, new NetRecord { eligibleCurbs = hasCurbs, eligibleBridge = hasBridge, mainVerts = segment.m_segmentMesh.vertices, lodVerts = segment.m_lodMesh.vertices });
 
-                                // Raise vertices.
+                                // Adjust vertices.
                                 AdjustMesh(segment.m_segmentMesh);
                                 if (RaiseLods)
                                 {
@@ -245,7 +270,7 @@ namespace CurbHeightAdjuster
                             // Iterate through each lane in network, replacing 30cm depths with our new curb height.
                             foreach (NetInfo.Lane lane in network.m_lanes)
                             {
-                                if (lane.m_verticalOffset < MinDepthTrigger && lane.m_verticalOffset > MaxDepthTrigger)
+                                if (lane.m_verticalOffset < MinCurbDepthTrigger && lane.m_verticalOffset > MaxCurbDepthTrigger)
                                 {
                                     // Record original value.
                                     netAltered = true;
@@ -288,26 +313,14 @@ namespace CurbHeightAdjuster
                                 node.m_nodeMesh = replacementMesh;
                             }
 
-                            // Check to see if this segment is a viable target.
-                            // Iterate through each vertex in segment mesh, counting how many meet our trigger height range.
-                            Vector3[] vertices = node.m_nodeMesh.vertices;
-                            int count30 = 0;
-                            for (int j = 0; j < vertices.Length; ++j)
-                            {
-                                if (vertices[j].y < MinDepthTrigger && vertices[j].y > MaxDepthTrigger)
-                                {
-                                    count30++;
-                                }
-                            }
-
-                            // Check final counts; more than four -30cm verticies means the node passes our filter.
-                            if (count30 > 4)
+                            // Check to see if this node is a viable target.
+                            if (IsEligibleMesh(node.m_nodeMesh.vertices, 9, out bool hasCurbs, out bool hasBridge))
                             {
                                 // Eligibile target; record original value.
                                 netAltered = true;
-                                curbRecord.nodeDict.Add(node, new OriginalVerts { mainVerts = vertices, lodVerts = node.m_lodMesh.vertices });
+                                curbRecord.nodeDict.Add(node, new NetRecord { eligibleCurbs = hasCurbs, eligibleBridge = hasBridge, mainVerts = node.m_nodeMesh.vertices, lodVerts = node.m_lodMesh.vertices });
 
-                                // Raise vertices.
+                                // Adjust vertices.
                                 AdjustMesh(node.m_nodeMesh);
                                 if (RaiseLods)
                                 {
@@ -454,14 +467,14 @@ namespace CurbHeightAdjuster
                 netEntry.Key.m_surfaceLevel = curbRecord.surfaceLevel;
 
                 // Restore segment vertices.
-                foreach (KeyValuePair<NetInfo.Segment, OriginalVerts> segmentEntry in curbRecord.segmentDict)
+                foreach (KeyValuePair<NetInfo.Segment, NetRecord> segmentEntry in curbRecord.segmentDict)
                 {
                     segmentEntry.Key.m_segmentMesh.vertices = segmentEntry.Value.mainVerts;
                     segmentEntry.Key.m_lodMesh.vertices = segmentEntry.Value.lodVerts;
                 }
 
                 // Restore node vertices.
-                foreach (KeyValuePair<NetInfo.Node, OriginalVerts> nodeEntry in curbRecord.nodeDict)
+                foreach (KeyValuePair<NetInfo.Node, NetRecord> nodeEntry in curbRecord.nodeDict)
                 {
                     nodeEntry.Key.m_nodeMesh.vertices = nodeEntry.Value.mainVerts;
                     nodeEntry.Key.m_lodMesh.vertices = nodeEntry.Value.lodVerts;
@@ -496,12 +509,10 @@ namespace CurbHeightAdjuster
 
 
         /// <summary>
-        /// Applies updated curb height changes.
+        /// Applies updated curb height and mesh changes.
         /// </summary>
         internal static void Apply()
         {
-            Logging.KeyMessage("applying custom curbs");
-
             // Ensure processed mesh list is clear, just in case.
             processedMeshes.Clear();
 
@@ -514,7 +525,7 @@ namespace CurbHeightAdjuster
                 netEntry.Key.m_surfaceLevel = newCurbHeight;
 
                 // Update segment vertices.
-                foreach (KeyValuePair<NetInfo.Segment, OriginalVerts> segmentEntry in curbRecord.segmentDict)
+                foreach (KeyValuePair<NetInfo.Segment, NetRecord> segmentEntry in curbRecord.segmentDict)
                 {
                     // Restore original vertices and then raise mesh.
                     segmentEntry.Key.m_segmentMesh.vertices = segmentEntry.Value.mainVerts;
@@ -527,7 +538,7 @@ namespace CurbHeightAdjuster
                 }
 
                 // Update node vertices.
-                foreach (KeyValuePair<NetInfo.Node, OriginalVerts> nodeEntry in curbRecord.nodeDict)
+                foreach (KeyValuePair<NetInfo.Node, NetRecord> nodeEntry in curbRecord.nodeDict)
                 {
                     // Restore original vertices and then raise mesh.
                     nodeEntry.Key.m_nodeMesh.vertices = nodeEntry.Value.mainVerts;
@@ -575,7 +586,7 @@ namespace CurbHeightAdjuster
 
         /// <summary>
         /// Proportionally raises the vertices of the given mesh in line with curb height adjustment.
-        /// Includes a filter to exclude meshes with fewer than four vertices.
+        /// Includes filters to exclude meshes with fewer than four vertices, or full-height bridges.
         /// </summary>
         /// <param name="mesh">Mesh to modify</param>
         private static void AdjustMesh(Mesh mesh)
@@ -587,33 +598,97 @@ namespace CurbHeightAdjuster
                 return;
             }
 
-            // Adjusted vertex counter.
-            int changedVertices = 0;
+            // Adjusted vertex counters.
+            int curbChangedVertices = 0, bridgeChangedVertices = 0;
+            bool isValidBridge = true;
 
             // Create new vertices array (changing individual elements within the existing array won't work with locked meshes).
             Vector3[] newVertices = new Vector3[mesh.vertices.Length];
             mesh.vertices.CopyTo(newVertices, 0);
 
-            // Raise verticies; anything below ground level (but above the maximum depth tirgger - allow for bridges etc.) has its y-value multiplied for proportional adjustment.
+            // Check to see if this is a valid bridge mesh.
             for (int i = 0; i < newVertices.Length; ++i)
             {
-                if (newVertices[i].y < 0.0f && newVertices[i].y > MaxDepthTrigger)
+                // If any vertex is more than 5m below surface height, we'll assume this is a full-height bridge mesh; skip.
+                if (newVertices[i].y < BridgeDepthCutoff)
+                {
+                    isValidBridge = false;
+                    break;
+                }
+            }
+
+            // Raise verticies; anything below ground level (but above the maximum depth trigger - allow for bridges etc.) has its y-value multiplied for proportional adjustment.
+            for (int i = 0; i < newVertices.Length; ++i)
+            {
+                float thisY = newVertices[i].y;
+
+                if (thisY < 0.0f && thisY > MaxCurbDepthTrigger)
                 {
                     newVertices[i].y *= newCurbMultiplier;
-                    ++changedVertices;
+                    ++curbChangedVertices;
+                }
+                else if (isValidBridge && thisY < bridgeHeightThreshold && thisY >= BridgeDepthCutoff)
+                {
+                    float newDepth = (thisY - bridgeHeightThreshold) * bridgeHeightScale;
+                    newVertices[i].y = newDepth + bridgeHeightThreshold;
+                    ++bridgeChangedVertices;
                 }
             }
 
             // If we changed at least four vertices, assign new vertices to mesh.
             // Don't change the mesh if we didn't get at least one quad, to avoid minor rendering glitches with flat LODs.
-            if (changedVertices > 3)
+            if (curbChangedVertices > 3 || (isValidBridge && bridgeChangedVertices > 3))
             {
                 mesh.vertices = newVertices;
 
                 // Record mesh as being altered.
                 processedMeshes.Add(mesh);
-
             }
+        }
+
+
+        /// <summary>
+        /// Checks vertices for eligibility for adjustment.
+        /// </summary>
+        /// <param name="vertices">Vertices to check</param>
+        /// <param name="minVertices">Minimum number of eligible vertices to be valid</param>
+        /// <param name="eligibleCurbs">Set to true if this mesh is eligible for curb height adjustment, false otherwise</param>
+        /// <param name="eligibleBridge">Set to true if this mesh is eligbile for bridge deck adjustment, false otherwise</param>
+        /// <returns>True if the mesh is eligible for adjustment (brigde or curb), false otherwise</returns>
+        private static bool IsEligibleMesh(Vector3[] vertices, int minVertices, out bool eligibleCurbs, out bool eligibleBridge)
+        {
+            // Status flags.
+            int curbVertices = 0, bridgeVertices = 0;
+            bool fullDepthMesh = false;
+
+
+            // Iterate through each vertex in segment mesh, counting how many meet our trigger height ranges.
+            for (int i = 0; i < vertices.Length; ++i)
+            {
+                float thisY = vertices[i].y;
+                if (thisY < MinCurbDepthTrigger && thisY > MaxCurbDepthTrigger)
+                {
+                    // Eligible curb vertex.
+                    curbVertices++;
+                }
+                else if (thisY < BridgeHeightThreshold && thisY >= BridgeDepthCutoff)
+                {
+                    // Eligible bridge vertex.
+                    bridgeVertices++;
+                }
+                else if (thisY < BridgeDepthCutoff)
+                {
+                    // Assume full-depth bridge mesh.
+                    fullDepthMesh = true;
+                }
+            }
+
+            eligibleCurbs = curbVertices >= minVertices;
+
+            // Bridge vertex count is only valid if this isn't a full-height bridge.
+            eligibleBridge = !fullDepthMesh && bridgeVertices >= minVertices;
+
+            return eligibleCurbs || eligibleBridge;
         }
 
 

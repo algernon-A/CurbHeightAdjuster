@@ -18,10 +18,6 @@ namespace CurbHeightAdjuster
 
         // Instance references.
         private static GameObject optionsGameObject;
-        private static CHAOptionsPanel panel;
-
-        // Accessors.
-        internal static CHAOptionsPanel Panel => panel;
 
 
         /// <summary>
@@ -95,15 +91,40 @@ namespace CurbHeightAdjuster
         {
             try
             {
-                // If no instance already set, create one.
-                if (optionsGameObject == null)
+                Logging.KeyMessage("creating options panels");
+
+                // We're now visible - create our gameobject, and give it a unique name for easy finding with ModTools.
+                optionsGameObject = new GameObject("CHAOptionsPanel");
+
+                // Attach to game options panel.
+                optionsGameObject.transform.parent = optionsPanel.transform;
+
+                // Create a base panel attached to our game object, perfectly overlaying the game options panel.
+                UIPanel basePanel = optionsGameObject.AddComponent<UIPanel>();
+                basePanel.absolutePosition = optionsPanel.absolutePosition;
+                basePanel.width = optionsPanel.width;
+                basePanel.height = 744f;
+
+                // Add tabstrip.
+                UITabstrip tabStrip = basePanel.AddUIComponent<UITabstrip>();
+                tabStrip.relativePosition = new Vector3(0, 0);
+                tabStrip.size = new Vector2(744f, 600f);
+
+                // Tab container (the panels underneath each tab).
+                UITabContainer tabContainer = basePanel.AddUIComponent<UITabContainer>();
+                tabContainer.relativePosition = new Vector2(0f, 40f);
+                tabContainer.size = new Vector2(744f, 713f);
+                tabStrip.tabPages = tabContainer;
+
+                // Add tabs and panels.
+                new CurbOptions(tabStrip, 0);
+                new BridgeOptions(tabStrip, 1);
+
+                // Change tab size and text scale.
+                foreach (UIButton button in tabStrip.components)
                 {
-                    // Give it a unique name for easy finding with ModTools.
-                    optionsGameObject = new GameObject("CHAOptionsPanel");
-                    optionsGameObject.transform.parent = optionsPanel.transform;
-                    panel = optionsGameObject.AddComponent<CHAOptionsPanel>();
-                    // Set up and show panel.
-                    Panel.Setup(optionsPanel.width, optionsPanel.height);
+                    button.textScale = 0.9f;
+                    button.width = 175f;
                 }
             }
             catch (Exception e)

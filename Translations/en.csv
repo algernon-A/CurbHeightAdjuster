@@ -2,9 +2,13 @@ CODE,en
 NAME,English
 CHA_NAM,Curb Height Adjuster
 CHA_DESC,Reduces the height of default road curbs.
+CHA_OPT_CUR,Curbs
+CHA_OPT_BRI,Bridges
 CHA_HEIGHT,New curb height
 CHA_LOD,Also adjust LODs
 CHA_REVERT,Remove custom curb heights
 CHA_APPLY,Apply
+CHA_BRI_THR,Scaling threshold start
+CHA_BRI_SCA,Depth scaling factor
 TRN_CHOICE,Set language
 TRN_SYS,Use game language
