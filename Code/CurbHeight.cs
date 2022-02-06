@@ -157,7 +157,7 @@ namespace CurbHeightAdjuster
         /// <summary>
         /// Determines if lods are also adjusted.
         /// </summary>
-        internal static bool RaiseLods { get; set; } = false;
+        internal static bool DoLODs { get; set; } = false;
 
 
         /// <summary>
@@ -257,7 +257,7 @@ namespace CurbHeightAdjuster
 
                                 // Adjust vertices.
                                 AdjustMesh(segment.m_segmentMesh);
-                                if (RaiseLods)
+                                if (DoLODs)
                                 {
                                     AdjustMesh(segment.m_lodMesh);
                                 }
@@ -322,7 +322,7 @@ namespace CurbHeightAdjuster
 
                                 // Adjust vertices.
                                 AdjustMesh(node.m_nodeMesh);
-                                if (RaiseLods)
+                                if (DoLODs)
                                 {
                                     AdjustMesh(node.m_lodMesh);
                                 }
@@ -397,9 +397,8 @@ namespace CurbHeightAdjuster
 
                             // Raise mesh.
                             RaiseMesh(mesh);
-                            if (RaiseLods)
+                            if (DoLODs)
                             {
-                                Logging.Message("raising LOD");
                                 RaiseMesh(building.m_lodMesh);
                             }
 
@@ -531,7 +530,7 @@ namespace CurbHeightAdjuster
                     segmentEntry.Key.m_segmentMesh.vertices = segmentEntry.Value.mainVerts;
                     segmentEntry.Key.m_lodMesh.vertices = segmentEntry.Value.lodVerts;
                     AdjustMesh(segmentEntry.Key.m_segmentMesh);
-                    if (RaiseLods)
+                    if (DoLODs)
                     {
                         AdjustMesh(segmentEntry.Key.m_lodMesh);
                     }
@@ -544,7 +543,7 @@ namespace CurbHeightAdjuster
                     nodeEntry.Key.m_nodeMesh.vertices = nodeEntry.Value.mainVerts;
                     nodeEntry.Key.m_lodMesh.vertices = nodeEntry.Value.lodVerts;
                     AdjustMesh(nodeEntry.Key.m_nodeMesh);
-                    if (RaiseLods)
+                    if (DoLODs)
                     {
                         AdjustMesh(nodeEntry.Key.m_lodMesh);
                     }

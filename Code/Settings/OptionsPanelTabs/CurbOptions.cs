@@ -23,24 +23,8 @@ namespace CurbHeightAdjuster
             // Y position indicator.
             float currentY = OptionsPanelUtils.Margin;
 
-            // Language choice.
-            UIDropDown languageDropDown = UIControls.AddPlainDropDown(panel, Translations.Translate("TRN_CHOICE"), Translations.LanguageList, Translations.Index);
-            languageDropDown.eventSelectedIndexChanged += (control, index) =>
-            {
-                Translations.Index = index;
-            };
-            languageDropDown.parent.relativePosition = new Vector2(OptionsPanelUtils.LeftMargin, currentY);
-            currentY += languageDropDown.parent.height + OptionsPanelUtils.GroupMargin;
-
             // Curb depth slider.
             UISlider depthSlider = OptionsPanelUtils.AddDepthSlider(panel, ref currentY, "CHA_HEIGHT", CurbHeight.MinCurbHeight, CurbHeight.MaxCurbHeight, CurbHeight.NewCurbHeight);
-            depthSlider.eventValueChanged += (control, value) => CurbHeight.NewCurbHeight = value;
-
-            // LOD checkbox.
-            UICheckBox lodCheck = UIControls.AddPlainCheckBox(panel, OptionsPanelUtils.Margin, currentY, Translations.Translate("CHA_LOD"));
-            lodCheck.isChecked = CurbHeight.RaiseLods;
-            lodCheck.eventCheckChanged += (control, isChecked) => { CurbHeight.RaiseLods = isChecked; };
-            currentY += lodCheck.height + OptionsPanelUtils.GroupMargin;
 
             // Apply button.
             UIButton applyButton = UIControls.AddButton(panel, OptionsPanelUtils.Margin, currentY, Translations.Translate("CHA_APPLY"), OptionsPanelUtils.ButtonWidth);

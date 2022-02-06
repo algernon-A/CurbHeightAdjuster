@@ -117,8 +117,9 @@ namespace CurbHeightAdjuster
                 tabStrip.tabPages = tabContainer;
 
                 // Add tabs and panels.
-                new CurbOptions(tabStrip, 0);
-                new BridgeOptions(tabStrip, 1);
+                new GeneralOptions(tabStrip, 0);
+                new CurbOptions(tabStrip, 1);
+                new BridgeOptions(tabStrip, 2);
 
                 // Change tab size and text scale.
                 foreach (UIButton button in tabStrip.components)

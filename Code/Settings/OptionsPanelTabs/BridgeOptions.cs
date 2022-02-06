@@ -31,11 +31,6 @@ namespace CurbHeightAdjuster
             UISlider multiplierSlider = OptionsPanelUtils.AddPercentageSlider(panel, ref currentY, "CHA_BRI_SCA", CurbHeight.MinBridgeScale, CurbHeight.MaxBridgeScale, CurbHeight.BridgeHeightScale);
             multiplierSlider.eventValueChanged += (control, value) => CurbHeight.BridgeHeightScale = value;
 
-            UICheckBox lodCheck = UIControls.AddPlainCheckBox(panel, OptionsPanelUtils.Margin, currentY, Translations.Translate("CHA_LOD"));
-            lodCheck.isChecked = CurbHeight.RaiseLods;
-            lodCheck.eventCheckChanged += (control, isChecked) => { CurbHeight.RaiseLods = isChecked; };
-            currentY += lodCheck.height + OptionsPanelUtils.GroupMargin;
-
             // Apply button.
             UIButton applyButton = UIControls.AddButton(panel, OptionsPanelUtils.Margin, currentY, Translations.Translate("CHA_APPLY"), OptionsPanelUtils.ButtonWidth);
             applyButton.eventClicked += (control, clickEvent) => CurbHeight.Apply();

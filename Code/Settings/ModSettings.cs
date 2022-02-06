@@ -35,7 +35,7 @@ namespace CurbHeightAdjuster
         /// Whether or not LODs are raised as well.
         /// </summary>
         [XmlElement("RaiseLODs")]
-        public bool XMLUpdateLods { get => CurbHeight.RaiseLods; set => CurbHeight.RaiseLods = value; }
+        public bool XMLUpdateLods { get => CurbHeight.DoLODs; set => CurbHeight.DoLODs = value; }
 
 
         /// <summary>
