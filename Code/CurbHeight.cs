@@ -250,39 +250,47 @@ namespace CurbHeightAdjuster
                                 segment.m_segmentMesh = replacementMesh;
                             }
 
-                            // Check to see if this segment is a viable target.
-                            // Iterate through each vertex in segment mesh, counting how many meet our trigger height range.
-                            Vector3[] vertices = segment.m_segmentMesh.vertices;
-                            bool segmentIsBridge = isBridge;
-                            int curbCount = 0;
-                            for (int j = 0; j < vertices.Length; ++j)
+                            // Skip any meshes that we've already processed.
+                            if (!processedMeshes.Contains(segment.m_segmentMesh))
                             {
-                                if (vertices[j].y < MinCurbDepthTrigger)
+                                // Check to see if this segment is a viable target.
+                                // Iterate through each vertex in segment mesh, counting how many meet our trigger height range.
+                                Vector3[] vertices = segment.m_segmentMesh.vertices;
+                                bool segmentIsBridge = isBridge;
+                                int curbCount = 0;
+                                for (int j = 0; j < vertices.Length; ++j)
                                 {
-                                    if (vertices[j].y > MaxCurbDepthTrigger)
+                                    if (vertices[j].y < MinCurbDepthTrigger)
                                     {
-                                        ++curbCount;
+                                        if (vertices[j].y > MaxCurbDepthTrigger)
+                                        {
+                                            ++curbCount;
+                                        }
+                                        else if (vertices[j].y < BridgeDepthCutoff)
+                                        {
+                                            segmentIsBridge = false;
+                                        }
                                     }
-                                    else if (vertices[j].y < BridgeDepthCutoff)
+                                }
+
+                                // Check final counts; more than eight eligible verticies means the segment passes our filter.
+                                if (curbCount > 8 || segmentIsBridge)
+                                {
+                                    // Eligibile target; record original value.
+                                    netAltered = true;
+                                    curbRecord.segmentDict.Add(segment, new NetComponentRecord { netInfo = network, mainVerts = vertices, lodVerts = segment.m_lodMesh.vertices });
+
+                                    // Adjust vertices.
+                                    AdjustMesh(segment.m_segmentMesh);
+                                    if (DoLODs)
                                     {
-                                        segmentIsBridge = false;
+                                        AdjustMesh(segment.m_lodMesh);
                                     }
                                 }
                             }
-
-                            // Check final counts; more than eight eligible verticies means the segment passes our filter.
-                            if (curbCount > 8 || segmentIsBridge)
+                            else
                             {
-                                // Eligibile target; record original value.
-                                netAltered = true;
-                                curbRecord.segmentDict.Add(segment, new NetComponentRecord { netInfo = network, mainVerts = vertices, lodVerts = segment.m_lodMesh.vertices });
-
-                                // Adjust vertices.
-                                AdjustMesh(segment.m_segmentMesh);
-                                if (DoLODs)
-                                {
-                                    AdjustMesh(segment.m_lodMesh);
-                                }
+                                Logging.Message("skipping already-processed segment mesh for network ", network.name);
                             }
                         }
 
@@ -335,39 +343,47 @@ namespace CurbHeightAdjuster
                                 node.m_nodeMesh = replacementMesh;
                             }
 
-                            // Check to see if this node is a viable target.
-                            // Iterate through each vertex in segment mesh, counting how many meet our trigger height range.
-                            Vector3[] vertices = node.m_nodeMesh.vertices;
-                            bool nodeIsBridge = isBridge;
-                            int curbCount = 0;
-                            for (int j = 0; j < vertices.Length; ++j)
+                            // Skip any meshes that we've already processed.
+                            if (!processedMeshes.Contains(node.m_nodeMesh))
                             {
-                                if (vertices[j].y < MinCurbDepthTrigger)
+                                // Check to see if this node is a viable target.
+                                // Iterate through each vertex in segment mesh, counting how many meet our trigger height range.
+                                Vector3[] vertices = node.m_nodeMesh.vertices;
+                                bool nodeIsBridge = isBridge;
+                                int curbCount = 0;
+                                for (int j = 0; j < vertices.Length; ++j)
                                 {
-                                    if (vertices[j].y > MaxCurbDepthTrigger)
+                                    if (vertices[j].y < MinCurbDepthTrigger)
                                     {
-                                        ++curbCount;
+                                        if (vertices[j].y > MaxCurbDepthTrigger)
+                                        {
+                                            ++curbCount;
+                                        }
+                                        else if (vertices[j].y < BridgeDepthCutoff)
+                                        {
+                                            nodeIsBridge = false;
+                                        }
                                     }
-                                    else if (vertices[j].y < BridgeDepthCutoff)
+                                }
+
+                                // Check final counts; more than four eligible verticies means the node passes our filter.
+                                if (curbCount > 4 || nodeIsBridge)
+                                {
+                                    // Eligibile target; record original value.
+                                    netAltered = true;
+                                    curbRecord.nodeDict.Add(node, new NetComponentRecord { netInfo = network, mainVerts = vertices, lodVerts = node.m_lodMesh.vertices });
+
+                                    // Adjust vertices.
+                                    AdjustMesh(node.m_nodeMesh);
+                                    if (DoLODs)
                                     {
-                                        nodeIsBridge = false;
+                                        AdjustMesh(node.m_lodMesh);
                                     }
                                 }
                             }
-
-                            // Check final counts; more than four eligible verticies means the node passes our filter.
-                            if (curbCount > 4 || nodeIsBridge)
+                            else
                             {
-                                // Eligibile target; record original value.
-                                netAltered = true;
-                                curbRecord.nodeDict.Add(node, new NetComponentRecord { netInfo = network, mainVerts = vertices, lodVerts = node.m_lodMesh.vertices });
-
-                                // Adjust vertices.
-                                AdjustMesh(node.m_nodeMesh);
-                                if (DoLODs)
-                                {
-                                    AdjustMesh(node.m_lodMesh);
-                                }
+                                Logging.Message("skipping already-processed node mesh for network ", network.name);
                             }
                         }
 
@@ -502,6 +518,8 @@ namespace CurbHeightAdjuster
             // Iterate through all curb records in dictionary.
             foreach (KeyValuePair<NetInfo, CurbRecord> netEntry in curbRecords)
             {
+                Logging.Message("reverting ", netEntry.Key.name);
+
                 CurbRecord curbRecord = netEntry.Value;
 
                 // Restore net surface level.
