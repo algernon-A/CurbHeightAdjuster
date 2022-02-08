@@ -34,8 +34,8 @@ namespace CurbHeightAdjuster
 
             // LOD checkbox.
             UICheckBox lodCheck = UIControls.AddPlainCheckBox(panel, OptionsPanelUtils.Margin, currentY, Translations.Translate("CHA_LOD"));
-            lodCheck.isChecked = CurbHeight.DoLODs;
-            lodCheck.eventCheckChanged += (control, isChecked) => { CurbHeight.DoLODs = isChecked; };
+            lodCheck.isChecked = NetHandler.DoLODs;
+            lodCheck.eventCheckChanged += (control, isChecked) => { NetHandler.DoLODs = isChecked; };
             currentY += lodCheck.height + OptionsPanelUtils.GroupMargin;
         }
     }

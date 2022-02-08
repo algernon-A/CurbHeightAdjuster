@@ -47,7 +47,7 @@ namespace CurbHeightAdjuster
                         yield return instruction;
 
                         // Insert call to our custom method immediately afterwards.
-                        instruction = new CodeInstruction(OpCodes.Call, typeof(CurbHeight).GetMethod(nameof(CurbHeight.RaiseCurbHeights)));
+                        instruction = new CodeInstruction(OpCodes.Call, typeof(NetHandler).GetMethod(nameof(NetHandler.OnLoad)));
 
                         // Set flag.
                         foundTarget = true;

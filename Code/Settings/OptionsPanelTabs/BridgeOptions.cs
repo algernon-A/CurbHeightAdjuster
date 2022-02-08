@@ -24,21 +24,21 @@ namespace CurbHeightAdjuster
             float currentY = OptionsPanelUtils.Margin;
 
             // Brige min threshold slider.
-            UISlider threshholdSlider = OptionsPanelUtils.AddDepthSlider(panel, ref currentY, "CHA_BRI_THR", CurbHeight.MinBridgeThreshold, CurbHeight.MaxBridgeThreshold, CurbHeight.BridgeHeightThreshold);
-            threshholdSlider.eventValueChanged += (control, value) => CurbHeight.BridgeHeightThreshold = value;
+            UISlider threshholdSlider = OptionsPanelUtils.AddDepthSlider(panel, ref currentY, "CHA_BRI_THR", NetHandler.MinBridgeThreshold, NetHandler.MaxBridgeThreshold, NetHandler.BridgeHeightThreshold);
+            threshholdSlider.eventValueChanged += (control, value) => NetHandler.BridgeHeightThreshold = value;
 
             // Bridge depth multiplier slider.
-            UISlider multiplierSlider = OptionsPanelUtils.AddPercentageSlider(panel, ref currentY, "CHA_BRI_SCA", CurbHeight.MinBridgeScale, CurbHeight.MaxBridgeScale, CurbHeight.BridgeHeightScale);
-            multiplierSlider.eventValueChanged += (control, value) => CurbHeight.BridgeHeightScale = value;
+            UISlider multiplierSlider = OptionsPanelUtils.AddPercentageSlider(panel, ref currentY, "CHA_BRI_SCA", NetHandler.MinBridgeScale, NetHandler.MaxBridgeScale, NetHandler.BridgeHeightScale);
+            multiplierSlider.eventValueChanged += (control, value) => NetHandler.BridgeHeightScale = value;
 
             // Apply button.
             UIButton applyButton = UIControls.AddButton(panel, OptionsPanelUtils.Margin, currentY, Translations.Translate("CHA_APPLY"), OptionsPanelUtils.ButtonWidth);
-            applyButton.eventClicked += (control, clickEvent) => CurbHeight.Apply();
+            applyButton.eventClicked += (control, clickEvent) => NetHandler.Apply();
             currentY += applyButton.height + OptionsPanelUtils.Margin;
 
             // Undo button.
             UIButton undoButton = UIControls.AddButton(panel, OptionsPanelUtils.Margin, currentY, Translations.Translate("CHA_REVERT"), OptionsPanelUtils.ButtonWidth);
-            undoButton.eventClicked += (control, clickEvent) => CurbHeight.Revert();
+            undoButton.eventClicked += (control, clickEvent) => NetHandler.Revert();
         }
     }
 }

@@ -57,7 +57,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Code\CurbHeight.cs" />
+    <Compile Include="Code\Manipulations\ParkingLots.cs" />
+    <Compile Include="Code\Manipulations\ManipData.cs" />
+    <Compile Include="Code\Manipulations\NetHandler.cs" />
     <Compile Include="Code\Loading.cs" />
     <Compile Include="Code\MeshHandler\MeshHandler.cs" />
     <Compile Include="Code\MeshHandler\SerializableMeshInfo.cs" />

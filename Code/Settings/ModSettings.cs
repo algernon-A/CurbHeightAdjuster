@@ -28,14 +28,14 @@ namespace CurbHeightAdjuster
         /// New curb height.
         /// </summary>
         [XmlElement("CurbHeight")]
-        public float XMLCurbHeight { get => CurbHeight.NewCurbHeight; set => CurbHeight.NewCurbHeight = value; }
+        public float XMLCurbHeight { get => NetHandler.NewCurbHeight; set => NetHandler.NewCurbHeight = value; }
 
         
         /// <summary>
         /// Whether or not LODs are raised as well.
         /// </summary>
         [XmlElement("RaiseLODs")]
-        public bool XMLUpdateLods { get => CurbHeight.DoLODs; set => CurbHeight.DoLODs = value; }
+        public bool XMLUpdateLods { get => NetHandler.DoLODs; set => NetHandler.DoLODs = value; }
 
 
         /// <summary>

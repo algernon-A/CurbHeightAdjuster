@@ -24,17 +24,17 @@ namespace CurbHeightAdjuster
             float currentY = OptionsPanelUtils.Margin;
 
             // Curb depth slider.
-            UISlider depthSlider = OptionsPanelUtils.AddDepthSlider(panel, ref currentY, "CHA_HEIGHT", CurbHeight.MinCurbHeight, CurbHeight.MaxCurbHeight, CurbHeight.NewCurbHeight);
-            depthSlider.eventValueChanged += (control, value) => CurbHeight.NewCurbHeight = value;
+            UISlider depthSlider = OptionsPanelUtils.AddDepthSlider(panel, ref currentY, "CHA_HEIGHT", NetHandler.MinCurbHeight, NetHandler.MaxCurbHeight, NetHandler.NewCurbHeight);
+            depthSlider.eventValueChanged += (control, value) => NetHandler.NewCurbHeight = value;
 
             // Apply button.
             UIButton applyButton = UIControls.AddButton(panel, OptionsPanelUtils.Margin, currentY, Translations.Translate("CHA_APPLY"), OptionsPanelUtils.ButtonWidth);
-            applyButton.eventClicked += (control, clickEvent) => CurbHeight.Apply();
+            applyButton.eventClicked += (control, clickEvent) => NetHandler.Apply();
             currentY += applyButton.height + OptionsPanelUtils.Margin;
 
             // Undo button.
             UIButton undoButton = UIControls.AddButton(panel, OptionsPanelUtils.Margin, currentY, Translations.Translate("CHA_REVERT"), OptionsPanelUtils.ButtonWidth);
-            undoButton.eventClicked += (control, clickEvent) => CurbHeight.Revert();
+            undoButton.eventClicked += (control, clickEvent) => NetHandler.Revert();
         }
     }
 }
