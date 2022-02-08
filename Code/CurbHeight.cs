@@ -167,6 +167,9 @@ namespace CurbHeightAdjuster
         /// </summary>
         public static void RaiseCurbHeights()
         {
+            // List of meshes that we've already checked.
+            HashSet<Mesh> checkedMeshes = new HashSet<Mesh>();
+
             Logging.KeyMessage("reducing curb heights");
 
             // Iterate through all networks in list.
@@ -250,35 +253,27 @@ namespace CurbHeightAdjuster
                                 segment.m_segmentMesh = replacementMesh;
                             }
 
-                            // Skip any meshes that we've already processed.
-                            if (!processedMeshes.Contains(segment.m_segmentMesh))
+                            // Skip any meshes that we've already checked.
+                            Mesh segmentMesh = segment.m_segmentMesh;
+                            if (!checkedMeshes.Contains(segmentMesh))
                             {
-                                // Check to see if this segment is a viable target.
-                                // Iterate through each vertex in segment mesh, counting how many meet our trigger height range.
-                                Vector3[] vertices = segment.m_segmentMesh.vertices;
-                                bool segmentIsBridge = isBridge;
-                                int curbCount = 0;
-                                for (int j = 0; j < vertices.Length; ++j)
-                                {
-                                    if (vertices[j].y < MinCurbDepthTrigger)
-                                    {
-                                        if (vertices[j].y > MaxCurbDepthTrigger)
-                                        {
-                                            ++curbCount;
-                                        }
-                                        else if (vertices[j].y < BridgeDepthCutoff)
-                                        {
-                                            segmentIsBridge = false;
-                                        }
-                                    }
-                                }
+                                // Not checked yet - add to list.
+                                checkedMeshes.Add(segmentMesh);
 
-                                // Check final counts; more than eight eligible verticies means the segment passes our filter.
-                                if (curbCount > 8 || segmentIsBridge)
+                                // Check to see if this segment is a viable target.
+                                Vector3[] vertices = segmentMesh.vertices;
+                                if (IsEligibleMesh(vertices, 9, isBridge, out bool eligibleCurbs, out bool eligibleBridge))
                                 {
                                     // Eligibile target; record original value.
                                     netAltered = true;
-                                    curbRecord.segmentDict.Add(segment, new NetComponentRecord { netInfo = network, mainVerts = vertices, lodVerts = segment.m_lodMesh.vertices });
+                                    curbRecord.segmentDict.Add(segment, new NetComponentRecord
+                                    {
+                                        netInfo = network,
+                                        eligibleCurbs = eligibleCurbs,
+                                        eligibleBridge = eligibleBridge,
+                                        mainVerts = vertices,
+                                        lodVerts = segment.m_lodMesh.vertices
+                                    });
 
                                     // Adjust vertices.
                                     AdjustMesh(segment.m_segmentMesh);
@@ -287,10 +282,6 @@ namespace CurbHeightAdjuster
                                         AdjustMesh(segment.m_lodMesh);
                                     }
                                 }
-                            }
-                            else
-                            {
-                                Logging.Message("skipping already-processed segment mesh for network ", network.name);
                             }
                         }
 
@@ -343,35 +334,27 @@ namespace CurbHeightAdjuster
                                 node.m_nodeMesh = replacementMesh;
                             }
 
-                            // Skip any meshes that we've already processed.
-                            if (!processedMeshes.Contains(node.m_nodeMesh))
+                            // Skip any meshes that we've already checked.
+                            Mesh nodeMesh = node.m_nodeMesh;
+                            if (!checkedMeshes.Contains(nodeMesh))
                             {
-                                // Check to see if this node is a viable target.
-                                // Iterate through each vertex in segment mesh, counting how many meet our trigger height range.
-                                Vector3[] vertices = node.m_nodeMesh.vertices;
-                                bool nodeIsBridge = isBridge;
-                                int curbCount = 0;
-                                for (int j = 0; j < vertices.Length; ++j)
-                                {
-                                    if (vertices[j].y < MinCurbDepthTrigger)
-                                    {
-                                        if (vertices[j].y > MaxCurbDepthTrigger)
-                                        {
-                                            ++curbCount;
-                                        }
-                                        else if (vertices[j].y < BridgeDepthCutoff)
-                                        {
-                                            nodeIsBridge = false;
-                                        }
-                                    }
-                                }
+                                // Not checked yet - add to list.
+                                checkedMeshes.Add(nodeMesh);
 
-                                // Check final counts; more than four eligible verticies means the node passes our filter.
-                                if (curbCount > 4 || nodeIsBridge)
+                                // Check to see if this node is a viable target.
+                                Vector3[] vertices = nodeMesh.vertices;
+                                if (IsEligibleMesh(vertices, 5, isBridge, out bool eligibleCurbs, out bool eligibleBridge))
                                 {
                                     // Eligibile target; record original value.
                                     netAltered = true;
-                                    curbRecord.nodeDict.Add(node, new NetComponentRecord { netInfo = network, mainVerts = vertices, lodVerts = node.m_lodMesh.vertices });
+                                    curbRecord.nodeDict.Add(node, new NetComponentRecord
+                                    {
+                                        netInfo = network,
+                                        eligibleCurbs = eligibleCurbs,
+                                        eligibleBridge = eligibleBridge,
+                                        mainVerts = vertices,
+                                        lodVerts = node.m_lodMesh.vertices
+                                    });
 
                                     // Adjust vertices.
                                     AdjustMesh(node.m_nodeMesh);
@@ -380,10 +363,6 @@ namespace CurbHeightAdjuster
                                         AdjustMesh(node.m_lodMesh);
                                     }
                                 }
-                            }
-                            else
-                            {
-                                Logging.Message("skipping already-processed node mesh for network ", network.name);
                             }
                         }
 
@@ -404,7 +383,6 @@ namespace CurbHeightAdjuster
 
             // Clear processed mesh list once done.
             processedMeshes.Clear();
-
 
             Logging.KeyMessage("finished reducing curb heights");
         }
@@ -586,8 +564,6 @@ namespace CurbHeightAdjuster
                 // Update segment vertices.
                 foreach (KeyValuePair<NetInfo.Segment, NetComponentRecord> segmentEntry in curbRecord.segmentDict)
                 {
-                    Logging.Message("adjusting segment from network ", segmentEntry.Value.netInfo.name);
-
                     // Restore original vertices and then raise mesh.
                     segmentEntry.Key.m_segmentMesh.vertices = segmentEntry.Value.mainVerts;
                     segmentEntry.Key.m_lodMesh.vertices = segmentEntry.Value.lodVerts;
@@ -601,8 +577,6 @@ namespace CurbHeightAdjuster
                 // Update node vertices.
                 foreach (KeyValuePair<NetInfo.Node, NetComponentRecord> nodeEntry in curbRecord.nodeDict)
                 {
-                    Logging.Message("adjusting node from network ", nodeEntry.Value.netInfo.name);
-
                     // Restore original vertices and then raise mesh.
                     nodeEntry.Key.m_nodeMesh.vertices = nodeEntry.Value.mainVerts;
                     nodeEntry.Key.m_lodMesh.vertices = nodeEntry.Value.lodVerts;
@@ -713,10 +687,11 @@ namespace CurbHeightAdjuster
         /// </summary>
         /// <param name="vertices">Vertices to check</param>
         /// <param name="minVertices">Minimum number of eligible vertices to be valid</param>
+        /// <param name="isBridge">If this mesh from a valid bridge prefab</param>
         /// <param name="eligibleCurbs">Set to true if this mesh is eligible for curb height adjustment, false otherwise</param>
         /// <param name="eligibleBridge">Set to true if this mesh is eligbile for bridge deck adjustment, false otherwise</param>
         /// <returns>True if the mesh is eligible for adjustment (brigde or curb), false otherwise</returns>
-        private static bool IsEligibleMesh(Vector3[] vertices, int minVertices, out bool eligibleCurbs, out bool eligibleBridge)
+        private static bool IsEligibleMesh(Vector3[] vertices, int minVertices, bool isBridge, out bool eligibleCurbs, out bool eligibleBridge)
         {
             // Status flags.
             int curbVertices = 0, bridgeVertices = 0;
@@ -747,7 +722,7 @@ namespace CurbHeightAdjuster
             eligibleCurbs = curbVertices >= minVertices;
 
             // Bridge vertex count is only valid if this isn't a full-height bridge.
-            eligibleBridge = !fullDepthMesh && bridgeVertices >= minVertices;
+            eligibleBridge = isBridge && (!fullDepthMesh && bridgeVertices >= minVertices);
 
             return eligibleCurbs || eligibleBridge;
         }
