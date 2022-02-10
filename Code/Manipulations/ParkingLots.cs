@@ -117,9 +117,9 @@ namespace CurbHeightAdjuster
                     // Don't let a single failure stop us.
                     Logging.LogException(e, "exception checking building ", building.name);
                 }
-
-                Logging.Message("finished raising parking lots");
             }
+
+            Logging.Message("finished raising parking lots");
         }
 
 
