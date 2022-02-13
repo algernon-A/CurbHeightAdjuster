@@ -54,6 +54,7 @@ namespace CurbHeightAdjuster
         internal const float MaxBridgeThreshold = 2.0f;
         internal const float MinBridgeScale = 0.1f;
         internal const float MaxBridgeScale = 1f;
+        internal const float MinBridgeCutoff = -1.2f;
         internal const float BridgeDepthCutoff = -5f;
 
         // Curb height multiiplier.
@@ -232,10 +233,10 @@ namespace CurbHeightAdjuster
                                     });
 
                                     // Adjust vertices.
-                                    AdjustMesh(segment.m_segmentMesh);
+                                    AdjustMesh(segment.m_segmentMesh, eligibleBridge);
                                     if (DoLODs)
                                     {
-                                        AdjustMesh(segment.m_lodMesh);
+                                        AdjustMesh(segment.m_lodMesh, eligibleBridge);
                                     }
                                 }
                             }
@@ -313,10 +314,10 @@ namespace CurbHeightAdjuster
                                     });
 
                                     // Adjust vertices.
-                                    AdjustMesh(node.m_nodeMesh);
+                                    AdjustMesh(node.m_nodeMesh, eligibleBridge);
                                     if (DoLODs)
                                     {
-                                        AdjustMesh(node.m_lodMesh);
+                                        AdjustMesh(node.m_lodMesh, eligibleBridge);
                                     }
                                 }
                             }
@@ -412,10 +413,10 @@ namespace CurbHeightAdjuster
                     // Restore original vertices and then raise mesh.
                     segmentEntry.Key.m_segmentMesh.vertices = segmentEntry.Value.mainVerts;
                     segmentEntry.Key.m_lodMesh.vertices = segmentEntry.Value.lodVerts;
-                    AdjustMesh(segmentEntry.Key.m_segmentMesh);
+                    AdjustMesh(segmentEntry.Key.m_segmentMesh, segmentEntry.Value.eligibleBridge);
                     if (DoLODs)
                     {
-                        AdjustMesh(segmentEntry.Key.m_lodMesh);
+                        AdjustMesh(segmentEntry.Key.m_lodMesh, segmentEntry.Value.eligibleBridge);
                     }
                 }
 
@@ -425,10 +426,10 @@ namespace CurbHeightAdjuster
                     // Restore original vertices and then raise mesh.
                     nodeEntry.Key.m_nodeMesh.vertices = nodeEntry.Value.mainVerts;
                     nodeEntry.Key.m_lodMesh.vertices = nodeEntry.Value.lodVerts;
-                    AdjustMesh(nodeEntry.Key.m_nodeMesh);
+                    AdjustMesh(nodeEntry.Key.m_nodeMesh, nodeEntry.Value.eligibleBridge);
                     if (DoLODs)
                     {
-                        AdjustMesh(nodeEntry.Key.m_lodMesh);
+                        AdjustMesh(nodeEntry.Key.m_lodMesh, nodeEntry.Value.eligibleBridge);
                     }
                 }
 
@@ -455,7 +456,8 @@ namespace CurbHeightAdjuster
         /// Includes filters to exclude meshes with fewer than four vertices, or full-height bridges.
         /// </summary>
         /// <param name="mesh">Mesh to modify</param>
-        private static void AdjustMesh(Mesh mesh)
+        /// <param name="bridge">True to apply bridge modifications, false otherwise</param>
+        private static void AdjustMesh(Mesh mesh, bool bridge)
         {
             // Check if we've already done this one.
             if (processedMeshes.Contains(mesh))
@@ -465,22 +467,10 @@ namespace CurbHeightAdjuster
 
             // Adjusted vertex counters.
             int curbChangedVertices = 0, bridgeChangedVertices = 0;
-            bool isValidBridge = true;
 
             // Create new vertices array (changing individual elements within the existing array won't work with locked meshes).
             Vector3[] newVertices = new Vector3[mesh.vertices.Length];
             mesh.vertices.CopyTo(newVertices, 0);
-
-            // Check to see if this is a valid bridge mesh.
-            for (int i = 0; i < newVertices.Length; ++i)
-            {
-                // If any vertex is more than 5m below surface height, we'll assume this is a full-height bridge mesh; skip.
-                if (newVertices[i].y < BridgeDepthCutoff)
-                {
-                    isValidBridge = false;
-                    break;
-                }
-            }
 
             // Raise verticies; anything below ground level (but above the maximum depth trigger - allow for bridges etc.) has its y-value multiplied for proportional adjustment.
             for (int i = 0; i < newVertices.Length; ++i)
@@ -492,7 +482,7 @@ namespace CurbHeightAdjuster
                     newVertices[i].y = thisY * newCurbMultiplier;
                     ++curbChangedVertices;
                 }
-                else if (isValidBridge && thisY < bridgeHeightThreshold && thisY >= BridgeDepthCutoff)
+                else if (bridge && thisY < bridgeHeightThreshold && thisY >= BridgeDepthCutoff)
                 {
                     newVertices[i].y = ((thisY - bridgeHeightThreshold) * bridgeHeightScale) + bridgeHeightThreshold;
                     ++bridgeChangedVertices;
@@ -501,7 +491,7 @@ namespace CurbHeightAdjuster
 
             // If we changed at least four vertices, assign new vertices to mesh.
             // Don't change the mesh if we didn't get at least one quad, to avoid minor rendering glitches with flat LODs.
-            if (curbChangedVertices > 3 || (isValidBridge && bridgeChangedVertices > 3))
+            if (curbChangedVertices > 3 || (bridge && bridgeChangedVertices > 3))
             {
                 mesh.vertices = newVertices;
 
@@ -536,7 +526,7 @@ namespace CurbHeightAdjuster
                     // Eligible curb vertex.
                     ++curbVertices;
                 }
-                else if (thisY < MaxCurbDepthTrigger && thisY >= BridgeDepthCutoff)
+                else if (thisY < MinBridgeCutoff && thisY >= BridgeDepthCutoff)
                 {
                     // Eligible bridge vertex.
                     ++bridgeVertices;
