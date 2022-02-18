@@ -32,10 +32,31 @@ namespace CurbHeightAdjuster
 
         
         /// <summary>
-        /// Whether or not LODs are raised as well.
+        /// Whether or not LODs are changed as well.
         /// </summary>
         [XmlElement("RaiseLODs")]
         public bool XMLUpdateLods { get => NetHandler.DoLODs; set => NetHandler.DoLODs = value; }
+
+
+        /// <summary>
+        /// Whether or not bridge manipulations are applied.
+        /// </summary>
+        [XmlElement("EnableBridges")]
+        public bool XMLEnableBridges { get => NetHandler.EnableBridges; set => NetHandler.EnableBridges = value; }
+
+
+        /// <summary>
+        /// Bridge deck threshold.
+        /// </summary>
+        [XmlElement("BridgeHeightThreshold")]
+        public float XMLBridgeHeightThreshold { get => NetHandler.BridgeHeightThreshold; set => NetHandler.BridgeHeightThreshold = value; }
+
+
+        /// <summary>
+        /// Bridge deck multiplier.
+        /// </summary>
+        [XmlElement("BridgeHeightScale")]
+        public float XMLBridgeHeightScale { get => NetHandler.BridgeHeightScale; set => NetHandler.BridgeHeightScale = value; }
 
 
         /// <summary>

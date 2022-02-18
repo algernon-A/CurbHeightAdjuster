@@ -119,6 +119,11 @@ namespace CurbHeightAdjuster
         /// </summary>
         internal static bool DoLODs { get; set; } = false;
 
+        /// <summary>
+        /// Enables bridge deck manipulation.
+        /// </summary>
+        internal static bool EnableBridges { get; set; } = true;
+
 
         /// <summary>
         /// Called on load to scan through all loaded NetInfos, build the database, and apply network manipulations (meshes and lanes).
