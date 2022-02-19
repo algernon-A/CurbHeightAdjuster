@@ -67,11 +67,7 @@
     <Compile Include="Code\Patches\NetDeserializePatch.cs" />
     <Compile Include="Code\Patches\Patcher.cs" />
     <Compile Include="Code\Settings\ModSettings.cs" />
-    <Compile Include="Code\Settings\OptionsPanelTabs\BridgeOptions.cs" />
-    <Compile Include="Code\Settings\OptionsPanelTabs\GeneralOptions.cs" />
-    <Compile Include="Code\Settings\OptionsPanelUtils.cs" />
-    <Compile Include="Code\Settings\OptionsPanelManager.cs" />
-    <Compile Include="Code\Settings\OptionsPanelTabs\CurbOptions.cs" />
+    <Compile Include="Code\Settings\OptionsPanel.cs" />
     <Compile Include="Code\TranslationFramework\TranslationFramework.cs" />
     <Compile Include="Code\TranslationFramework\Language.cs" />
     <Compile Include="Code\Utils\Logging.cs" />
