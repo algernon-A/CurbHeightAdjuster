@@ -461,14 +461,17 @@ namespace CurbHeightAdjuster
         /// Includes filters to exclude meshes with fewer than four vertices, or full-height bridges.
         /// </summary>
         /// <param name="mesh">Mesh to modify</param>
-        /// <param name="bridge">True to apply bridge modifications, false otherwise</param>
-        private static void AdjustMesh(Mesh mesh, bool bridge)
+        /// <param name="isBridge">True if this is an eligible bridge mesh, false otherwise</param>
+        private static void AdjustMesh(Mesh mesh, bool isBridge)
         {
             // Check if we've already done this one.
             if (processedMeshes.Contains(mesh))
             {
                 return;
             }
+
+            // Disable bridge manipulation if setting isn't set.
+            bool bridge = isBridge & EnableBridges;
 
             // Adjusted vertex counters.
             int curbChangedVertices = 0, bridgeChangedVertices = 0;

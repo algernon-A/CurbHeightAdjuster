@@ -23,6 +23,12 @@ namespace CurbHeightAdjuster
             // Y position indicator.
             float currentY = OptionsPanelUtils.Margin;
 
+            // Enable bridge mesh checkbox.
+            UICheckBox enableCheck = UIControls.AddPlainCheckBox(panel, OptionsPanelUtils.Margin, currentY, Translations.Translate("CHA_BRI_ENA"));
+            enableCheck.isChecked = NetHandler.DoLODs;
+            enableCheck.eventCheckChanged += (control, isChecked) => { NetHandler.EnableBridges = isChecked; };
+            currentY += enableCheck.height + OptionsPanelUtils.GroupMargin;
+
             // Brige min threshold slider.
             UISlider threshholdSlider = OptionsPanelUtils.AddDepthSlider(panel, ref currentY, "CHA_BRI_THR", NetHandler.MinBridgeThreshold, NetHandler.MaxBridgeThreshold, NetHandler.BridgeHeightThreshold);
             threshholdSlider.eventValueChanged += (control, value) => NetHandler.BridgeHeightThreshold = value;
