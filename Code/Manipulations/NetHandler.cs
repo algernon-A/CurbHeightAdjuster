@@ -96,7 +96,7 @@ namespace CurbHeightAdjuster
                 bridgeHeightThreshold = -Mathf.Clamp(value, MinBridgeThreshold, MaxBridgeThreshold);
             }
         }
-        private static float bridgeHeightThreshold = -0.4f;
+        private static float bridgeHeightThreshold = -0.5f;
 
 
         /// <summary>
@@ -111,7 +111,7 @@ namespace CurbHeightAdjuster
                 bridgeHeightScale = Mathf.Clamp(value, MinBridgeScale, MaxBridgeScale);
             }
         }
-        private static float bridgeHeightScale = 0.2f;
+        private static float bridgeHeightScale = 0.25f;
 
 
         /// <summary>
