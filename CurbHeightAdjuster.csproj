@@ -68,6 +68,7 @@
     <Compile Include="Code\Patches\Patcher.cs" />
     <Compile Include="Code\Settings\ModSettings.cs" />
     <Compile Include="Code\Settings\OptionsPanel.cs" />
+    <Compile Include="Code\Settings\OptionsPanelManager.cs" />
     <Compile Include="Code\TranslationFramework\TranslationFramework.cs" />
     <Compile Include="Code\TranslationFramework\Language.cs" />
     <Compile Include="Code\Utils\Logging.cs" />

@@ -19,7 +19,7 @@ namespace CurbHeightAdjuster
             base.OnLevelLoaded(mode);
 
             // Set up options panel event handler (need to redo this now that options panel has been reset after loading into game).
-            OptionsPanel.OptionsEventHook();
+            OptionsPanelManager.OptionsEventHook();
 
             Logging.Message("loading complete");
         }

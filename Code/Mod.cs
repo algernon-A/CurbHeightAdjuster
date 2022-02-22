@@ -34,12 +34,12 @@ namespace CurbHeightAdjuster
             if (UIView.GetAView() != null)
             {
                 // It's ready - attach the hook now.
-                OptionsPanel.OptionsEventHook();
+                OptionsPanelManager.OptionsEventHook();
             }
             else
             {
                 // Otherwise, queue the hook for when the intro's finished loading.
-                LoadingManager.instance.m_introLoaded += OptionsPanel.OptionsEventHook;
+                LoadingManager.instance.m_introLoaded += OptionsPanelManager.OptionsEventHook;
             }
         }
 
@@ -63,7 +63,7 @@ namespace CurbHeightAdjuster
         public void OnSettingsUI(UIHelperBase helper)
         {
             // Create options panel.
-            OptionsPanel.Setup(helper);
+            OptionsPanelManager.Setup(helper);
         }
     }
 }
