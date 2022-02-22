@@ -16,6 +16,19 @@ namespace CurbHeightAdjuster
         [XmlIgnore]
         private static readonly string SettingsFilePath = Path.Combine(ColossalFramework.IO.DataLocation.localApplicationData, "CurbHeightAdjuster.xml");
 
+        // What's new notification version.
+        [XmlIgnore]
+        internal static string whatsNewVersion = "0.0";
+
+
+        // File version.
+        [XmlAttribute("Version")]
+        public int version = 0;
+
+        // What's new notification version.
+        [XmlElement("WhatsNewVersion")]
+        public string XMLWhatsNewVersion { get => whatsNewVersion; set => whatsNewVersion = value; }
+
 
         /// <summary>
         /// Language setting.

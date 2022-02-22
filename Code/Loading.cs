@@ -21,6 +21,9 @@ namespace CurbHeightAdjuster
             // Set up options panel event handler (need to redo this now that options panel has been reset after loading into game).
             OptionsPanelManager.OptionsEventHook();
 
+            // Display update notification.
+            WhatsNew.ShowWhatsNew();
+
             Logging.Message("loading complete");
         }
     }

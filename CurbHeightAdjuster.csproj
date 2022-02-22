@@ -63,6 +63,11 @@
     <Compile Include="Code\Loading.cs" />
     <Compile Include="Code\MeshHandler\MeshHandler.cs" />
     <Compile Include="Code\MeshHandler\SerializableMeshInfo.cs" />
+    <Compile Include="Code\Notifications\DontShowAgainMessageBox.cs" />
+    <Compile Include="Code\Notifications\ListMessageBox.cs" />
+    <Compile Include="Code\Notifications\MessageBoxBase.cs" />
+    <Compile Include="Code\Notifications\WhatsNew.cs" />
+    <Compile Include="Code\Notifications\WhatsNewMessageBox.cs" />
     <Compile Include="Code\Patches\BuildingDeserializePatch.cs" />
     <Compile Include="Code\Patches\NetDeserializePatch.cs" />
     <Compile Include="Code\Patches\Patcher.cs" />
