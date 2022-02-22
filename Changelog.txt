@@ -1,4 +1,9 @@
-﻿Version 1.2.1
+﻿Versrion 1.3
+
+- Add optional bridge deck thickness reduction
+
+
+Version 1.2.1
 
 - Add additional checks for malformed building assets when changing parking lot heights.
 
