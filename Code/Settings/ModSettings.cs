@@ -59,6 +59,13 @@ namespace CurbHeightAdjuster
 
 
         /// <summary>
+        /// Whether or not bridge manipulations are applied.
+        /// </summary>
+        [XmlElement("UpdatePillars")]
+        public bool XMLUpdatePillars { get => Pillars.AutoUpdate; set => Pillars.AutoUpdate = value; }
+
+
+        /// <summary>
         /// Bridge deck threshold.
         /// </summary>
         [XmlElement("BridgeHeightThreshold")]

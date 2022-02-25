@@ -61,6 +61,7 @@
     <Compile Include="Code\Manipulations\ManipData.cs" />
     <Compile Include="Code\Manipulations\NetHandler.cs" />
     <Compile Include="Code\Loading.cs" />
+    <Compile Include="Code\Manipulations\Pillars.cs" />
     <Compile Include="Code\MeshHandler\MeshHandler.cs" />
     <Compile Include="Code\MeshHandler\SerializableMeshInfo.cs" />
     <Compile Include="Code\Notifications\DontShowAgainMessageBox.cs" />

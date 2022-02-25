@@ -59,7 +59,13 @@ namespace CurbHeightAdjuster
                 UICheckBox bridgeCheck = UIControls.AddPlainCheckBox(this, Margin, currentY, Translations.Translate("CHA_BRI_ENA"));
                 bridgeCheck.isChecked = NetHandler.DoLODs;
                 bridgeCheck.eventCheckChanged += BridgeCheckChanged;
-                currentY += bridgeCheck.height + GroupMargin;
+                currentY += bridgeCheck.height + Margin;
+
+                // Adjust exiting bridge pillars checkbox.
+                UICheckBox pillarCheck = UIControls.AddPlainCheckBox(this, Margin, currentY, Translations.Translate("CHA_OPT_PIL"));
+                pillarCheck.isChecked = Pillars.AutoUpdate;
+                pillarCheck.eventCheckChanged += (control, isChecked) => { Pillars.AutoUpdate = isChecked; };
+                currentY += pillarCheck.height + GroupMargin;
 
                 // Brige min threshold slider.
                 thresholdSlider = AddDepthSlider(this, ref currentY, "CHA_BRI_THR", NetHandler.MinBridgeThreshold, NetHandler.MaxBridgeThreshold, NetHandler.BridgeHeightThreshold);

@@ -375,6 +375,9 @@ namespace CurbHeightAdjuster
                 }
             }
 
+            // Adjust existing pillars.
+            Pillars.AdjustPillars();
+
             // Clear processed mesh lists once done.
             processedMeshes.Clear();
             processedOffsets.Clear();
@@ -430,6 +433,9 @@ namespace CurbHeightAdjuster
 
             // Revert parking records.
             ParkingLots.Revert();
+
+            // Adjust existing pillars.
+            Pillars.AdjustPillars();
 
             // Recalulate lanes on map with new height.
             RecalculateLanes();
@@ -508,6 +514,9 @@ namespace CurbHeightAdjuster
 
             // Apply changes to buildings.
             ParkingLots.Apply();
+
+            // Adjust existing pillars.
+            Pillars.AdjustPillars();
 
             // Recalulate lanes on map with new height.
             RecalculateLanes();
