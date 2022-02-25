@@ -15,7 +15,7 @@ namespace CurbHeightAdjuster
         /// Redesigned, rewritten, optimised, and extended by algernon.
         /// Bridge deck and parking lot manipulations added by algernon.
         /// Thanks to Ronyx69 (especially, for the original concept and implementation) and krzychu124 for their prior work!
-        
+
 
         // List of excluded networks (Steam IDs).
         private readonly static HashSet<string> excludedNets = new HashSet<string>
@@ -63,8 +63,11 @@ namespace CurbHeightAdjuster
         // Dictionary of altered nets.
         private readonly static Dictionary<NetInfo, NetRecord> netRecords = new Dictionary<NetInfo, NetRecord>();
 
-        // Hashset of currently processed network meshes.
+        // Hashset of currently processed network meshes, with calculated adjustment offsets.
         private readonly static HashSet<Mesh> processedMeshes = new HashSet<Mesh>();
+
+        // Hashset of processed bridge meshes with previously calculated pillar offsets.
+        private readonly static Dictionary<Mesh, float> processedOffsets = new Dictionary<Mesh, float>();
 
 
         /// <summary>
@@ -139,6 +142,7 @@ namespace CurbHeightAdjuster
             for (uint i = 0; i < PrefabCollection<NetInfo>.LoadedCount(); ++i)
             {
                 NetInfo network = PrefabCollection<NetInfo>.GetLoaded(i);
+                float maxAdjustment = 0f;
 
                 try
                 {
@@ -150,7 +154,8 @@ namespace CurbHeightAdjuster
 
                     // Only looking at road prefabs.
                     NetAI netAI = network.m_netAI;
-                    bool isBridge = netAI is RoadBridgeAI;
+                    RoadBridgeAI bridgeAI = netAI as RoadBridgeAI;
+                    bool isBridge = bridgeAI != null;
                     if (isBridge || netAI is RoadAI || netAI is RoadTunnelAI || netAI is DamAI)
                     {
                         // Skip excluded networks.
@@ -169,6 +174,14 @@ namespace CurbHeightAdjuster
 
                         // Network record for this prefab.
                         NetRecord netRecord = new NetRecord();
+
+                        // Record original pillar height.
+                        if (isBridge)
+                        {
+                            Logging.Message("isBridge set for network ", network.name);
+                            netRecord.bridgePillarOffset = bridgeAI.m_bridgePillarOffset;
+                            netRecord.middlePillarOffset = bridgeAI.m_middlePillarOffset;
+                        }
 
                         // Raise network surface level.
                         if (network.m_surfaceLevel == -0.3f)
@@ -319,10 +332,16 @@ namespace CurbHeightAdjuster
                                     });
 
                                     // Adjust vertices.
-                                    AdjustMesh(node.m_nodeMesh, eligibleBridge);
+                                    float adjustment = AdjustMesh(node.m_nodeMesh, eligibleBridge);
                                     if (DoLODs)
                                     {
                                         AdjustMesh(node.m_lodMesh, eligibleBridge);
+                                    }
+
+                                    // Adjust pillar heights to match net adjustment.
+                                    if (adjustment < maxAdjustment)
+                                    {
+                                        maxAdjustment = adjustment;
                                     }
                                 }
                             }
@@ -332,6 +351,15 @@ namespace CurbHeightAdjuster
                         if (netAltered)
                         {
                             netRecords.Add(network, netRecord);
+
+                            // Adjust pillar heights for bridges.
+                            if (isBridge && EnableBridges)
+                            {
+                                bridgeAI.m_bridgePillarOffset -= maxAdjustment;
+                                bridgeAI.m_middlePillarOffset -= maxAdjustment;
+                                Logging.Message("adjusted pillars by ", maxAdjustment, " for net ", network.name);
+                            }
+
                         }
                     }
                 }
@@ -343,8 +371,9 @@ namespace CurbHeightAdjuster
                 }
             }
 
-            // Clear processed mesh list once done.
+            // Clear processed mesh lists once done.
             processedMeshes.Clear();
+            processedOffsets.Clear();
 
             Logging.KeyMessage("finished load processing");
         }
@@ -386,6 +415,13 @@ namespace CurbHeightAdjuster
                 {
                     laneEntry.Key.m_verticalOffset = laneEntry.Value;
                 }
+
+                // Restore bridge pillar offsets.
+                if (netEntry.Key.m_netAI is RoadBridgeAI bridgeAI)
+                {
+                    bridgeAI.m_bridgePillarOffset = netRecord.bridgePillarOffset;
+                    bridgeAI.m_middlePillarOffset = netRecord.middlePillarOffset;
+                }
             }
 
             // Revert parking records.
@@ -401,41 +437,62 @@ namespace CurbHeightAdjuster
         /// </summary>
         internal static void Apply()
         {
-            // Ensure processed mesh list is clear, just in case.
+            // Ensure processed mesh lists are clear, just in case.
             processedMeshes.Clear();
+            processedOffsets.Clear();
 
             // Iterate through all network records in dictionary.
             foreach (KeyValuePair<NetInfo, NetRecord> netEntry in netRecords)
             {
+                // Local references.
+                NetInfo netInfo = netEntry.Key;
                 NetRecord netRecord = netEntry.Value;
 
                 // Change net surface level.
-                netEntry.Key.m_surfaceLevel = newCurbHeight;
+                netInfo.m_surfaceLevel = newCurbHeight;
 
                 // Update segment vertices.
                 foreach (KeyValuePair<NetInfo.Segment, NetComponentRecord> segmentEntry in netRecord.segmentDict)
                 {
                     // Restore original vertices and then raise mesh.
-                    segmentEntry.Key.m_segmentMesh.vertices = segmentEntry.Value.mainVerts;
-                    segmentEntry.Key.m_lodMesh.vertices = segmentEntry.Value.lodVerts;
-                    AdjustMesh(segmentEntry.Key.m_segmentMesh, segmentEntry.Value.eligibleBridge);
+                    NetInfo.Segment segment = segmentEntry.Key;
+                    segment.m_segmentMesh.vertices = segmentEntry.Value.mainVerts;
+                    segment.m_lodMesh.vertices = segmentEntry.Value.lodVerts;
+                    AdjustMesh(segment.m_segmentMesh, segmentEntry.Value.eligibleBridge);
                     if (DoLODs)
                     {
-                        AdjustMesh(segmentEntry.Key.m_lodMesh, segmentEntry.Value.eligibleBridge);
+                        AdjustMesh(segment.m_lodMesh, segmentEntry.Value.eligibleBridge);
                     }
                 }
 
                 // Update node vertices.
+                float maxAdjustment = 0f;
                 foreach (KeyValuePair<NetInfo.Node, NetComponentRecord> nodeEntry in netRecord.nodeDict)
                 {
                     // Restore original vertices and then raise mesh.
-                    nodeEntry.Key.m_nodeMesh.vertices = nodeEntry.Value.mainVerts;
-                    nodeEntry.Key.m_lodMesh.vertices = nodeEntry.Value.lodVerts;
-                    AdjustMesh(nodeEntry.Key.m_nodeMesh, nodeEntry.Value.eligibleBridge);
+                    NetInfo.Node node = nodeEntry.Key;
+                    node.m_nodeMesh.vertices = nodeEntry.Value.mainVerts;
+                    node.m_lodMesh.vertices = nodeEntry.Value.lodVerts;
+                    float adjustment = AdjustMesh(node.m_nodeMesh, nodeEntry.Value.eligibleBridge);
+
+                    // Update maximum adjustment value (for bridge pillar adjustment later).
+                    if (nodeEntry.Value.eligibleBridge && adjustment > maxAdjustment)
+                    {
+                        maxAdjustment = adjustment;
+                    }
+
+                    // Update LODs if set to do so.
                     if (DoLODs)
                     {
-                        AdjustMesh(nodeEntry.Key.m_lodMesh, nodeEntry.Value.eligibleBridge);
+                        AdjustMesh(node.m_lodMesh, nodeEntry.Value.eligibleBridge);
                     }
+                }
+
+                // Adjust pillar heights to match net adjustment.
+                if (netInfo.m_netAI is RoadBridgeAI bridgeAI)
+                {
+                    bridgeAI.m_bridgePillarOffset -= maxAdjustment;
+                    bridgeAI.m_middlePillarOffset -= maxAdjustment;
                 }
 
                 // Change lanes.
@@ -451,8 +508,9 @@ namespace CurbHeightAdjuster
             // Recalulate lanes on map with new height.
             RecalculateLanes();
 
-            // Clear processed mesh list once done.
+            // Clear processed mesh lists once done.
             processedMeshes.Clear();
+            processedOffsets.Clear();
         }
 
 
@@ -462,12 +520,22 @@ namespace CurbHeightAdjuster
         /// </summary>
         /// <param name="mesh">Mesh to modify</param>
         /// <param name="isBridge">True if this is an eligible bridge mesh, false otherwise</param>
-        private static void AdjustMesh(Mesh mesh, bool isBridge)
+        /// <returns>Maximum vertical bridge adjustment applied (0 if none)</returns>
+        private static float AdjustMesh(Mesh mesh, bool isBridge)
         {
+            float maxAdjusted = 0f;
+
             // Check if we've already done this one.
             if (processedMeshes.Contains(mesh))
             {
-                return;
+                // Already processed this mesh - try to get any stored bridge adjustment figure.
+                if (processedOffsets.TryGetValue(mesh, out float adjustment))
+                {
+                    return adjustment;
+                }
+
+                // No stored bridge adjustment figure; return 0.
+                return 0;
             }
 
             // Disable bridge manipulation if setting isn't set.
@@ -485,27 +553,46 @@ namespace CurbHeightAdjuster
             {
                 float thisY = newVertices[i].y;
 
+                // Adjust any eligible curb vertices.
                 if (thisY < 0.0f && thisY > MaxCurbDepthTrigger)
                 {
                     newVertices[i].y = thisY * newCurbMultiplier;
                     ++curbChangedVertices;
                 }
+                // Adjust any eligible bride vertices.
                 else if (bridge && thisY < bridgeHeightThreshold && thisY >= BridgeDepthCutoff)
                 {
-                    newVertices[i].y = ((thisY - bridgeHeightThreshold) * bridgeHeightScale) + bridgeHeightThreshold;
+                    float newHeight = ((thisY - bridgeHeightThreshold) * bridgeHeightScale) + bridgeHeightThreshold;
+                    newVertices[i].y = newHeight;
                     ++bridgeChangedVertices;
+
+                    // Update maximum adjusted value if needed.
+                    float adjustment = thisY - newHeight;
+                    if (adjustment < maxAdjusted)
+                    {
+                        maxAdjusted = adjustment;
+                    }
                 }
             }
 
             // If we changed at least four vertices, assign new vertices to mesh.
             // Don't change the mesh if we didn't get at least one quad, to avoid minor rendering glitches with flat LODs.
-            if (curbChangedVertices > 3 || (bridge && bridgeChangedVertices > 3))
+            bool bridgeChanged = bridge && bridgeChangedVertices > 3;
+            if (curbChangedVertices > 3 || bridgeChanged)
             {
                 mesh.vertices = newVertices;
 
                 // Record mesh as being altered.
                 processedMeshes.Add(mesh);
+
+                // If this was an adjusted bridge with a calculated adjustment, add it to our dictionary.
+                if (bridgeChanged && maxAdjusted != 0f)
+                {
+                    processedOffsets.Add(mesh, maxAdjusted);
+                }
             }
+
+            return maxAdjusted;
         }
 
 
