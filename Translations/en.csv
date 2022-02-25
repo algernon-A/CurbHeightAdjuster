@@ -5,7 +5,7 @@ CHA_DESC,Reduces the height of default road curbs.
 CHA_OPT_GEN,General
 CHA_OPT_CUR,Curbs
 CHA_OPT_BRI,Bridges
-,Automatically adjust height of existing bridge pillars
+CHA_OPT_PIL,Automatically adjust height of existing bridge pillars
 CHA_HEIGHT,New curb height
 CHA_LOD,Also adjust LODs
 CHA_DEFAULT,Restore defaults
