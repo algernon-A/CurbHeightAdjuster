@@ -7,6 +7,7 @@ CHA_OPT_CUR,Curbs
 CHA_OPT_BRI,Bridges
 CHA_HEIGHT,New curb height
 CHA_LOD,Also adjust LODs
+CHA_DEFAULT,Restore defaults
 CHA_REVERT,Remove adjustments
 CHA_APPLY,Apply
 CHA_BRI_ENA,Enable bridge deck thickness reduction

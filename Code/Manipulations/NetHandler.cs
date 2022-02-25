@@ -37,9 +37,13 @@ namespace CurbHeightAdjuster
         };
 
 
-        // Original and default new curb heights.
+        // Original curb heights.
         internal const float OriginalCurbHeight = -0.30f;
-        private const float DefaultNewCurbHeight = -0.15f;
+
+        // Default mod settings.
+        internal const float DefaultNewCurbHeight = -0.15f;
+        internal const float DefaultBridgeThreshold = -0.5f;
+        internal const float DefaultBridgeMultiplier = 0.25f;
 
         // Depth trigger - segments/nets need to have depths within these bounds to be adjusted.
         // Vanilla tram rails have tops at -0.225.
@@ -99,7 +103,7 @@ namespace CurbHeightAdjuster
                 bridgeHeightThreshold = -Mathf.Clamp(value, MinBridgeThreshold, MaxBridgeThreshold);
             }
         }
-        private static float bridgeHeightThreshold = -0.5f;
+        private static float bridgeHeightThreshold = DefaultBridgeThreshold;
 
 
         /// <summary>
@@ -114,7 +118,7 @@ namespace CurbHeightAdjuster
                 bridgeHeightScale = Mathf.Clamp(value, MinBridgeScale, MaxBridgeScale);
             }
         }
-        private static float bridgeHeightScale = 0.25f;
+        private static float bridgeHeightScale = DefaultBridgeMultiplier;
 
 
         /// <summary>

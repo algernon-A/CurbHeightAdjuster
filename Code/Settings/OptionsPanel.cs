@@ -69,6 +69,20 @@ namespace CurbHeightAdjuster
                 multiplierSlider = AddPercentageSlider(this, ref currentY, "CHA_BRI_SCA", NetHandler.MinBridgeScale, NetHandler.MaxBridgeScale, NetHandler.BridgeHeightScale);
                 multiplierSlider.eventValueChanged += (control, value) => NetHandler.BridgeHeightScale = value;
 
+                // Reset to deafults button.
+                UIButton defaultsButton = UIControls.AddButton(this, Margin, currentY, Translations.Translate("CHA_DEFAULT"), ButtonWidth);
+                defaultsButton.eventClicked += (control, clickEvent) =>
+                {
+                    // Set controls to default settings.
+                    depthSlider.value = NetHandler.DefaultNewCurbHeight;
+                    thresholdSlider.value = -NetHandler.DefaultBridgeThreshold;
+                    multiplierSlider.value = NetHandler.DefaultBridgeMultiplier;
+
+                    // Apply defaults.
+                    NetHandler.Apply();
+                };
+                currentY += defaultsButton.height + Margin;
+
                 // Apply button.
                 UIButton applyButton = UIControls.AddButton(this, Margin, currentY, Translations.Translate("CHA_APPLY"), ButtonWidth);
                 applyButton.eventClicked += (control, clickEvent) => NetHandler.Apply();
