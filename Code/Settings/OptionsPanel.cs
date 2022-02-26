@@ -57,7 +57,7 @@ namespace CurbHeightAdjuster
 
                 // Enable bridge mesh checkbox.
                 UICheckBox bridgeCheck = UIControls.AddPlainCheckBox(this, Margin, currentY, Translations.Translate("CHA_BRI_ENA"));
-                bridgeCheck.isChecked = NetHandler.DoLODs;
+                bridgeCheck.isChecked = NetHandler.EnableBridges;
                 bridgeCheck.eventCheckChanged += BridgeCheckChanged;
                 currentY += bridgeCheck.height + Margin;
 
