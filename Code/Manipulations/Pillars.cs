@@ -53,10 +53,14 @@ namespace CurbHeightAdjuster
                 // Check for road bridge AI.
                 if (info.m_netAI is RoadBridgeAI)
                 {
-                    Logging.Message("adjusting pillars for node ", i, ": ", info.name);
+                    // Only deal with networks with a valid adjustment.
+                    if (NetHandler.netRecords.ContainsKey(info))
+                    {
+                        Logging.Message("adjusting pillars for node ", i, ": ", info.name);
 
-                    // Reset pillar height via reverse patch call to NetNode.CheckHeightOffset.
-                    CheckHeightOffset(ref nodes[i], (ushort)i);
+                        // Reset pillar height via reverse patch call to NetNode.CheckHeightOffset.
+                        CheckHeightOffset(ref nodes[i], (ushort)i);
+                    }
                 }
             }
 

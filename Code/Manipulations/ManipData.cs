@@ -22,6 +22,7 @@ namespace CurbHeightAdjuster
         public Dictionary<NetInfo.Lane, float> laneDict = new Dictionary<NetInfo.Lane, float>();
 
         // Bridge pillar vertical offsets.
+        public bool adjustPillars = false;
         public float bridgePillarOffset = 0f;
         public float middlePillarOffset = 0f;
     } 

@@ -65,7 +65,7 @@ namespace CurbHeightAdjuster
         private static float newCurbMultiplier = DefaultNewCurbHeight / OriginalCurbHeight;
 
         // Dictionary of altered nets.
-        private readonly static Dictionary<NetInfo, NetRecord> netRecords = new Dictionary<NetInfo, NetRecord>();
+        internal readonly static Dictionary<NetInfo, NetRecord> netRecords = new Dictionary<NetInfo, NetRecord>();
 
         // Hashset of currently processed network meshes, with calculated adjustment offsets.
         private readonly static HashSet<Mesh> processedMeshes = new HashSet<Mesh>();
@@ -146,7 +146,6 @@ namespace CurbHeightAdjuster
             for (uint i = 0; i < PrefabCollection<NetInfo>.LoadedCount(); ++i)
             {
                 NetInfo network = PrefabCollection<NetInfo>.GetLoaded(i);
-                float maxAdjustment = 0f;
 
                 try
                 {
@@ -182,7 +181,6 @@ namespace CurbHeightAdjuster
                         // Record original pillar height.
                         if (isBridge)
                         {
-                            Logging.Message("isBridge set for network ", network.name);
                             netRecord.bridgePillarOffset = bridgeAI.m_bridgePillarOffset;
                             netRecord.middlePillarOffset = bridgeAI.m_middlePillarOffset;
                         }
@@ -197,6 +195,10 @@ namespace CurbHeightAdjuster
                             // Set new value.
                             network.m_surfaceLevel = newCurbHeight;
                         }
+
+                        // Bridge adjustment status.
+                        bool eligibleBridgeInfo = false;
+                        float maxAdjustment = 0f;
 
                         // Raise segments - iterate through each segment in net.
                         foreach (NetInfo.Segment segment in network.m_segments)
@@ -241,7 +243,7 @@ namespace CurbHeightAdjuster
 
                                 // Check to see if this segment is a viable target.
                                 Vector3[] vertices = segmentMesh.vertices;
-                                if (IsEligibleMesh(vertices, 9, isBridge, out bool eligibleCurbs, out bool eligibleBridge))
+                                if (IsEligibleMesh(vertices, 9, isBridge, out bool eligibleCurbs, out bool eligibleBridgeMesh))
                                 {
                                     // Eligibile target; record original value.
                                     netAltered = true;
@@ -249,16 +251,25 @@ namespace CurbHeightAdjuster
                                     {
                                         netInfo = network,
                                         eligibleCurbs = eligibleCurbs,
-                                        eligibleBridge = eligibleBridge,
+                                        eligibleBridge = eligibleBridgeMesh,
                                         mainVerts = vertices,
                                         lodVerts = segment.m_lodMesh.vertices
                                     });
 
+                                    // If this segment is an eligible bridge segment, mark the 
+                                    eligibleBridgeInfo |= eligibleBridgeMesh;
+
                                     // Adjust vertices.
-                                    AdjustMesh(segment.m_segmentMesh, eligibleBridge);
+                                    float adjustment = AdjustMesh(segment.m_segmentMesh, eligibleBridgeMesh);
                                     if (DoLODs)
                                     {
-                                        AdjustMesh(segment.m_lodMesh, eligibleBridge);
+                                        AdjustMesh(segment.m_lodMesh, eligibleBridgeMesh);
+                                    }
+
+                                    // Update maximum bridge adjustment, if applicable.
+                                    if (eligibleBridgeMesh && adjustment < maxAdjustment)
+                                    {
+                                        maxAdjustment = adjustment;
                                     }
                                 }
                             }
@@ -322,7 +333,7 @@ namespace CurbHeightAdjuster
 
                                 // Check to see if this node is a viable target.
                                 Vector3[] vertices = nodeMesh.vertices;
-                                if (IsEligibleMesh(vertices, 5, isBridge, out bool eligibleCurbs, out bool eligibleBridge))
+                                if (IsEligibleMesh(vertices, 5, isBridge, out bool eligibleCurbs, out bool eligibleBridgeMesh))
                                 {
                                     // Eligibile target; record original value.
                                     netAltered = true;
@@ -330,22 +341,16 @@ namespace CurbHeightAdjuster
                                     {
                                         netInfo = network,
                                         eligibleCurbs = eligibleCurbs,
-                                        eligibleBridge = eligibleBridge,
+                                        eligibleBridge = eligibleBridgeMesh,
                                         mainVerts = vertices,
                                         lodVerts = node.m_lodMesh.vertices
                                     });
 
                                     // Adjust vertices.
-                                    float adjustment = AdjustMesh(node.m_nodeMesh, eligibleBridge);
+                                    AdjustMesh(node.m_nodeMesh, eligibleBridgeMesh);
                                     if (DoLODs)
                                     {
-                                        AdjustMesh(node.m_lodMesh, eligibleBridge);
-                                    }
-
-                                    // Adjust pillar heights to match net adjustment.
-                                    if (adjustment < maxAdjustment)
-                                    {
-                                        maxAdjustment = adjustment;
+                                        AdjustMesh(node.m_lodMesh, eligibleBridgeMesh);
                                     }
                                 }
                             }
@@ -354,16 +359,22 @@ namespace CurbHeightAdjuster
                         // If the net was altered, record the created netRecord.
                         if (netAltered)
                         {
-                            netRecords.Add(network, netRecord);
-
-                            // Adjust pillar heights for bridges.
-                            if (isBridge && EnableBridges)
+                            // Handle pillar heights for bridges.
+                            if (isBridge && eligibleBridgeInfo)
                             {
-                                bridgeAI.m_bridgePillarOffset -= maxAdjustment;
-                                bridgeAI.m_middlePillarOffset -= maxAdjustment;
-                                Logging.Message("adjusted pillars by ", maxAdjustment, " for net ", network.name);
+                                // Record network as having adjustable pillars.
+                                netRecord.adjustPillars = true;
+
+                                // Apply adjustment if set.
+                                if (EnableBridges)
+                                {
+                                    bridgeAI.m_bridgePillarOffset -= maxAdjustment;
+                                    bridgeAI.m_middlePillarOffset -= maxAdjustment;
+                                    Logging.Message("adjusted pillars by ", maxAdjustment, " for net ", network.name);
+                                }
                             }
 
+                            netRecords.Add(network, netRecord);
                         }
                     }
                 }
@@ -398,10 +409,12 @@ namespace CurbHeightAdjuster
             {
                 Logging.Message("reverting ", netEntry.Key.name);
 
+                // Local references.
+                NetInfo netInfo = netEntry.Key;
                 NetRecord netRecord = netEntry.Value;
 
                 // Restore net surface level.
-                netEntry.Key.m_surfaceLevel = netRecord.surfaceLevel;
+                netInfo.m_surfaceLevel = netRecord.surfaceLevel;
 
                 // Restore segment vertices.
                 foreach (KeyValuePair<NetInfo.Segment, NetComponentRecord> segmentEntry in netRecord.segmentDict)
@@ -424,11 +437,14 @@ namespace CurbHeightAdjuster
                 }
 
                 // Restore bridge pillar offsets.
-                if (netEntry.Key.m_netAI is RoadBridgeAI bridgeAI)
+                if (netRecord.adjustPillars && netInfo.m_netAI is RoadBridgeAI bridgeAI)
                 {
                     bridgeAI.m_bridgePillarOffset = netRecord.bridgePillarOffset;
                     bridgeAI.m_middlePillarOffset = netRecord.middlePillarOffset;
                 }
+
+                // Reset any recorded pillar offset.
+                netRecord.bridgePillarOffset = 0;
             }
 
             // Revert parking records.
@@ -499,10 +515,10 @@ namespace CurbHeightAdjuster
                 }
 
                 // Adjust pillar heights to match net adjustment.
-                if (netInfo.m_netAI is RoadBridgeAI bridgeAI)
+                if (netRecord.adjustPillars && netInfo.m_netAI is RoadBridgeAI bridgeAI && EnableBridges)
                 {
-                    bridgeAI.m_bridgePillarOffset -= maxAdjustment;
-                    bridgeAI.m_middlePillarOffset -= maxAdjustment;
+                    bridgeAI.m_bridgePillarOffset = netRecord.bridgePillarOffset - maxAdjustment;
+                    bridgeAI.m_middlePillarOffset = netRecord.middlePillarOffset - maxAdjustment;
                 }
 
                 // Change lanes.
