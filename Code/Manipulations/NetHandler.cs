@@ -58,7 +58,7 @@ namespace CurbHeightAdjuster
         internal const float MaxBridgeThreshold = 2.0f;
         internal const float MinBridgeScale = 0.1f;
         internal const float MaxBridgeScale = 1f;
-        internal const float MinBridgeCutoff = -3.1f;
+        internal const float MinBridgeCutoff = -2.1f;
         internal const float BridgeDepthCutoff = -5f;
 
         // Curb height multiiplier.
@@ -69,9 +69,6 @@ namespace CurbHeightAdjuster
 
         // Hashset of currently processed network meshes, with calculated adjustment offsets.
         private readonly static HashSet<Mesh> processedMeshes = new HashSet<Mesh>();
-
-        // Hashset of processed bridge meshes with previously calculated pillar offsets.
-        private readonly static Dictionary<Mesh, float> processedOffsets = new Dictionary<Mesh, float>();
 
 
         /// <summary>
@@ -198,7 +195,6 @@ namespace CurbHeightAdjuster
 
                         // Bridge adjustment status.
                         bool eligibleBridgeInfo = false;
-                        float maxAdjustment = 0f;
 
                         // Raise segments - iterate through each segment in net.
                         foreach (NetInfo.Segment segment in network.m_segments)
@@ -260,16 +256,10 @@ namespace CurbHeightAdjuster
                                     eligibleBridgeInfo |= eligibleBridgeMesh;
 
                                     // Adjust vertices.
-                                    float adjustment = AdjustMesh(segment.m_segmentMesh, eligibleBridgeMesh);
+                                    AdjustMesh(segment.m_segmentMesh, eligibleBridgeMesh);
                                     if (DoLODs)
                                     {
                                         AdjustMesh(segment.m_lodMesh, eligibleBridgeMesh);
-                                    }
-
-                                    // Update maximum bridge adjustment, if applicable.
-                                    if (eligibleBridgeMesh && adjustment < maxAdjustment)
-                                    {
-                                        maxAdjustment = adjustment;
                                     }
                                 }
                             }
@@ -368,9 +358,8 @@ namespace CurbHeightAdjuster
                                 // Apply adjustment if set.
                                 if (EnableBridges)
                                 {
-                                    bridgeAI.m_bridgePillarOffset -= maxAdjustment;
-                                    bridgeAI.m_middlePillarOffset -= maxAdjustment;
-                                    Logging.Message("adjusted pillars by ", maxAdjustment, " for net ", network.name);
+                                    bridgeAI.m_bridgePillarOffset = BridgeAdjustment(netRecord.bridgePillarOffset);
+                                    bridgeAI.m_middlePillarOffset = BridgeAdjustment(netRecord.middlePillarOffset);
                                 }
                             }
 
@@ -386,12 +375,8 @@ namespace CurbHeightAdjuster
                 }
             }
 
-            // Adjust existing pillars.
-            Pillars.AdjustPillars();
-
-            // Clear processed mesh lists once done.
+            // Clear processed mesh list once done.
             processedMeshes.Clear();
-            processedOffsets.Clear();
 
             Logging.KeyMessage("finished load processing");
         }
@@ -463,9 +448,9 @@ namespace CurbHeightAdjuster
         /// </summary>
         internal static void Apply()
         {
-            // Ensure processed mesh lists are clear, just in case.
+            // Ensure processed mesh list is clear, just in case.
             processedMeshes.Clear();
-            processedOffsets.Clear();
+
 
             // Iterate through all network records in dictionary.
             foreach (KeyValuePair<NetInfo, NetRecord> netEntry in netRecords)
@@ -492,20 +477,13 @@ namespace CurbHeightAdjuster
                 }
 
                 // Update node vertices.
-                float maxAdjustment = 0f;
                 foreach (KeyValuePair<NetInfo.Node, NetComponentRecord> nodeEntry in netRecord.nodeDict)
                 {
                     // Restore original vertices and then raise mesh.
                     NetInfo.Node node = nodeEntry.Key;
                     node.m_nodeMesh.vertices = nodeEntry.Value.mainVerts;
                     node.m_lodMesh.vertices = nodeEntry.Value.lodVerts;
-                    float adjustment = AdjustMesh(node.m_nodeMesh, nodeEntry.Value.eligibleBridge);
-
-                    // Update maximum adjustment value (for bridge pillar adjustment later).
-                    if (nodeEntry.Value.eligibleBridge && adjustment > maxAdjustment)
-                    {
-                        maxAdjustment = adjustment;
-                    }
+                    AdjustMesh(node.m_nodeMesh, nodeEntry.Value.eligibleBridge);
 
                     // Update LODs if set to do so.
                     if (DoLODs)
@@ -517,8 +495,8 @@ namespace CurbHeightAdjuster
                 // Adjust pillar heights to match net adjustment.
                 if (netRecord.adjustPillars && netInfo.m_netAI is RoadBridgeAI bridgeAI && EnableBridges)
                 {
-                    bridgeAI.m_bridgePillarOffset = netRecord.bridgePillarOffset - maxAdjustment;
-                    bridgeAI.m_middlePillarOffset = netRecord.middlePillarOffset - maxAdjustment;
+                    bridgeAI.m_bridgePillarOffset = BridgeAdjustment(netRecord.bridgePillarOffset);
+                    bridgeAI.m_middlePillarOffset = BridgeAdjustment(netRecord.middlePillarOffset);
                 }
 
                 // Change lanes.
@@ -537,9 +515,27 @@ namespace CurbHeightAdjuster
             // Recalulate lanes on map with new height.
             RecalculateLanes();
 
-            // Clear processed mesh lists once done.
+            // Clear processed mesh list once done.
             processedMeshes.Clear();
-            processedOffsets.Clear();
+        }
+
+
+        /// <summary>
+        /// Returns the adjusted height of the given bridge vertex according to current settings.
+        /// </summary>
+        /// <param name="originalHeight"></param>
+        /// <returns></returns>
+        internal static float BridgeAdjustment(float originalHeight)
+        {
+            // Check for threshold trigger.
+            if (originalHeight < bridgeHeightThreshold)
+            {
+                // Threshold met; calculate new height.
+                return ((originalHeight - bridgeHeightThreshold) * bridgeHeightScale) + bridgeHeightThreshold;
+            }
+
+            // If we got here, the vertex didn't meet the threshold; return original value.
+            return originalHeight;
         }
 
 
@@ -549,22 +545,13 @@ namespace CurbHeightAdjuster
         /// </summary>
         /// <param name="mesh">Mesh to modify</param>
         /// <param name="isBridge">True if this is an eligible bridge mesh, false otherwise</param>
-        /// <returns>Maximum vertical bridge adjustment applied (0 if none)</returns>
-        private static float AdjustMesh(Mesh mesh, bool isBridge)
+        private static void AdjustMesh(Mesh mesh, bool isBridge)
         {
-            float maxAdjusted = 0f;
-
             // Check if we've already done this one.
             if (processedMeshes.Contains(mesh))
             {
-                // Already processed this mesh - try to get any stored bridge adjustment figure.
-                if (processedOffsets.TryGetValue(mesh, out float adjustment))
-                {
-                    return adjustment;
-                }
-
-                // No stored bridge adjustment figure; return 0.
-                return 0;
+                // Already processed this mesh - do nothing.
+                return;
             }
 
             // Disable bridge manipulation if setting isn't set.
@@ -591,16 +578,9 @@ namespace CurbHeightAdjuster
                 // Adjust any eligible bride vertices.
                 else if (bridge && thisY < bridgeHeightThreshold && thisY >= BridgeDepthCutoff)
                 {
-                    float newHeight = ((thisY - bridgeHeightThreshold) * bridgeHeightScale) + bridgeHeightThreshold;
+                    float newHeight = BridgeAdjustment(thisY);
                     newVertices[i].y = newHeight;
                     ++bridgeChangedVertices;
-
-                    // Update maximum adjusted value if needed.
-                    float adjustment = thisY - newHeight;
-                    if (adjustment < maxAdjusted)
-                    {
-                        maxAdjusted = adjustment;
-                    }
                 }
             }
 
@@ -613,15 +593,7 @@ namespace CurbHeightAdjuster
 
                 // Record mesh as being altered.
                 processedMeshes.Add(mesh);
-
-                // If this was an adjusted bridge with a calculated adjustment, add it to our dictionary.
-                if (bridgeChanged && maxAdjusted != 0f)
-                {
-                    processedOffsets.Add(mesh, maxAdjusted);
-                }
             }
-
-            return maxAdjusted;
         }
 
 

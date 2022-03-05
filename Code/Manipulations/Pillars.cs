@@ -18,7 +18,6 @@ namespace CurbHeightAdjuster
         /// </summary>
         internal static bool AutoUpdate { get; set; } = true;
 
-
         /// <summary>
         /// Adjusts pillar height on existing bridge nodes to match current settings.
         /// Called via transpiler insert.
@@ -33,38 +32,61 @@ namespace CurbHeightAdjuster
 
             Logging.KeyMessage("adjusting existing pillars");
 
-            // Iterate through all networks  in list.
-            NetNode[] nodes = Singleton<NetManager>.instance.m_nodes.m_buffer;
-            for (uint i = 0; i < nodes.Length; ++i)
+            // Perform action via simulation thread.
+            Singleton<SimulationManager>.instance.AddAction(delegate
             {
-                // Skip uncreated nodes or nodes with  no building attached.
-                if ((nodes[i].m_flags & NetNode.Flags.Created) == NetNode.Flags.None || nodes[i].m_building == 0)
-                {
-                    continue;
-                }
+                // Local reference.
+                NetManager netManager = Singleton<NetManager>.instance;
 
-                // Skip any nodes with null infos.
-                NetInfo info = nodes[i].Info;
-                if (info?.name == null)
+                // Iterate through all networks  in list.
+                NetNode[] nodes = Singleton<NetManager>.instance.m_nodes.m_buffer;
+                for (uint i = 0; i < nodes.Length; ++i)
                 {
-                    continue;
-                }
-
-                // Check for road bridge AI.
-                if (info.m_netAI is RoadBridgeAI)
-                {
-                    // Only deal with networks with a valid adjustment.
-                    if (NetHandler.netRecords.ContainsKey(info))
+                    // Skip uncreated nodes or nodes with  no building attached.
+                    if ((nodes[i].m_flags & NetNode.Flags.Created) == NetNode.Flags.None || nodes[i].m_building == 0)
                     {
-                        Logging.Message("adjusting pillars for node ", i, ": ", info.name);
+                        continue;
+                    }
 
-                        // Reset pillar height via reverse patch call to NetNode.CheckHeightOffset.
-                        CheckHeightOffset(ref nodes[i], (ushort)i);
+                    // Skip any nodes with null infos.
+                    NetInfo info = nodes[i].Info;
+                    if (info?.name == null)
+                    {
+                        continue;
+                    }
+
+                    // Check for road bridge AI.
+                    if (info.m_netAI is RoadBridgeAI bridgeAI)
+                    {
+                        // Only deal with networks with a valid adjustment.
+                        if (NetHandler.netRecords.ContainsKey(info))
+                        {
+                            Logging.Message("adjusting pillars for node ", i, ": ", info.name);
+
+                            // Reset pillar height via reverse patch call to NetNode.CheckHeightOffset.
+                            CheckHeightOffset(ref nodes[i], (ushort)i);
+
+                            // Additional manual pillar adjustment if needed.
+                            info.m_netAI.GetNodeBuilding((ushort)i, ref Singleton<NetManager>.instance.m_nodes.m_buffer[i], out var building, out var heightOffset);
+                            netManager.m_nodes.m_buffer[i].UpdateBuilding((ushort)i, building, heightOffset);
+                            netManager.UpdateNodeFlags((ushort)i);
+                            netManager.UpdateNodeRenderer((ushort)i, updateGroup: true);
+                            for (int j = 0; j < 8; j++)
+                            {
+                                ushort segment = netManager.m_nodes.m_buffer[i].GetSegment(j);
+                                if (segment != 0)
+                                {
+                                    netManager.m_segments.m_buffer[segment].UpdateLanes(segment, loading: false);
+                                    netManager.UpdateSegmentFlags(segment);
+                                    netManager.UpdateSegmentRenderer(segment, updateGroup: true);
+                                }
+                            }
+                        }
                     }
                 }
-            }
 
-            Logging.Message("finished adjusting pillars");
+                Logging.Message("finished adjusting pillars");
+            });
         }
 
         
