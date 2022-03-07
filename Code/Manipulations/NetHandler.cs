@@ -58,7 +58,7 @@ namespace CurbHeightAdjuster
         internal const float MaxBridgeThreshold = 2.0f;
         internal const float MinBridgeScale = 0.1f;
         internal const float MaxBridgeScale = 1f;
-        internal const float MinBridgeCutoff = -2.1f;
+        internal const float MinBridgeCutoff = -3.1f;
         internal const float BridgeDepthCutoff = -5f;
 
         // Curb height multiiplier.
