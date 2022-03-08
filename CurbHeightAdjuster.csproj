@@ -252,6 +252,7 @@
     <None Include="Translations\fr-FR.csv" />
     <None Include="Translations\ja-JP.csv" />
     <None Include="Translations\ko-KR.csv" />
+    <None Include="Translations\pt-BR.csv" />
     <None Include="Translations\zh-CN.csv" />
     <None Include="Translations\en.csv" />
   </ItemGroup>
