@@ -37,6 +37,7 @@ namespace CurbHeightAdjuster
                 languageDropDown.eventSelectedIndexChanged += (control, index) =>
                 {
                     Translations.Index = index;
+                    OptionsPanelManager.LocaleChanged();
                 };
                 languageDropDown.parent.relativePosition = new Vector2(LeftMargin, currentY);
                 currentY += languageDropDown.parent.height + GroupMargin;

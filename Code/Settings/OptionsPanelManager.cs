@@ -108,9 +108,12 @@ namespace CurbHeightAdjuster
 
                 // Create a base panel attached to our game object, perfectly overlaying the game options panel.
                 OptionsPanel panel = optionsGameObject.AddComponent<OptionsPanel>();
-                panel.absolutePosition = optionsPanel.absolutePosition;
-                panel.width = optionsPanel.width;
-                panel.height = 744f;
+                panel.width = optionsPanel.width - 10f;
+                panel.height = 725f;
+                panel.clipChildren = false;
+
+                // Needed to ensure position is consistent if we regenerate after initial opening (e.g. on language change).
+                panel.relativePosition = new Vector2(10f, 10f);
 
                 // Setup panel.
                 panel.Setup();
