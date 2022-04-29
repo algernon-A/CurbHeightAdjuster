@@ -50,15 +50,15 @@ namespace CurbHeightAdjuster
                     {
                         string steamID = building.name.Substring(0, periodIndex);
 
-                        // Parking lot roads.
-                        if (steamID.Equals("1285201733") || steamID.Equals("1293870311") || steamID.Equals("1293869603"))
+                        // Parking lot roads (including PLR 2).
+                        if (steamID.Equals("1285201733") || steamID.Equals("1293870311") || steamID.Equals("1293869603") || steamID.Equals("1969111282") /*building.name.Equals("1969111282.PLR II - 10 Spots with Planters_Data"))*/)
                         {
-                            // Local reference.
+                            // Found a match - raise the mesh.
+                            Logging.KeyMessage("raising Parking Lot Road ", building.name);
+
+                            // Local references.
                             Mesh mesh = building.m_mesh;
                             Vector3[] vertices = mesh.vertices;
-
-                            // Found a match - raise the mesh.
-                            Logging.Message("raising Parking Lot Road ", building.name);
 
                             // Record original vertices.
                             ParkingRecord parkingRecord = new ParkingRecord
@@ -66,18 +66,30 @@ namespace CurbHeightAdjuster
                                 vertices = vertices
                             };
 
-                            // Raise mesh.
-                            RaiseMesh(mesh);
-                            if (NetHandler.DoLODs)
+                            // Check to see if we've already adjusted this mesh.
+                            if (processedMeshes.Contains(mesh))
                             {
-                                RaiseMesh(building.m_lodMesh);
+                                Logging.KeyMessage("skipping processed mesh");
+                                parkingRecord.vertices = null;
+                            }
+                            else
+                            {
+                                // Raise mesh.
+                                RaiseMesh(mesh);
+                                if (NetHandler.DoLODs)
+                                {
+                                    RaiseMesh(building.m_lodMesh);
+                                }
                             }
 
                             // Raise props in building.
                             foreach (BuildingInfo.Prop prop in building.m_props)
                             {
                                 parkingRecord.propHeights.Add(prop, prop.m_position.y);
-                                prop.m_position.y -= HeightAdjustment;
+                                if (prop.m_position.y < 0)
+                                {
+                                    prop.m_position.y -= HeightAdjustment;
+                                }
                             }
 
                             // Add original data record to dictionary.
@@ -131,8 +143,13 @@ namespace CurbHeightAdjuster
             // Iterate through all parking records in dictionary.
             foreach (KeyValuePair<BuildingInfo, ParkingRecord> buildingEntry in parkingRecords)
             {
-                // Restore building vertices.
-                buildingEntry.Key.m_mesh.vertices = buildingEntry.Value.vertices;
+                // Skip any null entries (due to skipped shared meshes).
+                if (buildingEntry.Value.vertices != null)
+                {
+                    // Restore building vertices.
+                    buildingEntry.Key.m_mesh.vertices = buildingEntry.Value.vertices;
+
+                }
 
                 // Restore prop heights.
                 foreach (KeyValuePair<BuildingInfo.Prop, float> propEntry in buildingEntry.Value.propHeights)
@@ -185,7 +202,7 @@ namespace CurbHeightAdjuster
             // Check if we've already done this one.
             if (processedMeshes.Contains(mesh))
             {
-                Logging.Message("skipping duplicate parking mesh ", mesh.name ?? "null");
+                Logging.KeyMessage("skipping duplicate parking mesh ", mesh.name ?? "null");
                 return;
             }
 
@@ -213,7 +230,7 @@ namespace CurbHeightAdjuster
             }
 
             // Assign new vertices to mesh if minimum height check was passed (parking lot road parking lot minHeight will be -0.2794001).
-            if (minHeight < 0.279)
+            if (minHeight < -0.279)
             {
                 mesh.vertices = newVertices;
 
