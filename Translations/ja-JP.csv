@@ -11,7 +11,7 @@
 "CHA_DEFAULT","デフォルトに戻す"
 "CHA_REVERT","調整済みを削除"
 "CHA_APPLY","適用"
-"CHA_BRI_ENA","高架や橋の床版部分の厚みを薄くすることが可能です"
+"CHA_BRI_ENA","高架や橋の床版部分の厚み低減を有効化"
 "CHA_BRI_THR","スケーリング閾値の始点"
 "CHA_BRI_SCA","深さのスケーリング係数"
 "TRN_CHOICE","言語設定"
@@ -19,3 +19,4 @@
 "MES_CLS","閉じる"
 "MES_DSA","次回から非表示"
 "CHA_130_0","Curb Height Adjusterで、橋梁の床板部の厚みを薄くできます！ オプションパネルから機能を有効化してください"
+"CHA_131_0","Parking Lot Roads IIの駐車場ネットワークに対応"
