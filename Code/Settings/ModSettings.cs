@@ -41,21 +41,21 @@ namespace CurbHeightAdjuster
         /// New curb height.
         /// </summary>
         [XmlElement("CurbHeight")]
-        public float XMLCurbHeight { get => NetHandler.NewCurbHeight; set => NetHandler.NewCurbHeight = value; }
+        public float XMLCurbHeight { get => RoadHandler.NewCurbHeight; set => RoadHandler.NewCurbHeight = value; }
 
-        
+
         /// <summary>
-        /// Whether or not LODs are changed as well.
+        /// Whether or not road LODs are changed as well.
         /// </summary>
         [XmlElement("RaiseLODs")]
-        public bool XMLUpdateLods { get => NetHandler.DoLODs; set => NetHandler.DoLODs = value; }
+        public bool XMLUpdateRoadLods { get => RoadHandler.DoLODs; set => RoadHandler.DoLODs = value; }
 
 
         /// <summary>
         /// Whether or not bridge manipulations are applied.
         /// </summary>
         [XmlElement("EnableBridges")]
-        public bool XMLEnableBridges { get => NetHandler.EnableBridges; set => NetHandler.EnableBridges = value; }
+        public bool XMLEnableBridges { get => RoadHandler.EnableBridges; set => RoadHandler.EnableBridges = value; }
 
 
         /// <summary>
@@ -69,14 +69,28 @@ namespace CurbHeightAdjuster
         /// Bridge deck threshold.
         /// </summary>
         [XmlElement("BridgeHeightThreshold")]
-        public float XMLBridgeHeightThreshold { get => NetHandler.BridgeHeightThreshold; set => NetHandler.BridgeHeightThreshold = value; }
+        public float XMLBridgeHeightThreshold { get => RoadHandler.BridgeHeightThreshold; set => RoadHandler.BridgeHeightThreshold = value; }
 
 
         /// <summary>
         /// Bridge deck multiplier.
         /// </summary>
         [XmlElement("BridgeHeightScale")]
-        public float XMLBridgeHeightScale { get => NetHandler.BridgeHeightScale; set => NetHandler.BridgeHeightScale = value; }
+        public float XMLBridgeHeightScale { get => RoadHandler.BridgeHeightScale; set => RoadHandler.BridgeHeightScale = value; }
+
+
+        /// <summary>
+        /// New path height.
+        /// </summary>
+        [XmlElement("PathHeight")]
+        public float XMLPathHeight { get => PathHandler.NewPathHeight; set => PathHandler.NewPathHeight = value; }
+
+
+        /// <summary>
+        /// Whether or not path LODs are changed as well.
+        /// </summary>
+        [XmlElement("PathLods")]
+        public bool XMLUpdatePathLods { get => PathHandler.DoLODs; set => PathHandler.DoLODs = value; }
 
 
         /// <summary>

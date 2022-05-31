@@ -59,7 +59,7 @@ namespace CurbHeightAdjuster
                     if (info.m_netAI is RoadBridgeAI bridgeAI)
                     {
                         // Only deal with networks with a valid adjustment.
-                        if (NetHandler.netRecords.ContainsKey(info))
+                        if (RoadHandler.netRecords.ContainsKey(info))
                         {
                             Logging.Message("adjusting pillars for node ", i, ": ", info.name);
 

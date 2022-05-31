@@ -61,7 +61,9 @@
     <Compile Include="Code\Manipulations\ManipData.cs" />
     <Compile Include="Code\Manipulations\NetHandler.cs" />
     <Compile Include="Code\Loading.cs" />
+    <Compile Include="Code\Manipulations\PathHandler.cs" />
     <Compile Include="Code\Manipulations\Pillars.cs" />
+    <Compile Include="Code\Manipulations\RoadHandler.cs" />
     <Compile Include="Code\MeshHandler\MeshHandler.cs" />
     <Compile Include="Code\MeshHandler\SerializableMeshInfo.cs" />
     <Compile Include="Code\Notifications\DontShowAgainMessageBox.cs" />
@@ -74,7 +76,10 @@
     <Compile Include="Code\Patches\Patcher.cs" />
     <Compile Include="Code\Settings\ModSettings.cs" />
     <Compile Include="Code\Settings\OptionsPanel.cs" />
-    <Compile Include="Code\Settings\OptionsPanelManager.cs" />
+    <Compile Include="Code\Settings\OptionsPanelTabs\GeneralOptions.cs" />
+    <Compile Include="Code\Settings\OptionsPanelTabs\PathOptions.cs" />
+    <Compile Include="Code\Settings\OptionsPanelTabs\RoadOptions.cs" />
+    <Compile Include="Code\Settings\OptionsPanelUtils.cs" />
     <Compile Include="Code\TranslationFramework\TranslationFramework.cs" />
     <Compile Include="Code\TranslationFramework\Language.cs" />
     <Compile Include="Code\Utils\Logging.cs" />

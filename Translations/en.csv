@@ -3,6 +3,8 @@ NAME,English
 CHA_NAM,Curb Height Adjuster
 CHA_DESC,Reduces the height of default road curbs.
 CHA_OPT_GEN,General
+CHA_OPT_ROA,Roads
+CHA_OPT_PAT,Paths
 CHA_OPT_CUR,Curbs
 CHA_OPT_BRI,Bridges
 CHA_OPT_PIL,Automatically adjust height of existing bridge pillars

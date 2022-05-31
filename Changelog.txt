@@ -1,4 +1,7 @@
-﻿Version 1.3.1
+﻿- Add Parklife and Campus pedestrian path curb height reduction
+
+
+Version 1.3.1
 
 - Add support for Parking Lot Roads II parking lots
 

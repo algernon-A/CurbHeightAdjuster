@@ -20,7 +20,7 @@ namespace CurbHeightAdjuster
         /// <summary>
         /// Curb height adjustment change to make.
         /// </summary>
-        private static float HeightAdjustment => NetHandler.OriginalCurbHeight + NetHandler.NewCurbHeight;
+        private static float HeightAdjustment => RoadHandler.OriginalCurbHeight + RoadHandler.NewCurbHeight;
 
 
         /// <summary>
@@ -76,7 +76,7 @@ namespace CurbHeightAdjuster
                             {
                                 // Raise mesh.
                                 RaiseMesh(mesh);
-                                if (NetHandler.DoLODs)
+                                if (RoadHandler.DoLODs)
                                 {
                                     RaiseMesh(building.m_lodMesh);
                                 }

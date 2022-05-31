@@ -20,10 +20,10 @@ namespace CurbHeightAdjuster
             base.OnLevelLoaded(mode);
 
             // Adjust existing pillars, if we're doing so.
-            if (NetHandler.EnableBridges)
+            if (RoadHandler.EnableBridges)
             {
                 // Iterate through all network records in dictionary.
-                foreach (KeyValuePair<NetInfo, NetRecord> netEntry in NetHandler.netRecords)
+                foreach (KeyValuePair<NetInfo, NetRecord> netEntry in RoadHandler.netRecords)
                 {
                     // Local references.
                     NetInfo netInfo = netEntry.Key;
@@ -35,8 +35,8 @@ namespace CurbHeightAdjuster
                     // Adjust pillar heights to match net adjustment.
                     if (netRecord.adjustPillars && netInfo.m_netAI is RoadBridgeAI bridgeAI)
                     {
-                        bridgeAI.m_bridgePillarOffset = NetHandler.BridgeAdjustment(netRecord.bridgePillarOffset);
-                        bridgeAI.m_middlePillarOffset = NetHandler.BridgeAdjustment(netRecord.middlePillarOffset);
+                        bridgeAI.m_bridgePillarOffset = RoadHandler.BridgeAdjustment(netRecord.bridgePillarOffset);
+                        bridgeAI.m_middlePillarOffset = RoadHandler.BridgeAdjustment(netRecord.middlePillarOffset);
                     }
                 }
 
@@ -45,7 +45,7 @@ namespace CurbHeightAdjuster
             }
 
             // Set up options panel event handler (need to redo this now that options panel has been reset after loading into game).
-            OptionsPanelManager.OptionsEventHook();
+            OptionsPanel.OptionsEventHook();
 
             // Display update notification.
             WhatsNew.ShowWhatsNew();
