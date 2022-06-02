@@ -8,6 +8,9 @@ CHA_OPT_PAT,Paths
 CHA_OPT_CUR,Curbs
 CHA_OPT_BRI,Bridges
 CHA_OPT_PIL,Automatically adjust height of existing bridge pillars
+CHA_PAT_ENA,Enable parklife/campus pedestrian path customization
+CHA_PAT_BAS,Parklife/campus pedestrian path pavement height
+CHA_PAT_CUR,Parklife/campus pedestrian path curb height
 CHA_HEIGHT,New curb height
 CHA_LOD,Also adjust LODs
 CHA_DEFAULT,Restore defaults

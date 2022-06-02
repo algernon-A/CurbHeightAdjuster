@@ -11,19 +11,30 @@ namespace CurbHeightAdjuster
     public static class PathHandler
     {
         // Original curb heights.
-        internal const float OriginalPathHeight = 0.20f;
+        private const float OriginalBaseHeight = 0.10f;
+        private const float OriginalCurbHeight = 0.10f;
 
         // Default mod settings.
-        internal const float DefaultNewPathHeight = 0.05f;
+        internal const float DefaultBaseHeight = 0.05f;
+        internal const float DefaultCurbHeight = 0.05f;
+
+        // Thresholds.
+        private const float MaxBaseThreshold = 0.11f;
 
         // Maximum bounds.
-        internal const float MinPathHeight = 0.01f;
-        internal const float MaxPathHeight = 0.19f;
+        internal const float MinBaseHeight = 0.01f;
+        internal const float MaxBaseHeight = 0.10f;
+        internal const float MinCurbHeight = 0.01f;
+        internal const float MaxCurbHeight = 0.10f;
+
+
+        // Activation flag.
+        internal static bool customizePaths = false;
 
         // Path height multiiplier.
-        private static float newPathMultiplier = DefaultNewPathHeight / OriginalPathHeight;
+        private static float baseMultiplier = DefaultBaseHeight / OriginalBaseHeight;
 
-        // Dictionaris of altered nets.
+        // Dictionaries of altered nets.
         internal readonly static Dictionary<NetInfo, NetRecord> netRecords = new Dictionary<NetInfo, NetRecord>();
 
         // Hashset of currently processed network meshes, with calculated adjustment offsets.
@@ -31,20 +42,36 @@ namespace CurbHeightAdjuster
 
 
         /// <summary>
-        /// New curb height to apply (positive figure, in cm).
+        /// New base height to apply (positive figure, in cm).
         /// </summary>
-        internal static float NewPathHeight
+        internal static float BaseHeight
         {
-            get => newPathHeight;
+            get => baseHeight;
 
             set
             {
                 // Update multiplier with change in value.
-                newPathHeight = Mathf.Clamp(value, MinPathHeight, MaxPathHeight);
-                newPathMultiplier = NewPathHeight / OriginalPathHeight;
+                baseHeight = Mathf.Clamp(value, MinBaseHeight, MaxBaseHeight);
+                baseMultiplier = baseHeight / OriginalBaseHeight;
             }
         }
-        private static float newPathHeight = DefaultNewPathHeight;
+        private static float baseHeight = DefaultBaseHeight;
+
+
+        /// <summary>
+        /// New curb height to apply (positive figure, in cm).
+        /// </summary>
+        internal static float CurbHeight
+        {
+            get => curbHeight;
+
+            set
+            {
+                // Update multiplier with change in value.
+                curbHeight = Mathf.Clamp(value, MinCurbHeight, MaxCurbHeight);
+            }
+        }
+        private static float curbHeight = DefaultCurbHeight;
 
 
         /// <summary>
@@ -135,10 +162,14 @@ namespace CurbHeightAdjuster
                                     lodVerts = segment.m_lodMesh.vertices
                                 });
 
-                                AdjustMesh(segment.m_segmentMesh);
-                                if (DoLODs)
+                                // Apply adjustments, if we're doing so.
+                                if (customizePaths)
                                 {
-                                    AdjustMesh(segment.m_lodMesh);
+                                    AdjustMesh(segment.m_segmentMesh);
+                                    if (DoLODs)
+                                    {
+                                        AdjustMesh(segment.m_lodMesh);
+                                    }
                                 }
                             }
                         }
@@ -190,11 +221,14 @@ namespace CurbHeightAdjuster
                                     lodVerts = node.m_lodMesh.vertices
                                 });
 
-                                // Adjust vertices.
-                                AdjustMesh(node.m_nodeMesh);
-                                if (DoLODs)
+                                // Apply adjustments, if we're doing so.
+                                if (customizePaths)
                                 {
-                                    AdjustMesh(node.m_lodMesh);
+                                    AdjustMesh(node.m_nodeMesh);
+                                    if (DoLODs)
+                                    {
+                                        AdjustMesh(node.m_lodMesh);
+                                    }
                                 }
                             }
                         }
@@ -275,30 +309,43 @@ namespace CurbHeightAdjuster
                 // Update segment vertices.
                 foreach (KeyValuePair<NetInfo.Segment, NetComponentRecord> segmentEntry in netRecord.segmentDict)
                 {
-                    // Restore original vertices and then raise mesh.
+                    // Restore original vertices.
                     NetInfo.Segment segment = segmentEntry.Key;
                     segment.m_segmentMesh.vertices = segmentEntry.Value.mainVerts;
                     segment.m_lodMesh.vertices = segmentEntry.Value.lodVerts;
-                    AdjustMesh(segment.m_segmentMesh);
-                    if (DoLODs)
+
+                    // Apply adjustments, if we're doing so.
+                    if (customizePaths)
                     {
-                        AdjustMesh(segment.m_lodMesh);
+                        AdjustMesh(segment.m_segmentMesh);
+
+                        // Update LODs if set to do so.
+                        if (DoLODs)
+                        {
+                            AdjustMesh(segment.m_lodMesh);
+                        }
                     }
                 }
 
                 // Update node vertices.
                 foreach (KeyValuePair<NetInfo.Node, NetComponentRecord> nodeEntry in netRecord.nodeDict)
                 {
-                    // Restore original vertices and then raise mesh.
+                    // Restore original vertices.
                     NetInfo.Node node = nodeEntry.Key;
                     node.m_nodeMesh.vertices = nodeEntry.Value.mainVerts;
                     node.m_lodMesh.vertices = nodeEntry.Value.lodVerts;
-                    AdjustMesh(node.m_nodeMesh);
 
-                    // Update LODs if set to do so.
-                    if (DoLODs)
+
+                    // Apply adjustments, if we're doing so.
+                    if (customizePaths)
                     {
-                        AdjustMesh(node.m_lodMesh);
+                        AdjustMesh(node.m_nodeMesh);
+
+                        // Update LODs if set to do so.
+                        if (DoLODs)
+                        {
+                            AdjustMesh(node.m_lodMesh);
+                        }
                     }
                 }
             }
@@ -328,8 +375,19 @@ namespace CurbHeightAdjuster
             // Raise verticies; anything below ground level (but above the maximum depth trigger - allow for bridges etc.) has its y-value multiplied for proportional adjustment.
             for (int i = 0; i < newVertices.Length; ++i)
             {
-                // Adjust any eligible curb vertices.
-                newVertices[i].y *= newPathMultiplier;
+                float thisY = newVertices[i].y;
+
+                // Base or curb?
+                if (thisY < MaxBaseThreshold)
+                {
+                    // Base - adjust with base multiplier.
+                    newVertices[i].y = thisY * baseMultiplier;
+                }
+                else
+                {
+                    // Curb - adjust from new base.
+                    newVertices[i].y = thisY - OriginalBaseHeight - OriginalCurbHeight + baseHeight + curbHeight;
+                }
             }
 
             mesh.vertices = newVertices;

@@ -78,12 +78,25 @@ namespace CurbHeightAdjuster
         [XmlElement("BridgeHeightScale")]
         public float XMLBridgeHeightScale { get => RoadHandler.BridgeHeightScale; set => RoadHandler.BridgeHeightScale = value; }
 
+        /// <summary>
+        /// Enable path manipulations.
+        /// </summary>
+        [XmlElement("EnablePaths")]
+        public bool XMLEnablePaths { get => PathHandler.customizePaths; set => PathHandler.customizePaths = value; }
+
 
         /// <summary>
-        /// New path height.
+        /// New path base height.
         /// </summary>
-        [XmlElement("PathHeight")]
-        public float XMLPathHeight { get => PathHandler.NewPathHeight; set => PathHandler.NewPathHeight = value; }
+        [XmlElement("PathBaseHeight")]
+        public float XMLPathBaseHeight { get => PathHandler.BaseHeight; set => PathHandler.BaseHeight = value; }
+
+
+        /// <summary>
+        /// New path curb height.
+        /// </summary>
+        [XmlElement("PathCurbHeight")]
+        public float XMLPathCurbHeight { get => PathHandler.CurbHeight; set => PathHandler.CurbHeight = value; }
 
 
         /// <summary>

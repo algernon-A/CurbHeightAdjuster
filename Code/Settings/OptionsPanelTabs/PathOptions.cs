@@ -8,6 +8,11 @@ namespace CurbHeightAdjuster
     /// </summary>
     internal class PathOptionsPanel
     {
+        // Panel components.
+        private UISlider baseSlider, curbSlider;
+        private UICheckBox lodCheck;
+
+
         /// <summary>
         /// Adds mod options tab to tabstrip.
         /// </summary>
@@ -19,14 +24,24 @@ namespace CurbHeightAdjuster
             UIPanel panel = OptionsPanelUtils.AddTab(tabStrip, Translations.Translate("CHA_OPT_PAT"), tabIndex);
 
             // Y position indicator.
-            float currentY = OptionsPanelUtils.Margin;
+            float currentY = OptionsPanelUtils.GroupMargin;
 
-            // Curb depth slider.
-            UISlider depthSlider = OptionsPanelUtils.AddDepthSlider(panel, ref currentY, "CHA_HEIGHT", PathHandler.MinPathHeight, PathHandler.MaxPathHeight, PathHandler.NewPathHeight);
-            depthSlider.eventValueChanged += (control, value) => PathHandler.NewPathHeight = value;
+            // Enable path manipulations checkbox.
+            UICheckBox pathCheck = UIControls.AddPlainCheckBox(panel, OptionsPanelUtils.Margin, currentY, Translations.Translate("CHA_PAT_ENA"));
+            pathCheck.isChecked = PathHandler.customizePaths;
+            pathCheck.eventCheckChanged += PathCheckChanged;
+            currentY += pathCheck.height + OptionsPanelUtils.GroupMargin;
+
+            // Base level slider slider.
+            baseSlider = OptionsPanelUtils.AddDepthSlider(panel, ref currentY, "CHA_PAT_BAS", PathHandler.MinBaseHeight, PathHandler.MaxBaseHeight, PathHandler.BaseHeight);
+            baseSlider.eventValueChanged += (control, value) => PathHandler.BaseHeight = value;
+
+            // Curb height slider.
+            curbSlider = OptionsPanelUtils.AddDepthSlider(panel, ref currentY, "CHA_PAT_CUR", PathHandler.MinCurbHeight, PathHandler.MaxCurbHeight, PathHandler.CurbHeight);
+            curbSlider.eventValueChanged += (control, value) => PathHandler.CurbHeight = value;
 
             // LOD checkbox.
-            UICheckBox lodCheck = UIControls.AddPlainCheckBox(panel, OptionsPanelUtils.Margin, currentY, Translations.Translate("CHA_LOD"));
+            lodCheck = UIControls.AddPlainCheckBox(panel, OptionsPanelUtils.Margin, currentY, Translations.Translate("CHA_LOD"));
             lodCheck.isChecked = PathHandler.DoLODs;
             lodCheck.eventCheckChanged += (control, isChecked) => { PathHandler.DoLODs = isChecked; };
             currentY += lodCheck.height + OptionsPanelUtils.GroupMargin;
@@ -36,7 +51,8 @@ namespace CurbHeightAdjuster
             defaultsButton.eventClicked += (control, clickEvent) =>
             {
                 // Set controls to default settings.
-                depthSlider.value = PathHandler.DefaultNewPathHeight;
+                baseSlider.value = PathHandler.DefaultBaseHeight;
+                curbSlider.value = PathHandler.DefaultCurbHeight;
 
                 // Apply defaults.
                 PathHandler.Apply();
@@ -52,6 +68,36 @@ namespace CurbHeightAdjuster
             UIButton undoButton = UIControls.AddButton(panel, OptionsPanelUtils.Margin, currentY, Translations.Translate("CHA_REVERT"), OptionsPanelUtils.ButtonWidth);
             undoButton.eventClicked += (control, clickEvent) => PathHandler.Revert();
 
+            // Set initial control states.
+            UpdateControlStates(pathCheck.isChecked);
+
+        }
+
+
+        /// <summary>
+        /// Enable path customizations checkbox event handler
+        /// </summary>
+        /// <param name="control">Calling component (unused)</param>
+        /// <param name="isChecked">New checked state</param>
+        private void PathCheckChanged(UIComponent control, bool isChecked)
+        {
+            // Update state.
+            PathHandler.customizePaths = isChecked;
+
+            // Refresh control state.
+            UpdateControlStates(isChecked);
+        }
+
+
+        /// <summary>
+        /// Updates control visibility according to current settings.
+        /// </summary>
+        /// <param name="pathsEnabled">True if path customizations are enabled, false if disabled</param>
+        private void UpdateControlStates(bool pathsEnabled)
+        {
+            baseSlider.parent.isVisible = pathsEnabled;
+            curbSlider.parent.isVisible = pathsEnabled;
+            lodCheck.isVisible = pathsEnabled;
         }
     }
 }
