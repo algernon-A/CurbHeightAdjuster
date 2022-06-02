@@ -23,7 +23,7 @@ namespace CurbHeightAdjuster
             UIPanel panel = OptionsPanelUtils.AddTab(tabStrip, Translations.Translate("CHA_OPT_ROA"), tabIndex);
             
             // Y position indicator.
-            float currentY = OptionsPanelUtils.Margin;
+            float currentY = OptionsPanelUtils.GroupMargin;
 
             // Curb depth slider.
             UISlider depthSlider = OptionsPanelUtils.AddDepthSlider(panel, ref currentY, "CHA_HEIGHT", RoadHandler.MinCurbHeight, RoadHandler.MaxCurbHeight, RoadHandler.NewCurbHeight);
@@ -74,15 +74,18 @@ namespace CurbHeightAdjuster
             };
             currentY += defaultsButton.height + OptionsPanelUtils.Margin;
 
-            // Apply button.
-            UIButton applyButton = UIControls.AddButton(panel, OptionsPanelUtils.Margin, currentY, Translations.Translate("CHA_APPLY"), OptionsPanelUtils.ButtonWidth);
-            applyButton.eventClicked += (control, clickEvent) => RoadHandler.Apply();
-            currentY += applyButton.height + OptionsPanelUtils.Margin;
+            // Only show undo and apply buttons if in-game.
+            if (ColossalFramework.Singleton<LoadingManager>.instance.m_loadingComplete)
+            {
+                // Apply button.
+                UIButton applyButton = UIControls.AddButton(panel, OptionsPanelUtils.Margin, currentY, Translations.Translate("CHA_APPLY"), OptionsPanelUtils.ButtonWidth);
+                applyButton.eventClicked += (control, clickEvent) => RoadHandler.Apply();
+                currentY += applyButton.height + OptionsPanelUtils.Margin;
 
-            // Undo button.
-            UIButton undoButton = UIControls.AddButton(panel, OptionsPanelUtils.Margin, currentY, Translations.Translate("CHA_REVERT"), OptionsPanelUtils.ButtonWidth);
-            undoButton.eventClicked += (control, clickEvent) => RoadHandler.Revert();
-
+                // Undo button.
+                UIButton undoButton = UIControls.AddButton(panel, OptionsPanelUtils.Margin, currentY, Translations.Translate("CHA_REVERT"), OptionsPanelUtils.ButtonWidth);
+                undoButton.eventClicked += (control, clickEvent) => RoadHandler.Revert();
+            }
         }
 
 

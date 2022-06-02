@@ -59,14 +59,18 @@ namespace CurbHeightAdjuster
             };
             currentY += defaultsButton.height + OptionsPanelUtils.Margin;
 
-            // Apply button.
-            UIButton applyButton = UIControls.AddButton(panel, OptionsPanelUtils.Margin, currentY, Translations.Translate("CHA_APPLY"), OptionsPanelUtils.ButtonWidth);
-            applyButton.eventClicked += (control, clickEvent) => PathHandler.Apply();
-            currentY += applyButton.height + OptionsPanelUtils.Margin;
+            // Only show undo and apply buttons if in-game.
+            if (ColossalFramework.Singleton<LoadingManager>.instance.m_loadingComplete)
+            {
+                // Apply button.
+                UIButton applyButton = UIControls.AddButton(panel, OptionsPanelUtils.Margin, currentY, Translations.Translate("CHA_APPLY"), OptionsPanelUtils.ButtonWidth);
+                applyButton.eventClicked += (control, clickEvent) => PathHandler.Apply();
+                currentY += applyButton.height + OptionsPanelUtils.Margin;
 
-            // Undo button.
-            UIButton undoButton = UIControls.AddButton(panel, OptionsPanelUtils.Margin, currentY, Translations.Translate("CHA_REVERT"), OptionsPanelUtils.ButtonWidth);
-            undoButton.eventClicked += (control, clickEvent) => PathHandler.Revert();
+                // Undo button.
+                UIButton undoButton = UIControls.AddButton(panel, OptionsPanelUtils.Margin, currentY, Translations.Translate("CHA_REVERT"), OptionsPanelUtils.ButtonWidth);
+                undoButton.eventClicked += (control, clickEvent) => PathHandler.Revert();
+            }
 
             // Set initial control states.
             UpdateControlStates(pathCheck.isChecked);

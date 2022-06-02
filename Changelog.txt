@@ -1,4 +1,5 @@
 ﻿- Add Parklife and Campus pedestrian path curb height reduction
+- Overhaul options panel
 
 
 Version 1.3.1
