@@ -20,7 +20,7 @@ namespace CurbHeightAdjuster
             UIPanel panel = OptionsPanelUtils.AddTab(tabStrip, Translations.Translate("CHA_OPT_GEN"), tabIndex);
 
             // Y position indicator.
-            float currentY = OptionsPanelUtils.Margin;
+            float currentY = OptionsPanelUtils.GroupMargin;
 
             // Language choice.
             UIDropDown languageDropDown = UIControls.AddPlainDropDown(panel, Translations.Translate("TRN_CHOICE"), Translations.LanguageList, Translations.Index);
@@ -31,6 +31,11 @@ namespace CurbHeightAdjuster
             };
             languageDropDown.parent.relativePosition = new Vector2(OptionsPanelUtils.LeftMargin, currentY);
             currentY += languageDropDown.parent.height + OptionsPanelUtils.GroupMargin;
+
+            // LOD checkbox.
+            UICheckBox logCheck = UIControls.AddPlainCheckBox(panel, OptionsPanelUtils.Margin, currentY, Translations.Translate("CHA_OPT_LOG"));
+            logCheck.isChecked = Logging.detailLogging;
+            logCheck.eventCheckChanged += (control, isChecked) => { Logging.detailLogging = isChecked; };
         }
     }
 }

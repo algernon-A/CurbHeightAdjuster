@@ -36,6 +36,12 @@ namespace CurbHeightAdjuster
         [XmlElement("Language")]
         public string XMLLanguage { get => Translations.CurrentLanguage; set => Translations.CurrentLanguage = value; }
 
+        /// <summary>
+        /// Detailed logging enabled.
+        /// </summary>
+        [XmlElement("DetailedLogging")]
+        public bool XMDetailedLogging { get => Logging.detailLogging; set => Logging.detailLogging = value; }
+
 
         /// <summary>
         /// New curb height.
