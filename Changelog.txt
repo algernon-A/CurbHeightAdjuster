@@ -1,4 +1,6 @@
-﻿- Add Parklife and Campus pedestrian path curb height reduction
+﻿Version 1.4
+
+- Add Parklife and Campus pedestrian path curb height reduction
 - Overhaul options panel
 - Add detailed logging option
 
