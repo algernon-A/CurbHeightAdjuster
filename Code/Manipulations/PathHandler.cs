@@ -34,7 +34,7 @@ namespace CurbHeightAdjuster
         // Path height multiiplier.
         private static float baseMultiplier = DefaultBaseHeight / OriginalBaseHeight;
 
-        // Dictionaries of altered nets.
+        // Dictionary of altered nets.
         internal readonly static Dictionary<NetInfo, NetRecord> netRecords = new Dictionary<NetInfo, NetRecord>();
 
         // Hashset of currently processed network meshes, with calculated adjustment offsets.
@@ -104,13 +104,22 @@ namespace CurbHeightAdjuster
                     }
 
                     // Only looking at pedestrian way prefabs.
-                    if (network.m_netAI is PedestrianWayAI netAI)
+                    if (network.m_netAI is PedestrianWayAI || network.m_netAI is PedestrianBridgeAI || network.name.StartsWith("2212198462"))
                     {
+                        // Skip nature reserve paths.
+                        if (network.name.StartsWith("Nature Reserve") || network.name.StartsWith("2212198462.Natural Park"))
+                        {
+                            continue;
+                        }
+
                         // Dirty flag.
                         bool netAltered = false;
 
                         // Network record for this prefab.
                         NetRecord netRecord = new NetRecord();
+
+                        // Whether or not to raise zero-level.
+                        bool raiseZero = network.m_netAI is PedestrianBridgeAI || network.m_netAI is RoadBridgeAI;
 
                         // Raise segments - iterate through each segment in net.
                         foreach (NetInfo.Segment segment in network.m_segments)
@@ -119,31 +128,6 @@ namespace CurbHeightAdjuster
                             if (segment?.m_segmentMesh?.name == null || segment.m_segmentMaterial?.shader?.name == null)
                             {
                                 continue;
-                            }
-
-                            // Only interested in segments using road shaders.
-                            string shaderName = segment.m_segmentMaterial.shader.name;
-                            if (shaderName != "Custom/Net/Road")
-                            {
-                                continue;
-                            }
-
-                            // Is mesh readable?
-                            if (!segment.m_segmentMesh.isReadable)
-                            {
-                                // Unreadable mesh - see if we've got a replacement serialized mesh.
-                                Logging.Message("unreadable segment mesh for network ", network.name);
-                                Mesh replacementMesh = MeshHandler.LoadMesh(segment.m_segmentMesh.name);
-                                if (replacementMesh == null)
-                                {
-                                    // No replacement mesh found - skip this segment, as we can't do anything more.
-                                    Logging.Message("skipping unreadable segment mesh for network ", network.name);
-                                    continue;
-                                }
-
-                                // Replace unreadable segment mesh with replacment mesh.
-                                Logging.Message("substituting unreadable segment mesh for network ", network.name);
-                                segment.m_segmentMesh = replacementMesh;
                             }
 
                             // Skip any meshes that we've already checked.
@@ -165,10 +149,10 @@ namespace CurbHeightAdjuster
                                 // Apply adjustments, if we're doing so.
                                 if (customizePaths)
                                 {
-                                    AdjustMesh(segment.m_segmentMesh);
+                                    AdjustMesh(segment.m_segmentMesh, raiseZero);
                                     if (DoLODs)
                                     {
-                                        AdjustMesh(segment.m_lodMesh);
+                                        AdjustMesh(segment.m_lodMesh, false);
                                     }
                                 }
                             }
@@ -181,28 +165,6 @@ namespace CurbHeightAdjuster
                             if (node?.m_nodeMesh?.name == null || node.m_nodeMaterial?.shader?.name == null)
                             {
                                 continue;
-                            }
-
-                            // Only interested in nodes using road shaders.
-                            string shaderName = node.m_nodeMaterial.shader.name;
-                            if (shaderName != "Custom/Net/Road")
-                            {
-                                continue;
-                            }
-
-                            // Is mesh readable?
-                            if (!node.m_nodeMesh.isReadable)
-                            {
-                                // Unreadable mesh - see if we've got a replacement serialized mesh.
-                                Mesh replacementMesh = MeshHandler.LoadMesh(node.m_nodeMesh.name);
-                                if (replacementMesh == null)
-                                {
-                                    // No replacement mesh found - skip this segment, as we can't do anything more.
-                                    Logging.Message("skipping unreadable node mesh for network ", network.name);
-                                    continue;
-                                }
-                                Logging.Message("substituting unreadable node mesh for network ", network.name);
-                                node.m_nodeMesh = replacementMesh;
                             }
 
                             // Skip any meshes that we've already checked.
@@ -224,10 +186,10 @@ namespace CurbHeightAdjuster
                                 // Apply adjustments, if we're doing so.
                                 if (customizePaths)
                                 {
-                                    AdjustMesh(node.m_nodeMesh);
+                                    AdjustMesh(node.m_nodeMesh, raiseZero);
                                     if (DoLODs)
                                     {
-                                        AdjustMesh(node.m_lodMesh);
+                                        AdjustMesh(node.m_lodMesh, false);
                                     }
                                 }
                             }
@@ -238,7 +200,7 @@ namespace CurbHeightAdjuster
                         {
                             netRecords.Add(network, netRecord);
                         }
-                    }
+                    } 
                 }
                 catch (Exception e)
                 {
@@ -306,6 +268,9 @@ namespace CurbHeightAdjuster
                 NetInfo netInfo = netEntry.Key;
                 NetRecord netRecord = netEntry.Value;
 
+                // Whether or not to raise zero-level.
+                bool raiseZero = netInfo.m_netAI is PedestrianBridgeAI || netInfo.m_netAI is RoadBridgeAI;
+
                 // Update segment vertices.
                 foreach (KeyValuePair<NetInfo.Segment, NetComponentRecord> segmentEntry in netRecord.segmentDict)
                 {
@@ -317,12 +282,12 @@ namespace CurbHeightAdjuster
                     // Apply adjustments, if we're doing so.
                     if (customizePaths)
                     {
-                        AdjustMesh(segment.m_segmentMesh);
+                        AdjustMesh(segment.m_segmentMesh, raiseZero);
 
                         // Update LODs if set to do so.
                         if (DoLODs)
                         {
-                            AdjustMesh(segment.m_lodMesh);
+                            AdjustMesh(segment.m_lodMesh, false);
                         }
                     }
                 }
@@ -339,12 +304,12 @@ namespace CurbHeightAdjuster
                     // Apply adjustments, if we're doing so.
                     if (customizePaths)
                     {
-                        AdjustMesh(node.m_nodeMesh);
+                        AdjustMesh(node.m_nodeMesh, raiseZero);
 
                         // Update LODs if set to do so.
                         if (DoLODs)
                         {
-                            AdjustMesh(node.m_lodMesh);
+                            AdjustMesh(node.m_lodMesh, false);
                         }
                     }
                 }
@@ -356,11 +321,16 @@ namespace CurbHeightAdjuster
 
 
         /// <summary>
-        /// Adjusts the given mesh in line with current settings (curb height).
+        /// Adjusts the given mesh in line with current settings (pavement and curb height).
         /// </summary>
         /// <param name="mesh">Mesh to modify</param>
-        private static void AdjustMesh(Mesh mesh)
+        /// <param name="raiseZero">Set to true to raise zero-level vertices to the new pavement height (typically for elevated segments to match ground pavement height)</param>
+        private static void AdjustMesh(Mesh mesh, bool raiseZero)
         {
+            // Create new vertices array (changing individual elements within the existing array won't work with locked meshes).
+            Vector3[] newVertices = new Vector3[mesh.vertices.Length];
+            mesh.vertices.CopyTo(newVertices, 0);
+
             // Check if we've already done this one.
             if (processedMeshes.Contains(mesh))
             {
@@ -368,14 +338,24 @@ namespace CurbHeightAdjuster
                 return;
             }
 
-            // Create new vertices array (changing individual elements within the existing array won't work with locked meshes).
-            Vector3[] newVertices = new Vector3[mesh.vertices.Length];
-            mesh.vertices.CopyTo(newVertices, 0);
-
+            // Watch out for mesh.name.Equals("ZooPath01Node_0") || mesh.name.Equals("ZooPath01Node_0_0").
             // Raise verticies; anything below ground level (but above the maximum depth trigger - allow for bridges etc.) has its y-value multiplied for proportional adjustment.
             for (int i = 0; i < newVertices.Length; ++i)
             {
                 float thisY = newVertices[i].y;
+
+                // Ignore anything less than 0.
+                if (thisY < -0.01f)
+                {
+                    continue;
+                }
+
+                // Adjust pavement height if we're doing this.
+                if (raiseZero && thisY < 0.01f)
+                {
+                    newVertices[i].y += baseHeight;
+                    continue;
+                }
 
                 // Base or curb?
                 if (thisY < MaxBaseThreshold)
