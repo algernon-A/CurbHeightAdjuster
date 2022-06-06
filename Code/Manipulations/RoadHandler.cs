@@ -613,7 +613,6 @@ namespace CurbHeightAdjuster
             int curbVertices = 0, bridgeVertices = 0;
             bool fullDepthMesh = false;
 
-
             // Iterate through each vertex in segment mesh, counting how many meet our trigger height ranges.
             for (int i = 0; i < vertices.Length; ++i)
             {

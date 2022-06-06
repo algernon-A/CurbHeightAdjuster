@@ -58,7 +58,14 @@ namespace CurbHeightAdjuster
 
                             // Local references.
                             Mesh mesh = building.m_mesh;
-                            Vector3[] vertices = mesh.vertices;
+                            Vector3[] vertices = mesh?.vertices;
+
+                            // Skip buildings with no mesh/vertices.
+                            if (vertices == null)
+                            {
+                                Logging.Message("no vertices found");
+                                continue;
+                            }
 
                             // Record original vertices.
                             ParkingRecord parkingRecord = new ParkingRecord
