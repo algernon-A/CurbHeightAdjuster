@@ -29,7 +29,7 @@ namespace CurbHeightAdjuster
 
 
         // Activation flag.
-        internal static bool customizePaths = false;
+        internal static bool customizePaths = true;
 
         // Path height multiiplier.
         private static float baseMultiplier = DefaultBaseHeight / OriginalBaseHeight;
