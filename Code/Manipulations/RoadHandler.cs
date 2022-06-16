@@ -61,7 +61,7 @@ namespace CurbHeightAdjuster
         internal const float MinBridgeCutoff = -3.1f;
         internal const float BridgeDepthCutoff = -5f;
 
-        // Curb height multiiplier.
+        // Curb height multiplier.
         private static float newCurbMultiplier = DefaultNewCurbHeight / OriginalCurbHeight;
 
         // Dictionary of altered nets.
@@ -168,6 +168,12 @@ namespace CurbHeightAdjuster
                             {
                                 continue;
                             }
+                            if (CustomRoadHandler.customRoads.TryGetValue(steamID, out CustomRoadParams customRoad))
+                            {
+                                Logging.KeyMessage("skipping custom road ", steamID, " in package ", network.name);
+                                CustomRoadHandler.CustomNetManipulation(network, customRoad);
+                                continue;
+                            }
                         }
 
                         // Dirty flag.
@@ -266,7 +272,7 @@ namespace CurbHeightAdjuster
                             }
                         }
 
-                        // Check lanes, if we've passed checks.
+                        // Check lanes.
                         if (network.m_lanes != null)
                         {
                             // Iterate through each lane in network, replacing ~30cm depths with our new curb height.
@@ -388,8 +394,6 @@ namespace CurbHeightAdjuster
         /// </summary>
         internal static void Revert()
         {
-            Logging.KeyMessage("reverting changes");
-
             // Iterate through all network records in dictionary.
             foreach (KeyValuePair<NetInfo, NetRecord> netEntry in netRecords)
             {
@@ -433,6 +437,9 @@ namespace CurbHeightAdjuster
                 netRecord.bridgePillarOffset = 0;
             }
 
+            // Revert custom networks.
+            CustomRoadHandler.Revert();
+
             // Revert parking records.
             ParkingLots.Revert();
 
@@ -451,7 +458,6 @@ namespace CurbHeightAdjuster
         {
             // Ensure processed mesh list is clear, just in case.
             processedMeshes.Clear();
-
 
             // Iterate through all network records in dictionary.
             foreach (KeyValuePair<NetInfo, NetRecord> netEntry in netRecords)
@@ -506,6 +512,9 @@ namespace CurbHeightAdjuster
                     laneEntry.Key.m_verticalOffset = newCurbHeight;
                 }
             }
+
+            // Apply changes to custom roads.
+            CustomRoadHandler.Apply();
 
             // Apply changes to buildings.
             ParkingLots.Apply();

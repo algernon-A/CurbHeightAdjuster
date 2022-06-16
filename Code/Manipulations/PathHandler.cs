@@ -222,14 +222,9 @@ namespace CurbHeightAdjuster
         /// </summary>
         internal static void Revert()
         {
-            Logging.Message("PathHandler.Revert");
-            Logging.KeyMessage("reverting changes");
-
             // Iterate through all network records in dictionary.
             foreach (KeyValuePair<NetInfo, NetRecord> netEntry in netRecords)
             {
-                Logging.Message("reverting ", netEntry.Key.name);
-
                 // Local references.
                 NetInfo netInfo = netEntry.Key;
                 NetRecord netRecord = netEntry.Value;
@@ -256,8 +251,6 @@ namespace CurbHeightAdjuster
         /// </summary>
         internal static void Apply()
         {
-            Logging.Message("PathHandler.Apply");
-
             // Ensure processed mesh list is clear, just in case.
             processedMeshes.Clear();
 
