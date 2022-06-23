@@ -1,6 +1,7 @@
 ﻿- Add proper support for clus' LRT tracks
 - Add support framework for defined custom networks
 - Add support for BIG Suburbs 2-lane roads
+- Add support for 0.1m sunken + Prague Curb roads
 
 
 Version 1.4

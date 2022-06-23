@@ -7,19 +7,30 @@ namespace CurbHeightAdjuster
 {
     internal static class CustomRoadHandler
     {
-        // Dictionary of custom roas and settings.
-        internal static Dictionary<string, CustomRoadParams> customRoads = new Dictionary<string, CustomRoadParams>
+        // Dictionary of custom roads requiring individualised settings.
+        internal static Dictionary<string, CustomRoadParams> customRoads = new Dictionary<string, CustomRoadParams>();
+
+        // List of 10cm curb roads.
+        private static HashSet<string> curbs10cm = new HashSet<string>
         {
-            {
-                // BIG suburbs 2 lane.
-                "2211907342",
-                new CustomRoadParams { surfaceLevel = -0.10f, surfaceTopBound = -0.06f, surfaceBottomBound = -0.31f }
-            },
-            {
-                // BIG suburbs 2 lane worn.
-                "2211898750",
-                new CustomRoadParams { surfaceLevel = -0.10f, surfaceTopBound = -0.06f, surfaceBottomBound = -0.31f }
-            }
+            // BIG suburbs 2 lane.
+            "2211907342",
+            // BIG suburbs 2 lane worn.
+            "2211898750",
+            // 0.1m sunken + Prague Curbs.
+            "2643462494",
+            "2643463468",
+            "2643464569",
+            "2643465478",
+            "2643466243",
+            "2643467084",
+            "2643468733",
+            "2643467962",
+            "2643469133",
+            "2643470190",
+            "2643469678",
+            "2643470754",
+            "2643471147"
         };
 
 
@@ -33,11 +44,42 @@ namespace CurbHeightAdjuster
         private readonly static HashSet<Mesh> checkedMeshes = new HashSet<Mesh>();
 
 
+        /// <summary>
+        /// Checks to see if the given network is a custom network, and if so, performs custom net manipulations
+        /// </summary>
+        /// <param name="network">Network prefab</param>
+        /// <returns>True if this was processed as a custom network, false otherwise</returns>
+        internal static bool IsCustomNet(NetInfo network)
+        {
+            // Try to find steam ID (anything without this isn't custom).
+            int periodIndex = network.name.IndexOf(".");
+            if (periodIndex > 0)
+            {
+                // Steam ID found; check for any custom roads.
+                string steamID = network.name.Substring(0, periodIndex);
+                if (customRoads.TryGetValue(steamID, out CustomRoadParams customRoad))
+                {
+                    Logging.KeyMessage("processing custom road ", network.name, " with Steam ID ", steamID);
+                    CustomNetManipulation(network, customRoad);
+                    return true;
+                }
+                else if (curbs10cm.Contains(steamID))
+                {
+                    Logging.KeyMessage("processing 10cm curb road ", network.name, " with Steam ID ", steamID);
+                    CustomNetManipulation(network, new CustomRoadParams { surfaceLevel = -0.10f, surfaceTopBound = -0.06f, surfaceBottomBound = -0.31f });
+                    return true;
+                }
+            }
+
+            // If we got here, it wasn't a custom network; return false.
+            return false;
+        }
+
 
         /// <summary>
-        /// Class to manage changes to road requiring custom manipulations.
+        /// Perform manipulations on specially defined meshes.
         /// </summary>
-        internal static void CustomNetManipulation(NetInfo network, CustomRoadParams customParams)
+        private static void CustomNetManipulation(NetInfo network, CustomRoadParams customParams)
         {
             // Dirty flag.
             bool netAltered = false;

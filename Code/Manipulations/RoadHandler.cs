@@ -17,26 +17,6 @@ namespace CurbHeightAdjuster
         /// Thanks to Ronyx69 (especially, for the original concept and implementation) and krzychu124 for their prior work!
 
 
-        // List of excluded networks (Steam IDs).
-        private readonly static HashSet<string> excludedNets = new HashSet<string>
-        {
-            // Prague curb roads.
-            "2643462494",
-            "2643463468",
-            "2643464569",
-            "2643465478",
-            "2643466243",
-            "2643467084",
-            "2643468733",
-            "2643467962",
-            "2643469133",
-            "2643470190",
-            "2643469678",
-            "2643470754",
-            "2643471147"
-        };
-
-
         // Original curb heights.
         internal const float OriginalCurbHeight = -0.30f;
 
@@ -160,21 +140,10 @@ namespace CurbHeightAdjuster
                     bool isBridge = bridgeAI != null;
                     if (isBridge || netAI is RoadAI || netAI is RoadTunnelAI || netAI is DamAI)
                     {
-                        // Skip excluded networks.
-                        int periodIndex = network.name.IndexOf(".");
-                        if (periodIndex > 0)
+                        // Check for any custom roads.
+                        if (CustomRoadHandler.IsCustomNet(network))
                         {
-                            string steamID = network.name.Substring(0, periodIndex);
-                            if (excludedNets.Contains(steamID))
-                            {
-                                continue;
-                            }
-                            if (CustomRoadHandler.customRoads.TryGetValue(steamID, out CustomRoadParams customRoad))
-                            {
-                                Logging.KeyMessage("skipping custom road ", steamID, " in package ", network.name);
-                                CustomRoadHandler.CustomNetManipulation(network, customRoad);
-                                continue;
-                            }
+                            continue;
                         }
 
                         // Dirty flag.
