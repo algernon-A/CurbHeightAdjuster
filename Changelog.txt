@@ -1,4 +1,9 @@
-﻿Version 1.4
+﻿- Add proper support for clus' LRT tracks
+- Add support framework for defined custom networks
+- Add support for BIG Suburbs 2-lane roads
+
+
+Version 1.4
 
 - Add Parklife and Campus pedestrian path curb height reduction
 - Overhaul options panel

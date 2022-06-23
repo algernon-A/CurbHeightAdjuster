@@ -45,16 +45,17 @@ namespace CurbHeightAdjuster
         internal const float DefaultBridgeThreshold = -0.5f;
         internal const float DefaultBridgeMultiplier = 0.25f;
 
-        // Depth trigger - segments/nets need to have depths within these bounds to be adjusted.
+        // Depth triggers - segments/nets need to have depths within these bounds to be adjusted.
         // Vanilla tram rails have tops at -0.225.
         // LRT tram rails have bases at -0.5.
         private const float MinCurbDepthTrigger = -0.21f;
         private const float MaxCurbDepthTrigger = -0.32f;
+        private const float MaxSubDepthTrigger = -0.55f;
 
         // Maximum bounds.
         internal const float MinCurbHeight = 0.07f;
         internal const float MaxCurbHeight = 0.29f;
-        internal const float MinBridgeThreshold = 0.35f;
+        internal const float MinBridgeThreshold = 0.55f;
         internal const float MaxBridgeThreshold = 2.0f;
         internal const float MinBridgeScale = 0.1f;
         internal const float MaxBridgeScale = 1f;
@@ -246,7 +247,7 @@ namespace CurbHeightAdjuster
 
                                 // Check to see if this segment is a viable target.
                                 Vector3[] vertices = segmentMesh.vertices;
-                                if (IsEligibleMesh(vertices, 9, isBridge, out bool eligibleCurbs, out bool eligibleBridgeMesh))
+                                if (IsEligibleMesh(vertices, 9, isBridge, out bool eligibleCurbs, out bool eligibleBridgeMesh, out bool eligbleSubMesh))
                                 {
                                     // Eligibile target; record original value.
                                     netAltered = true;
@@ -330,7 +331,7 @@ namespace CurbHeightAdjuster
 
                                 // Check to see if this node is a viable target.
                                 Vector3[] vertices = nodeMesh.vertices;
-                                if (IsEligibleMesh(vertices, 5, isBridge, out bool eligibleCurbs, out bool eligibleBridgeMesh))
+                                if (IsEligibleMesh(vertices, 5, isBridge, out bool eligibleCurbs, out bool eligibleBridgeMesh, out bool eligibleSub))
                                 {
                                     // Eligibile target; record original value.
                                     netAltered = true;
@@ -580,17 +581,28 @@ namespace CurbHeightAdjuster
                 float thisY = newVertices[i].y;
 
                 // Adjust any eligible curb vertices.
-                if (thisY < 0.0f && thisY > MaxCurbDepthTrigger)
+                if (thisY < 0.0f)
                 {
-                    newVertices[i].y = thisY * newCurbMultiplier;
-                    ++curbChangedVertices;
-                }
-                // Adjust any eligible bride vertices.
-                else if (bridge && thisY < bridgeHeightThreshold && thisY >= BridgeDepthCutoff)
-                {
-                    float newHeight = BridgeAdjustment(thisY);
-                    newVertices[i].y = newHeight;
-                    ++bridgeChangedVertices;
+                    if (thisY > MaxCurbDepthTrigger)
+                    {
+                        // Standard vertices, road surface and above - scale.
+                        newVertices[i].y = thisY * newCurbMultiplier;
+                        ++curbChangedVertices;
+                    }
+                    else if (thisY > MaxSubDepthTrigger)
+                    {
+                        // Sub-verticies below road surface, e.g. LRT tracks.
+                        // Shift up by total adjustment difference, not scaled.
+                        newVertices[i].y = thisY - (OriginalCurbHeight - newCurbHeight);
+                        ++curbChangedVertices;
+                    }
+                    // Adjust any eligible bride vertices.
+                    else if (bridge && thisY < bridgeHeightThreshold && thisY >= BridgeDepthCutoff)
+                    {
+                        float newHeight = BridgeAdjustment(thisY);
+                        newVertices[i].y = newHeight;
+                        ++bridgeChangedVertices;
+                    }
                 }
             }
 
@@ -615,11 +627,12 @@ namespace CurbHeightAdjuster
         /// <param name="isBridge">If this mesh from a valid bridge prefab</param>
         /// <param name="eligibleCurbs">Set to true if this mesh is eligible for curb height adjustment, false otherwise</param>
         /// <param name="eligibleBridge">Set to true if this mesh is eligbile for bridge deck adjustment, false otherwise</param>
+        /// <param name="eligibleBridge">Set to true if this mesh has eligible vertices below road surface height (e.g. LRT tracks), false otherwise</param>
         /// <returns>True if the mesh is eligible for adjustment (brigde or curb), false otherwise</returns>
-        private static bool IsEligibleMesh(Vector3[] vertices, int minVertices, bool isBridge, out bool eligibleCurbs, out bool eligibleBridge)
+        private static bool IsEligibleMesh(Vector3[] vertices, int minVertices, bool isBridge, out bool eligibleCurbs, out bool eligibleBridge, out bool eligbleSub)
         {
             // Status flags.
-            int curbVertices = 0, bridgeVertices = 0;
+            int curbVertices = 0, bridgeVertices = 0, subVertices = 0;
             bool fullDepthMesh = false;
 
             // Iterate through each vertex in segment mesh, counting how many meet our trigger height ranges.
@@ -630,6 +643,11 @@ namespace CurbHeightAdjuster
                 {
                     // Eligible curb vertex.
                     ++curbVertices;
+                }
+                else if (thisY < MinCurbDepthTrigger && thisY > MaxSubDepthTrigger)
+                {
+                    // Eligible vertex below road surface height, e.g. LRT tracks.
+                    ++subVertices;
                 }
                 else if (thisY < MinBridgeCutoff && thisY >= BridgeDepthCutoff)
                 {
@@ -643,12 +661,14 @@ namespace CurbHeightAdjuster
                 }
             }
 
+            // Set return bools.
             eligibleCurbs = curbVertices >= minVertices;
+            eligbleSub = subVertices >= minVertices;
 
             // Bridge vertex count is only valid if this isn't a full-height bridge.
             eligibleBridge = isBridge && (!fullDepthMesh && bridgeVertices >= minVertices);
 
-            return eligibleCurbs || eligibleBridge;
+            return eligibleCurbs | eligibleBridge | eligbleSub;
         }
 
 
