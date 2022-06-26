@@ -15,6 +15,17 @@ namespace CurbHeightAdjuster
         {
             new WhatsNewMessage
             {
+                version = new Version("1.5.0.0"),
+                versionHeader = "",
+                messageKeys = true,
+                messages = new string[]
+                {
+                    "CHA_150_0",
+                    "CHA_150_1",
+                    "CHA_150_2"
+                }
+            },new WhatsNewMessage
+            {
                 version = new Version("1.4.0.0"),
                 versionHeader = "",
                 messageKeys = true,
