@@ -8,7 +8,11 @@ namespace CurbHeightAdjuster
     internal static class CustomRoadHandler
     {
         // Dictionary of custom roads requiring individualised settings.
-        internal static Dictionary<string, CustomRoadParams> customRoads = new Dictionary<string, CustomRoadParams>();
+        internal static Dictionary<string, CustomRoadParams> customRoads = new Dictionary<string, CustomRoadParams>
+        {
+            // Paris cobblestone roads.
+            { "1729876865", new CustomRoadParams { surfaceLevel = -0.15f, surfaceTopBound = -0.06f, surfaceBottomBound = -0.2f } }
+        };
 
         // List of 10cm curb roads.
         private static HashSet<string> curbs10cm = new HashSet<string>
@@ -31,6 +35,11 @@ namespace CurbHeightAdjuster
             "2643469678",
             "2643470754",
             "2643471147"
+        };
+        private static HashSet<string> curbs15cm = new HashSet<string>
+        {
+            // Paris cobblestone roads.
+            "1729876865"
         };
 
 
