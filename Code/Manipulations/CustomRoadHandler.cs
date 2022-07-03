@@ -188,8 +188,6 @@ namespace CurbHeightAdjuster
                 Mesh nodeMesh = node.m_nodeMesh;
                 if (!checkedMeshes.Contains(nodeMesh))
                 {
-                    PrintVertices(network, nodeMesh);
-
                     // Not checked yet - add to list.
                     checkedMeshes.Add(nodeMesh);
 
@@ -228,8 +226,6 @@ namespace CurbHeightAdjuster
         /// </summary>
         internal static void Revert()
         {
-            Logging.KeyMessage("CustomRoadRevert");
-
             // Iterate through all network records in dictionary.
             foreach (KeyValuePair<NetInfo, CustomNetRecord> netEntry in netRecords)
             {
@@ -254,8 +250,6 @@ namespace CurbHeightAdjuster
                 {
                     nodeEntry.Key.m_nodeMesh.vertices = nodeEntry.Value.mainVerts;
                     nodeEntry.Key.m_lodMesh.vertices = nodeEntry.Value.lodVerts;
-                    PrintVertices(netInfo, nodeEntry.Key.m_nodeMesh);
-                    PrintVertices(netInfo, nodeEntry.Value.mainVerts);
                 }
 
                 // Restore lanes.
@@ -416,25 +410,6 @@ namespace CurbHeightAdjuster
                     }
                 }
             });
-        }
-
-        private static void PrintVertices(NetInfo network, Mesh mesh)
-        {
-            Logging.Message("PrintVertices mesh: ", mesh.name);
-            PrintVertices(network, mesh.vertices);
-        }
-
-        private static void PrintVertices(NetInfo network, Vector3[] vertices)
-        {
-            Logging.Message("Network: ", network.name);
-            for (int i = 0; i < vertices.Length; ++i)
-            {
-                float vertext = vertices[i].y;
-                if (vertext < -0.2f && vertext > -0.31f)
-                {
-                    Logging.KeyMessage("found vertext ", i, ":" , vertext);
-                }
-            }
         }
     }
 
