@@ -11,7 +11,9 @@ namespace CurbHeightAdjuster
         internal static Dictionary<string, CustomRoadParams> customRoads = new Dictionary<string, CustomRoadParams>
         {
             // Paris cobblestone roads.
-            { "1729876865", new CustomRoadParams { surfaceLevel = -0.15f, surfaceTopBound = -0.06f, surfaceBottomBound = -0.2f } }
+            { "1729876865", new CustomRoadParams { surfaceLevel = -0.15f, surfaceTopBound = -0.06f, surfaceBottomBound = -0.31f } },
+            // Cobblestone Lane (1-tile wide).
+            { "1521824617", new CustomRoadParams { surfaceLevel = -0.14f, surfaceTopBound = -0.06f, surfaceBottomBound = -0.31f } }
         };
 
         // List of 10cm curb roads.
@@ -34,7 +36,9 @@ namespace CurbHeightAdjuster
             "2643470190",
             "2643469678",
             "2643470754",
-            "2643471147"
+            "2643471147",
+            // Tiny Narrow Alley
+            "2270053832"
         };
         private static HashSet<string> curbs15cm = new HashSet<string>
         {

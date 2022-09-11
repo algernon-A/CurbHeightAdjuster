@@ -124,10 +124,9 @@ namespace CurbHeightAdjuster
             // Iterate through all networks in list.
             for (uint i = 0; i < PrefabCollection<NetInfo>.LoadedCount(); ++i)
             {
-                NetInfo network = PrefabCollection<NetInfo>.GetLoaded(i);
-
                 try
                 {
+                    NetInfo network = PrefabCollection<NetInfo>.GetLoaded(i);
                     // Skip any null prefabs.
                     if (network?.m_netAI == null || network.name == null || network.m_segments == null || network.m_nodes == null)
                     {
@@ -347,7 +346,7 @@ namespace CurbHeightAdjuster
                 catch (Exception e)
                 {
                     // Don't let one exception stop everything - skip this network and carry on.
-                    Logging.LogException(e, "exception reading network ", network?.name ?? "null");
+                    Logging.LogException(e, "exception reading network");
                     continue;
                 }
             }
