@@ -1,10 +1,10 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
-using ColossalFramework;
-
-
-namespace CurbHeightAdjuster
+﻿namespace CurbHeightAdjuster
 {
+    using System.Collections.Generic;
+    using AlgernonCommons;
+    using ColossalFramework;
+    using UnityEngine;
+
     internal static class CustomRoadHandler
     {
         // Dictionary of custom roads requiring individualised settings.

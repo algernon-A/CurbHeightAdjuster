@@ -1,11 +1,10 @@
-﻿using System;
-using System.IO;
-using System.Collections.Generic;
-using UnityEngine;
-
-
-namespace CurbHeightAdjuster
+﻿namespace CurbHeightAdjuster
 {
+    using System;
+    using System.IO;
+    using System.Collections.Generic;
+    using UnityEngine;
+
     /// <summary>
     /// Class to serialize Unity meshes into binary format.
     /// </summary>

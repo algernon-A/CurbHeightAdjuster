@@ -35,4 +35,5 @@
 		<Copy SourceFiles="@(_Translations)" DestinationFolder="$(DeployDir)/Translations" />
 		<Copy SourceFiles="@(_Data)" DestinationFolder="$(DeployDir)/Data" />
 	</Target>
+	<Import Project="..\AlgernonCommons\AlgernonCommonsPatchingShared.projitems" Label="Shared" />
 </Project>

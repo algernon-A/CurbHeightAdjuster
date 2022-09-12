@@ -1,8 +1,9 @@
-﻿using ColossalFramework.UI;
-
-
-namespace CurbHeightAdjuster
+﻿namespace CurbHeightAdjuster
 {
+    using AlgernonCommons.Translation;
+    using AlgernonCommons.UI;
+    using ColossalFramework.UI;
+
     /// <summary>
     /// Options panel for setting pedestrian path-related options.
     /// </summary>
@@ -21,13 +22,13 @@ namespace CurbHeightAdjuster
         internal PathOptionsPanel(UITabstrip tabStrip, int tabIndex)
         {
             // Add tab and helper.
-            UIPanel panel = OptionsPanelUtils.AddTab(tabStrip, Translations.Translate("CHA_OPT_PAT"), tabIndex);
+            UIPanel panel = UITabstrips.AddTextTab(tabStrip, Translations.Translate("CHA_OPT_PAT"), tabIndex, out UIButton _);
 
             // Y position indicator.
             float currentY = OptionsPanelUtils.GroupMargin;
 
             // Enable path manipulations checkbox.
-            UICheckBox pathCheck = UIControls.AddPlainCheckBox(panel, OptionsPanelUtils.Margin, currentY, Translations.Translate("CHA_PAT_ENA"));
+            UICheckBox pathCheck = UICheckBoxes.AddPlainCheckBox(panel, OptionsPanelUtils.Margin, currentY, Translations.Translate("CHA_PAT_ENA"));
             pathCheck.isChecked = PathHandler.customizePaths;
             pathCheck.eventCheckChanged += PathCheckChanged;
             currentY += pathCheck.height + OptionsPanelUtils.GroupMargin;
@@ -41,13 +42,13 @@ namespace CurbHeightAdjuster
             curbSlider.eventValueChanged += (control, value) => PathHandler.CurbHeight = value;
 
             // LOD checkbox.
-            lodCheck = UIControls.AddPlainCheckBox(panel, OptionsPanelUtils.Margin, currentY, Translations.Translate("CHA_LOD"));
+            lodCheck = UICheckBoxes.AddPlainCheckBox(panel, OptionsPanelUtils.Margin, currentY, Translations.Translate("CHA_LOD"));
             lodCheck.isChecked = PathHandler.DoLODs;
             lodCheck.eventCheckChanged += (control, isChecked) => { PathHandler.DoLODs = isChecked; };
             currentY += lodCheck.height + OptionsPanelUtils.GroupMargin;
 
             // Reset to deafults button.
-            UIButton defaultsButton = UIControls.AddButton(panel, OptionsPanelUtils.Margin, currentY, Translations.Translate("CHA_DEFAULT"), OptionsPanelUtils.ButtonWidth);
+            UIButton defaultsButton = UIButtons.AddButton(panel, OptionsPanelUtils.Margin, currentY, Translations.Translate("CHA_DEFAULT"), OptionsPanelUtils.ButtonWidth);
             defaultsButton.eventClicked += (control, clickEvent) =>
             {
                 // Set controls to default settings.
@@ -63,12 +64,12 @@ namespace CurbHeightAdjuster
             if (ColossalFramework.Singleton<LoadingManager>.instance.m_loadingComplete)
             {
                 // Apply button.
-                UIButton applyButton = UIControls.AddButton(panel, OptionsPanelUtils.Margin, currentY, Translations.Translate("CHA_APPLY"), OptionsPanelUtils.ButtonWidth);
+                UIButton applyButton = UIButtons.AddButton(panel, OptionsPanelUtils.Margin, currentY, Translations.Translate("CHA_APPLY"), OptionsPanelUtils.ButtonWidth);
                 applyButton.eventClicked += (control, clickEvent) => PathHandler.Apply();
                 currentY += applyButton.height + OptionsPanelUtils.Margin;
 
                 // Undo button.
-                UIButton undoButton = UIControls.AddButton(panel, OptionsPanelUtils.Margin, currentY, Translations.Translate("CHA_REVERT"), OptionsPanelUtils.ButtonWidth);
+                UIButton undoButton = UIButtons.AddButton(panel, OptionsPanelUtils.Margin, currentY, Translations.Translate("CHA_REVERT"), OptionsPanelUtils.ButtonWidth);
                 undoButton.eventClicked += (control, clickEvent) => PathHandler.Revert();
             }
 

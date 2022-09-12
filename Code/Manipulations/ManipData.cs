@@ -1,9 +1,8 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
-
-
-namespace CurbHeightAdjuster
+﻿namespace CurbHeightAdjuster
 {
+    using System.Collections.Generic;
+    using UnityEngine;
+
     /// <summary>
     /// Class to hold original data for networks (prior to curb height alteration).
     /// </summary>

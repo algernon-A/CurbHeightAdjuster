@@ -1,9 +1,10 @@
-﻿using UnityEngine;
-using ColossalFramework.UI;
-
-
-namespace CurbHeightAdjuster
+﻿namespace CurbHeightAdjuster
 {
+    using AlgernonCommons;
+    using AlgernonCommons.Translation;
+    using AlgernonCommons.UI;
+    using ColossalFramework.UI;
+
     /// <summary>
     /// Options panel for setting general mod options.
     /// </summary>
@@ -17,25 +18,24 @@ namespace CurbHeightAdjuster
         internal GeneralOptionsPanel(UITabstrip tabStrip, int tabIndex)
         {
             // Add tab and helper.
-            UIPanel panel = OptionsPanelUtils.AddTab(tabStrip, Translations.Translate("CHA_OPT_GEN"), tabIndex);
+            UIPanel panel = UITabstrips.AddTextTab(tabStrip, Translations.Translate("CHA_OPT_GEN"), tabIndex, out UIButton _);
 
             // Y position indicator.
             float currentY = OptionsPanelUtils.GroupMargin;
 
             // Language choice.
-            UIDropDown languageDropDown = UIControls.AddPlainDropDown(panel, Translations.Translate("TRN_CHOICE"), Translations.LanguageList, Translations.Index);
+            UIDropDown languageDropDown = UIDropDowns.AddPlainDropDown(panel, OptionsPanelUtils.LeftMargin, currentY, Translations.Translate("TRN_CHOICE"), Translations.LanguageList, Translations.Index);
             languageDropDown.eventSelectedIndexChanged += (control, index) =>
             {
                 Translations.Index = index;
-                OptionsPanel.LocaleChanged();
+                OptionsPanelManager<OptionsPanel>.LocaleChanged();
             };
-            languageDropDown.parent.relativePosition = new Vector2(OptionsPanelUtils.LeftMargin, currentY);
             currentY += languageDropDown.parent.height + OptionsPanelUtils.GroupMargin;
 
             // LOD checkbox.
-            UICheckBox logCheck = UIControls.AddPlainCheckBox(panel, OptionsPanelUtils.Margin, currentY, Translations.Translate("CHA_OPT_LOG"));
-            logCheck.isChecked = Logging.detailLogging;
-            logCheck.eventCheckChanged += (control, isChecked) => { Logging.detailLogging = isChecked; };
+            UICheckBox logCheck = UICheckBoxes.AddPlainCheckBox(panel, OptionsPanelUtils.Margin, currentY, Translations.Translate("CHA_OPT_LOG"));
+            logCheck.isChecked = Logging.DetailLogging;
+            logCheck.eventCheckChanged += (control, isChecked) => { Logging.DetailLogging = isChecked; };
         }
     }
 }

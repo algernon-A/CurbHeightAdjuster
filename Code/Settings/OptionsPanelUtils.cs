@@ -1,9 +1,9 @@
-﻿using UnityEngine;
-using ColossalFramework.UI;
-
-
-namespace CurbHeightAdjuster
+﻿namespace CurbHeightAdjuster
 {
+    using AlgernonCommons.Translation;
+    using AlgernonCommons.UI;
+    using ColossalFramework.UI;
+
     /// <summary>
     /// Utilities for Options Panel UI.
     /// </summary>
@@ -14,47 +14,6 @@ namespace CurbHeightAdjuster
         internal const float LeftMargin = 24f;
         internal const float GroupMargin = 40f;
         internal const float ButtonWidth = 400f;
-
-
-        /// <summary>
-        /// Adds a tab to a UI tabstrip.
-        /// </summary>
-        /// <param name="tabStrip">UIT tabstrip to add to</param>
-        /// <param name="tabName">Name of this tab</param>
-        /// <param name="tabIndex">Index number of this tab</param>
-        /// <returns>UIHelper instance for the new tab panel</returns>
-        internal static UIPanel AddTab(UITabstrip tabStrip, string tabName, int tabIndex, bool autoLayout = false)
-        {
-            // Create tab.
-            UIButton tabButton = tabStrip.AddTab(tabName);
-
-            // Sprites.
-            tabButton.normalBgSprite = "SubBarButtonBase";
-            tabButton.disabledBgSprite = "SubBarButtonBaseDisabled";
-            tabButton.focusedBgSprite = "SubBarButtonBaseFocused";
-            tabButton.hoveredBgSprite = "SubBarButtonBaseHovered";
-            tabButton.pressedBgSprite = "SubBarButtonBasePressed";
-
-            // Tooltip.
-            tabButton.tooltip = tabName;
-
-            tabStrip.selectedIndex = tabIndex;
-
-            // Force width.
-            tabButton.width = 240;
-
-            // Get tab root panel.
-            UIPanel rootPanel = tabStrip.tabContainer.components[tabIndex] as UIPanel;
-
-            // Panel setup.
-            rootPanel.autoLayout = autoLayout;
-            rootPanel.autoLayoutDirection = LayoutDirection.Vertical;
-            rootPanel.autoLayoutPadding.top = 5;
-            rootPanel.autoLayoutPadding.left = 10;
-
-            return rootPanel;
-        }
-
 
 
         /// <summary>
@@ -115,11 +74,10 @@ namespace CurbHeightAdjuster
         private static UISlider AddSlider(UIComponent parent, ref float yPos, string labelKey, float min, float max, float initialValue)
         {
             // Create new slider.
-            UISlider newSlider = UIControls.AddSlider(parent, Translations.Translate(labelKey), min, max, 0.01f, initialValue);
-            newSlider.parent.relativePosition = new Vector2(Margin, yPos);
+            UISlider newSlider = UISliders.AddPlainSlider(parent, Margin, yPos, Translations.Translate(labelKey), min, max, 0.01f, initialValue);
 
             // Value label.
-            UILabel valueLabel = UIControls.AddLabel(newSlider.parent, Margin, newSlider.parent.height - Margin, string.Empty);
+            UILabel valueLabel = UILabels.AddLabel(newSlider.parent, Margin, newSlider.parent.height - Margin, string.Empty);
             newSlider.objectUserData = valueLabel;
 
             // Increment y position indicator.

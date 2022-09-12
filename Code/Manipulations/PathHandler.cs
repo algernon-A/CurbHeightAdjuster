@@ -1,10 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using UnityEngine;
-
-
-namespace CurbHeightAdjuster
+﻿namespace CurbHeightAdjuster
 {
+    using System;
+    using System.Collections.Generic;
+    using AlgernonCommons;
+    using UnityEngine;
+
     /// <summary>
     /// Class to manage changes to pedestrian paths.
     /// </summary>

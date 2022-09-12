@@ -1,11 +1,11 @@
-﻿using System;
-using System.Runtime.CompilerServices;
-using ColossalFramework;
-using HarmonyLib;
-
-
-namespace CurbHeightAdjuster
+﻿namespace CurbHeightAdjuster
 {
+    using System;
+    using System.Runtime.CompilerServices;
+    using AlgernonCommons;
+    using ColossalFramework;
+    using HarmonyLib;
+
     /// <summary>
     /// Class to adjust network pillars
     /// </summary>

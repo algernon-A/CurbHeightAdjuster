@@ -1,5 +1,6 @@
 ﻿- Don't try to adjust deleted pillars
 - Add support for Urabanist's cobblestone lane
+- Implement AlgernonCommons
 
 
 Version 1.5.1

@@ -1,8 +1,9 @@
-﻿using ColossalFramework.UI;
-
-
-namespace CurbHeightAdjuster
+﻿namespace CurbHeightAdjuster
 {
+    using AlgernonCommons.Translation;
+    using AlgernonCommons.UI;
+    using ColossalFramework.UI;
+
     /// <summary>
     /// Options panel for setting road-related mod options.
     /// </summary>
@@ -20,7 +21,7 @@ namespace CurbHeightAdjuster
         internal RoadOptionsPanel(UITabstrip tabStrip, int tabIndex)
         {
             // Add tab and helper.
-            UIPanel panel = OptionsPanelUtils.AddTab(tabStrip, Translations.Translate("CHA_OPT_ROA"), tabIndex);
+            UIPanel panel = UITabstrips.AddTextTab(tabStrip, Translations.Translate("CHA_OPT_ROA"), tabIndex, out UIButton _);
             
             // Y position indicator.
             float currentY = OptionsPanelUtils.GroupMargin;
@@ -30,17 +31,17 @@ namespace CurbHeightAdjuster
             depthSlider.eventValueChanged += (control, value) => RoadHandler.NewCurbHeight = value;
 
             // Spacer.
-            UIControls.OptionsSpacer(panel, OptionsPanelUtils.Margin, currentY, panel.width - (OptionsPanelUtils.Margin * 2f));
+            UISpacers.AddOptionsSpacer(panel, OptionsPanelUtils.Margin, currentY, panel.width - (OptionsPanelUtils.Margin * 2f));
             currentY += OptionsPanelUtils.GroupMargin;
 
             // Enable bridge mesh checkbox.
-            UICheckBox bridgeCheck = UIControls.AddPlainCheckBox(panel, OptionsPanelUtils.Margin, currentY, Translations.Translate("CHA_BRI_ENA"));
+            UICheckBox bridgeCheck = UICheckBoxes.AddPlainCheckBox(panel, OptionsPanelUtils.Margin, currentY, Translations.Translate("CHA_BRI_ENA"));
             bridgeCheck.isChecked = RoadHandler.EnableBridges;
             bridgeCheck.eventCheckChanged += BridgeCheckChanged;
             currentY += bridgeCheck.height + OptionsPanelUtils.Margin;
 
             // Adjust exiting bridge pillars checkbox.
-            UICheckBox pillarCheck = UIControls.AddPlainCheckBox(panel, OptionsPanelUtils.Margin, currentY, Translations.Translate("CHA_OPT_PIL"));
+            UICheckBox pillarCheck = UICheckBoxes.AddPlainCheckBox(panel, OptionsPanelUtils.Margin, currentY, Translations.Translate("CHA_OPT_PIL"));
             pillarCheck.isChecked = Pillars.AutoUpdate;
             pillarCheck.eventCheckChanged += (control, isChecked) => { Pillars.AutoUpdate = isChecked; };
             currentY += pillarCheck.height + OptionsPanelUtils.GroupMargin;
@@ -54,14 +55,14 @@ namespace CurbHeightAdjuster
             multiplierSlider.eventValueChanged += (control, value) => RoadHandler.BridgeHeightScale = value;
 
             // LOD checkbox.
-            UICheckBox lodCheck = UIControls.AddPlainCheckBox(panel, OptionsPanelUtils.Margin, currentY, Translations.Translate("CHA_LOD"));
+            UICheckBox lodCheck = UICheckBoxes.AddPlainCheckBox(panel, OptionsPanelUtils.Margin, currentY, Translations.Translate("CHA_LOD"));
             lodCheck.isChecked = RoadHandler.DoLODs;
             lodCheck.eventCheckChanged += (control, isChecked) => { RoadHandler.DoLODs = isChecked; };
             currentY += lodCheck.height + OptionsPanelUtils.GroupMargin;
 
 
             // Reset to deafults button.
-            UIButton defaultsButton = UIControls.AddButton(panel, OptionsPanelUtils.Margin, currentY, Translations.Translate("CHA_DEFAULT"), OptionsPanelUtils.ButtonWidth);
+            UIButton defaultsButton = UIButtons.AddButton(panel, OptionsPanelUtils.Margin, currentY, Translations.Translate("CHA_DEFAULT"), OptionsPanelUtils.ButtonWidth);
             defaultsButton.eventClicked += (control, clickEvent) =>
             {
                 // Set controls to default settings.
@@ -78,12 +79,12 @@ namespace CurbHeightAdjuster
             if (ColossalFramework.Singleton<LoadingManager>.instance.m_loadingComplete)
             {
                 // Apply button.
-                UIButton applyButton = UIControls.AddButton(panel, OptionsPanelUtils.Margin, currentY, Translations.Translate("CHA_APPLY"), OptionsPanelUtils.ButtonWidth);
+                UIButton applyButton = UIButtons.AddButton(panel, OptionsPanelUtils.Margin, currentY, Translations.Translate("CHA_APPLY"), OptionsPanelUtils.ButtonWidth);
                 applyButton.eventClicked += (control, clickEvent) => RoadHandler.Apply();
                 currentY += applyButton.height + OptionsPanelUtils.Margin;
 
                 // Undo button.
-                UIButton undoButton = UIControls.AddButton(panel, OptionsPanelUtils.Margin, currentY, Translations.Translate("CHA_REVERT"), OptionsPanelUtils.ButtonWidth);
+                UIButton undoButton = UIButtons.AddButton(panel, OptionsPanelUtils.Margin, currentY, Translations.Translate("CHA_REVERT"), OptionsPanelUtils.ButtonWidth);
                 undoButton.eventClicked += (control, clickEvent) => RoadHandler.Revert();
             }
         }

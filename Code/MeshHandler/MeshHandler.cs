@@ -1,17 +1,17 @@
-﻿using System;
-using System.IO;
-using UnityEngine;
-
-
-namespace CurbHeightAdjuster
+﻿namespace CurbHeightAdjuster
 {
+    using System;
+    using System.IO;
+    using AlgernonCommons;
+    using UnityEngine;
+
     /// <summary>
     /// Class for handling meshes and serialization/deserialization.
     /// </summary>
     internal static class MeshHandler
     {
         // Mesh data location.
-        private static string pathName = Path.Combine(ModUtils.AssemblyPath, "Data");
+        private static string pathName = Path.Combine(AssemblyUtils.AssemblyPath, "Data");
 
 
         /// <summary>

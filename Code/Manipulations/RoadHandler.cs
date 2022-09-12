@@ -1,11 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using UnityEngine;
-using ColossalFramework;
-
-
-namespace CurbHeightAdjuster
+﻿namespace CurbHeightAdjuster
 {
+    using System;
+    using System.Collections.Generic;
+    using AlgernonCommons;
+    using UnityEngine;
+    using ColossalFramework;
+
     /// <summary>
     /// Class to manage changes to roads.
     /// </summary>
