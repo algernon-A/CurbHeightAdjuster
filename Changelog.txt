@@ -1,5 +1,7 @@
-﻿- Add support for Urbanist's Cobblestone Lane (1-tile wide)
-- Don't try to adjust deleted pillars
+﻿Version 1.5.2
+
+- Add support for Urbanist's Cobblestone Lane (1-tile wide)
+- Don't try to adjust deleted pillars (81 Tiles 2 compatibility)
 - Implement AlgernonCommons
 
 
