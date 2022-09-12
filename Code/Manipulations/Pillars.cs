@@ -35,39 +35,40 @@ namespace CurbHeightAdjuster
             // Perform action via simulation thread.
             Singleton<SimulationManager>.instance.AddAction(delegate
             {
-                // Local reference.
-                NetManager netManager = Singleton<NetManager>.instance;
+            // Local reference.
+            NetManager netManager = Singleton<NetManager>.instance;
 
-                // Iterate through all networks  in list.
-                NetNode[] nodes = Singleton<NetManager>.instance.m_nodes.m_buffer;
-                for (uint i = 0; i < nodes.Length; ++i)
+            // Iterate through all networks  in list.
+            NetNode[] nodes = Singleton<NetManager>.instance.m_nodes.m_buffer;
+            Building[] buildings = Singleton<BuildingManager>.instance.m_buildings.m_buffer;
+            for (uint i = 0; i < nodes.Length; ++i)
+            {
+                // Skip uncreated nodes or nodes with  no building attached.
+                if ((nodes[i].m_flags & NetNode.Flags.Created) == NetNode.Flags.None || nodes[i].m_building == 0 || (buildings[nodes[i].m_building].m_flags & Building.Flags.Created) == 0)
                 {
-                    // Skip uncreated nodes or nodes with  no building attached.
-                    if ((nodes[i].m_flags & NetNode.Flags.Created) == NetNode.Flags.None || nodes[i].m_building == 0)
-                    {
-                        continue;
-                    }
+                    continue;
+                }
 
-                    // Skip any nodes with null infos.
-                    NetInfo info = nodes[i].Info;
-                    if (info?.name == null)
-                    {
-                        continue;
-                    }
+                // Skip any nodes with null infos.
+                NetInfo info = nodes[i].Info;
+                if (info?.name == null)
+                {
+                    continue;
+                }
 
-                    // Check for road bridge AI.
-                    if (info.m_netAI is RoadBridgeAI bridgeAI)
-                    {
-                        // Only deal with networks with a valid adjustment.
-                        if (RoadHandler.netRecords.ContainsKey(info))
+                // Check for road bridge AI.
+                if (info.m_netAI is RoadBridgeAI bridgeAI)
+                {
+                    // Only deal with networks with a valid adjustment.
+                    if (RoadHandler.netRecords.ContainsKey(info))
                         {
                             Logging.Message("adjusting pillars for node ", i, ": ", info.name);
 
                             // Reset pillar height via reverse patch call to NetNode.CheckHeightOffset.
                             CheckHeightOffset(ref nodes[i], (ushort)i);
 
-                            // Additional manual pillar adjustment if needed.
-                            info.m_netAI.GetNodeBuilding((ushort)i, ref Singleton<NetManager>.instance.m_nodes.m_buffer[i], out var building, out var heightOffset);
+                        // Additional manual pillar adjustment if needed.
+                        info.m_netAI.GetNodeBuilding((ushort)i, ref Singleton<NetManager>.instance.m_nodes.m_buffer[i], out BuildingInfo building, out float heightOffset);
                             netManager.m_nodes.m_buffer[i].UpdateBuilding((ushort)i, building, heightOffset);
                             netManager.UpdateNodeFlags((ushort)i);
                             netManager.UpdateNodeRenderer((ushort)i, updateGroup: true);
