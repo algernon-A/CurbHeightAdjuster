@@ -19,8 +19,8 @@ namespace CurbHeightAdjuster
         /// <summary>
         /// Harmomy transpiler to insert call to RaiseCurbHeights in NetManager.Data.AfterDeserialize.
         /// </summary>
-        /// <param name="instructions">Original ILCode</param>
-        /// <returns>Patched ILCode</returns>
+        /// <param name="instructions">Original ILCode.</param>
+        /// <returns>Patched ILCode.</returns>
         public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
         {
             // Going to find first (and only) stloc.2 in game code.  Immediately after that we insert a call to RaiseParkingLots.  Simple.

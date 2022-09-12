@@ -6,7 +6,6 @@
 namespace CurbHeightAdjuster
 {
     using System.Collections.Generic;
-    using UnityEngine;
 
     /// <summary>
     /// Class to hold original data for networks (prior to curb height alteration).
@@ -36,10 +35,10 @@ namespace CurbHeightAdjuster
         public Dictionary<NetInfo.Lane, float> m_laneDict = new Dictionary<NetInfo.Lane, float>();
 
         /// <summary>
-        /// Whether or not to adjust pillars..
+        /// Whether or not to adjust pillars.
         /// </summary>
-        /// 
         public bool m_adjustPillars = false;
+
         /// <summary>
         /// Bridge pillar vertical offsets.
         /// </summary>
