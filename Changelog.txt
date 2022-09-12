@@ -1,5 +1,5 @@
-﻿- Don't try to adjust deleted pillars
-- Add support for Urabanist's cobblestone lane
+﻿- Add support for Urbanist's Cobblestone Lane (1-tile wide)
+- Don't try to adjust deleted pillars
 - Implement AlgernonCommons
 
 
