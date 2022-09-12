@@ -1,167 +1,113 @@
-﻿using System;
-using System.IO;
-using System.Xml.Serialization;
-
+﻿// <copyright file="ModSettings.cs" company="algernon (K. Algernon A. Sheppard)">
+// Copyright (c) algernon (K. Algernon A. Sheppard). All rights reserved.
+// Licensed under the MIT license. See LICENSE.txt file in the project root for full license information.
+// </copyright>
 
 namespace CurbHeightAdjuster
 {
+    using System.IO;
+    using System.Xml.Serialization;
+    using AlgernonCommons;
+    using AlgernonCommons.XML;
+
     /// <summary>
     /// Global mod settings.
     /// </summary>
-    /// 
     [XmlRoot("CurbHeightAdjuster")]
-    public class ModSettings
+    public class ModSettings : SettingsXMLBase
     {
         // Settings file name.
         [XmlIgnore]
-        private static readonly string SettingsFilePath = Path.Combine(ColossalFramework.IO.DataLocation.localApplicationData, "CurbHeightAdjuster.xml");
+        private static readonly string SettingsFileName = "CurbHeightAdjuster.xml";
 
-        // What's new notification version.
+        // User settings directory.
         [XmlIgnore]
-        internal static string whatsNewVersion = "0.0";
+        private static readonly string UserSettingsDir = ColossalFramework.IO.DataLocation.localApplicationData;
 
-
-        // File version.
-        [XmlAttribute("Version")]
-        public int version = 0;
-
-        // What's new notification version.
-        [XmlElement("WhatsNewVersion")]
-        public string XMLWhatsNewVersion { get => whatsNewVersion; set => whatsNewVersion = value; }
-
+        // Full userdir settings file name.
+        [XmlIgnore]
+        private static readonly string SettingsFile = Path.Combine(UserSettingsDir, SettingsFileName);
 
         /// <summary>
-        /// Language setting.
+        /// Gets or sets the settings file version.
         /// </summary>
-        [XmlElement("Language")]
-        public string XMLLanguage { get => Translations.CurrentLanguage; set => Translations.CurrentLanguage = value; }
+        [XmlAttribute("Version")]
+        public int Version { get; set; }
 
         /// <summary>
-        /// Detailed logging enabled.
+        /// Gets or sets a value indicating whether detailed logging is enabled.
         /// </summary>
         [XmlElement("DetailedLogging")]
-        public bool XMDetailedLogging { get => Logging.detailLogging; set => Logging.detailLogging = value; }
-
+        public bool XMDetailedLogging { get => Logging.DetailLogging; set => Logging.DetailLogging = value; }
 
         /// <summary>
-        /// New curb height.
+        /// Gets or sets the new curb height to apply (positive figure, in cm).
         /// </summary>
         [XmlElement("CurbHeight")]
         public float XMLCurbHeight { get => RoadHandler.NewCurbHeight; set => RoadHandler.NewCurbHeight = value; }
 
-
         /// <summary>
-        /// Whether or not road LODs are changed as well.
+        /// Gets or sets a value indicating whether LODs are changed as well.
         /// </summary>
         [XmlElement("RaiseLODs")]
         public bool XMLUpdateRoadLods { get => RoadHandler.DoLODs; set => RoadHandler.DoLODs = value; }
 
-
         /// <summary>
-        /// Whether or not bridge manipulations are applied.
+        /// Gets or sets a value indicating whether bridge manipulations are applied.
         /// </summary>
         [XmlElement("EnableBridges")]
         public bool XMLEnableBridges { get => RoadHandler.EnableBridges; set => RoadHandler.EnableBridges = value; }
 
-
         /// <summary>
-        /// Whether or not bridge manipulations are applied.
+        /// Gets or sets a value indicating whether bridge manipulations are applied.
         /// </summary>
         [XmlElement("UpdatePillars")]
         public bool XMLUpdatePillars { get => Pillars.AutoUpdate; set => Pillars.AutoUpdate = value; }
 
-
         /// <summary>
-        /// Bridge deck threshold.
+        /// Gets or sets the bridge height threshold to apply (positive figure, in cm).
         /// </summary>
         [XmlElement("BridgeHeightThreshold")]
         public float XMLBridgeHeightThreshold { get => RoadHandler.BridgeHeightThreshold; set => RoadHandler.BridgeHeightThreshold = value; }
 
-
         /// <summary>
-        /// Bridge deck multiplier.
+        /// Gets or sets the bridge deck thickness multiplier.
         /// </summary>
         [XmlElement("BridgeHeightScale")]
         public float XMLBridgeHeightScale { get => RoadHandler.BridgeHeightScale; set => RoadHandler.BridgeHeightScale = value; }
 
         /// <summary>
-        /// Enable path manipulations.
+        /// Gets or sets a value indicating whether custom path manipulations are enabled.
         /// </summary>
         [XmlElement("EnablePaths")]
-        public bool XMLEnablePaths { get => PathHandler.customizePaths; set => PathHandler.customizePaths = value; }
-
+        public bool XMLEnablePaths { get => PathHandler.CustomizePaths; set => PathHandler.CustomizePaths = value; }
 
         /// <summary>
-        /// New path base height.
+        /// Gets or sets the new base height to apply (positive figure, in cm).
         /// </summary>
         [XmlElement("PathBaseHeight")]
         public float XMLPathBaseHeight { get => PathHandler.BaseHeight; set => PathHandler.BaseHeight = value; }
 
-
         /// <summary>
-        /// New path curb height.
+        /// Gets or sets the new curb height to apply (positive figure, in cm).
         /// </summary>
         [XmlElement("PathCurbHeight")]
         public float XMLPathCurbHeight { get => PathHandler.CurbHeight; set => PathHandler.CurbHeight = value; }
 
-
         /// <summary>
-        /// Whether or not path LODs are changed as well.
+        /// Gets or sets a value indicating whether path lods are also adjusted.
         /// </summary>
         [XmlElement("PathLods")]
         public bool XMLUpdatePathLods { get => PathHandler.DoLODs; set => PathHandler.DoLODs = value; }
 
+        /// <summary>
+        /// Loads settings from file.
+        /// </summary>
+        internal static void Load() => XMLFileUtils.Load<ModSettings>(SettingsFile);
 
         /// <summary>
-        /// Load settings from XML file.
+        /// Saves settings to file.
         /// </summary>
-        internal static void Load()
-        {
-            try
-            {
-                // Check to see if configuration file exists.
-                if (File.Exists(SettingsFilePath))
-                {
-                    // Read it.
-                    using (StreamReader reader = new StreamReader(SettingsFilePath))
-                    {
-                        XmlSerializer xmlSerializer = new XmlSerializer(typeof(ModSettings));
-                        if (!(xmlSerializer.Deserialize(reader) is ModSettings settingsFile))
-                        {
-                            Logging.Error("couldn't deserialize settings file");
-                        }
-                    }
-                }
-                else
-                {
-                    Logging.Message("no settings file found");
-                }
-            }
-            catch (Exception e)
-            {
-                Logging.LogException(e, "exception reading XML settings file");
-            }
-        }
-
-
-        /// <summary>
-        /// Save settings to XML file.
-        /// </summary>
-        internal static void Save()
-        {
-            try
-            {
-                // Pretty straightforward.  Serialisation is within GBRSettingsFile class.
-                using (StreamWriter writer = new StreamWriter(SettingsFilePath))
-                {
-                    XmlSerializer xmlSerializer = new XmlSerializer(typeof(ModSettings));
-                    xmlSerializer.Serialize(writer, new ModSettings());
-                }
-            }
-            catch (Exception e)
-            {
-                Logging.LogException(e, "exception saving XML settings file");
-            }
-        }
+        internal static void Save() => XMLFileUtils.Save<ModSettings>(SettingsFile);
     }
 }

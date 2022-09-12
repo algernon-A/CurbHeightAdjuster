@@ -1,10 +1,15 @@
-﻿using System.Collections.Generic;
-using System.Reflection.Emit;
-using HarmonyLib;
-
+﻿// <copyright file="NetDeserializePatch.cs" company="algernon (K. Algernon A. Sheppard)">
+// Copyright (c) algernon (K. Algernon A. Sheppard). All rights reserved.
+// Licensed under the MIT license. See LICENSE.txt file in the project root for full license information.
+// </copyright>
 
 namespace CurbHeightAdjuster
 {
+    using System.Collections.Generic;
+    using System.Reflection.Emit;
+    using AlgernonCommons;
+    using HarmonyLib;
+
     /// <summary>
     /// Harmony patch to change curb hights on net load (before initial render generation to avoid needing to regenerate it later).
     /// </summary>
@@ -14,8 +19,8 @@ namespace CurbHeightAdjuster
         /// <summary>
         /// Harmomy transpiler to insert call to RaiseCurbHeights in NetManager.Data.AfterDeserialize.
         /// </summary>
-        /// <param name="instructions">Original ILCode</param>
-        /// <returns>Patched ILCode</returns>
+        /// <param name="instructions">Original ILCode.</param>
+        /// <returns>Patched ILCode.</returns>
         public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
         {
             // Going to find first (and only) stloc.s 7 in game code.  Immediately after that we insert a call to RaiseCurbHeights.  Simple.
@@ -26,7 +31,6 @@ namespace CurbHeightAdjuster
             CodeInstruction instruction;
 
             Logging.Message("starting NetManager.Data.AfterDeserialize transpiler");
-
 
             // Status flag.
             bool foundTarget = false;

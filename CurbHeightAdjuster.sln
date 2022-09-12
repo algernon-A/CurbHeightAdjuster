@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.31829.152
+# Visual Studio Version 17
+VisualStudioVersion = 17.3.32811.315
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CurbHeightAdjuster", "CurbHeightAdjuster.csproj", "{F1F72E66-6F95-4BCE-AF85-81944DB359DD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CurbHeightAdjuster", "CurbHeightAdjuster.csproj", "{F1F72E66-6F95-4BCE-AF85-81944DB359DD}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "AlgernonCommonsPatchingShared", "..\AlgernonCommons\AlgernonCommonsPatchingShared.shproj", "{25AEF446-6F0D-43A8-BB84-D1306789B68C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,5 +23,9 @@ Global
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F5F3A5C4-94DD-4F14-ADFE-2C2044989AF6}
+	EndGlobalSection
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		..\AlgernonCommons\AlgernonCommonsPatchingShared.projitems*{25aef446-6f0d-43a8-bb84-d1306789b68c}*SharedItemsImports = 13
+		..\AlgernonCommons\AlgernonCommonsPatchingShared.projitems*{f1f72e66-6f95-4bce-af85-81944db359dd}*SharedItemsImports = 5
 	EndGlobalSection
 EndGlobal

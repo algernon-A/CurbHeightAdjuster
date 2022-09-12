@@ -1,20 +1,24 @@
-﻿using System;
-using System.Runtime.CompilerServices;
-using ColossalFramework;
-using HarmonyLib;
-
+﻿// <copyright file="Pillars.cs" company="algernon (K. Algernon A. Sheppard)">
+// Copyright (c) algernon (K. Algernon A. Sheppard). All rights reserved.
+// Licensed under the MIT license. See LICENSE.txt file in the project root for full license information.
+// </copyright>
 
 namespace CurbHeightAdjuster
 {
+    using System;
+    using System.Runtime.CompilerServices;
+    using AlgernonCommons;
+    using ColossalFramework;
+    using HarmonyLib;
+
     /// <summary>
-    /// Class to adjust network pillars
+    /// Class to adjust network pillars.
     /// </summary>
-    /// 
     [HarmonyPatch]
     public static class Pillars
     {
         /// <summary>
-        /// Enables automatic update of bridge pillars when true.
+        /// Gets or sets a value indicating whether automatic update of bridge pillars is enabled.
         /// </summary>
         internal static bool AutoUpdate { get; set; } = true;
 
@@ -33,17 +37,18 @@ namespace CurbHeightAdjuster
             Logging.KeyMessage("adjusting existing pillars");
 
             // Perform action via simulation thread.
-            Singleton<SimulationManager>.instance.AddAction(delegate
+            Singleton<SimulationManager>.instance.AddAction(() =>
             {
                 // Local reference.
                 NetManager netManager = Singleton<NetManager>.instance;
 
                 // Iterate through all networks  in list.
                 NetNode[] nodes = Singleton<NetManager>.instance.m_nodes.m_buffer;
+                Building[] buildings = Singleton<BuildingManager>.instance.m_buildings.m_buffer;
                 for (uint i = 0; i < nodes.Length; ++i)
                 {
                     // Skip uncreated nodes or nodes with  no building attached.
-                    if ((nodes[i].m_flags & NetNode.Flags.Created) == NetNode.Flags.None || nodes[i].m_building == 0)
+                    if ((nodes[i].m_flags & NetNode.Flags.Created) == NetNode.Flags.None || nodes[i].m_building == 0 || (buildings[nodes[i].m_building].m_flags & Building.Flags.Created) == 0)
                     {
                         continue;
                     }
@@ -59,7 +64,7 @@ namespace CurbHeightAdjuster
                     if (info.m_netAI is RoadBridgeAI bridgeAI)
                     {
                         // Only deal with networks with a valid adjustment.
-                        if (RoadHandler.netRecords.ContainsKey(info))
+                        if (RoadHandler.NetRecords.ContainsKey(info))
                         {
                             Logging.Message("adjusting pillars for node ", i, ": ", info.name);
 
@@ -67,7 +72,7 @@ namespace CurbHeightAdjuster
                             CheckHeightOffset(ref nodes[i], (ushort)i);
 
                             // Additional manual pillar adjustment if needed.
-                            info.m_netAI.GetNodeBuilding((ushort)i, ref Singleton<NetManager>.instance.m_nodes.m_buffer[i], out var building, out var heightOffset);
+                            info.m_netAI.GetNodeBuilding((ushort)i, ref Singleton<NetManager>.instance.m_nodes.m_buffer[i], out BuildingInfo building, out float heightOffset);
                             netManager.m_nodes.m_buffer[i].UpdateBuilding((ushort)i, building, heightOffset);
                             netManager.UpdateNodeFlags((ushort)i);
                             netManager.UpdateNodeRenderer((ushort)i, updateGroup: true);
@@ -89,15 +94,14 @@ namespace CurbHeightAdjuster
             });
         }
 
-        
         /// <summary>
         /// Harmony reverse patch to access private method NetNode.CheckHeightOffset.
         /// </summary>
-        /// <param name="instance"></param>
-        /// <param name="nodeID"></param>
-        /// <exception cref="NotImplementedException"></exception>
+        /// <param name="instance">NetNode instance.</param>
+        /// <param name="nodeID">NetNode ID.</param>
+        /// <exception cref="NotImplementedException">Reverse patch wasn't applied.</exception>
         [HarmonyReversePatch]
-        [HarmonyPatch((typeof(NetNode)), "CheckHeightOffset")]
+        [HarmonyPatch(typeof(NetNode), "CheckHeightOffset")]
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static void CheckHeightOffset(ref NetNode instance, ushort nodeID)
         {
