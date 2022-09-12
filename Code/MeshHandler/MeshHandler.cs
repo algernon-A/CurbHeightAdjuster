@@ -1,4 +1,9 @@
-﻿namespace CurbHeightAdjuster
+﻿// <copyright file="MeshHandler.cs" company="algernon (K. Algernon A. Sheppard)">
+// Copyright (c) algernon (K. Algernon A. Sheppard). All rights reserved.
+// Licensed under the MIT license. See LICENSE.txt file in the project root for full license information.
+// </copyright>
+
+namespace CurbHeightAdjuster
 {
     using System;
     using System.IO;
@@ -13,12 +18,11 @@
         // Mesh data location.
         private static string pathName = Path.Combine(AssemblyUtils.AssemblyPath, "Data");
 
-
         /// <summary>
         /// Loads a mesh from binary file.
         /// </summary>
-        /// <param name="meshName"></param>
-        /// <returns>New mesh from binary data (null if error)</returns>
+        /// <param name="meshName">Mesh name.</param>
+        /// <returns>New mesh from binary data (null if error).</returns>
         internal static Mesh LoadMesh(string meshName)
         {
             // Read mesh as <meshname>.dat.

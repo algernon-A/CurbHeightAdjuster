@@ -1,6 +1,6 @@
 ﻿// <copyright file="WhatsNewMessageListing.cs" company="algernon (K. Algernon A. Sheppard)">
 // Copyright (c) algernon (K. Algernon A. Sheppard). All rights reserved.
-// Licensed under the Apache license. See LICENSE.txt file in the project root for full license information.
+// Licensed under the MIT license. See LICENSE.txt file in the project root for full license information.
 // </copyright>
 
 namespace CurbHeightAdjuster
@@ -24,8 +24,8 @@ namespace CurbHeightAdjuster
                 MessagesAreKeys = true,
                 Messages = new string[]
                 {
-                    "CHA_151_0"
-                }
+                    "CHA_151_0",
+                },
             },
             new WhatsNewMessage
             {
@@ -35,16 +35,17 @@ namespace CurbHeightAdjuster
                 {
                     "CHA_150_0",
                     "CHA_150_1",
-                    "CHA_150_2"
-                }
-            },new WhatsNewMessage
+                    "CHA_150_2",
+                },
+            },
+            new WhatsNewMessage
             {
                 Version = new Version("1.4.0.0"),
                 MessagesAreKeys = true,
                 Messages = new string[]
                 {
-                    "CHA_140_0"
-                }
+                    "CHA_140_0",
+                },
             },
             new WhatsNewMessage
             {
@@ -52,8 +53,8 @@ namespace CurbHeightAdjuster
                 MessagesAreKeys = true,
                 Messages = new string[]
                 {
-                    "CHA_131_0"
-                }
+                    "CHA_131_0",
+                },
             },
             new WhatsNewMessage
             {
@@ -61,9 +62,9 @@ namespace CurbHeightAdjuster
                 MessagesAreKeys = true,
                 Messages = new string[]
                 {
-                    "CHA_130_0"
-                }
-            }
+                    "CHA_130_0",
+                },
+            },
         };
     }
 }

@@ -1,4 +1,9 @@
-﻿namespace CurbHeightAdjuster
+﻿// <copyright file="OptionsPanel.cs" company="algernon (K. Algernon A. Sheppard)">
+// Copyright (c) algernon (K. Algernon A. Sheppard). All rights reserved.
+// Licensed under the MIT license. See LICENSE.txt file in the project root for full license information.
+// </copyright>
+
+namespace CurbHeightAdjuster
 {
     using AlgernonCommons.UI;
     using ColossalFramework.UI;
@@ -8,12 +13,6 @@
     /// </summary>
     public class OptionsPanel : UIPanel
     {
-        // Layout constants.
-        internal const float Margin = 5f;
-        internal const float LeftMargin = 24f;
-        internal const float GroupMargin = 40f;
-        internal const float ButtonWidth = 400f;
-
         /// <summary>
         /// Initializes a new instance of the <see cref="OptionsPanel"/> class.
         /// </summary>

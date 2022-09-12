@@ -1,4 +1,9 @@
-﻿namespace CurbHeightAdjuster
+﻿// <copyright file="Loading.cs" company="algernon (K. Algernon A. Sheppard)">
+// Copyright (c) algernon (K. Algernon A. Sheppard). All rights reserved.
+// Licensed under the MIT license. See LICENSE.txt file in the project root for full license information.
+// </copyright>
+
+namespace CurbHeightAdjuster
 {
     using System.Collections.Generic;
     using AlgernonCommons.Patching;
@@ -21,20 +26,20 @@
             if (RoadHandler.EnableBridges)
             {
                 // Iterate through all network records in dictionary.
-                foreach (KeyValuePair<NetInfo, NetRecord> netEntry in RoadHandler.netRecords)
+                foreach (KeyValuePair<NetInfo, NetRecord> netEntry in RoadHandler.NetRecords)
                 {
                     // Local references.
                     NetInfo netInfo = netEntry.Key;
                     NetRecord netRecord = netEntry.Value;
 
                     // Reset any recorded pillar offset.
-                    netRecord.bridgePillarOffset = 0;
+                    netRecord.m_bridgePillarOffset = 0;
 
                     // Adjust pillar heights to match net adjustment.
-                    if (netRecord.adjustPillars && netInfo.m_netAI is RoadBridgeAI bridgeAI)
+                    if (netRecord.m_adjustPillars && netInfo.m_netAI is RoadBridgeAI bridgeAI)
                     {
-                        bridgeAI.m_bridgePillarOffset = RoadHandler.BridgeAdjustment(netRecord.bridgePillarOffset);
-                        bridgeAI.m_middlePillarOffset = RoadHandler.BridgeAdjustment(netRecord.middlePillarOffset);
+                        bridgeAI.m_bridgePillarOffset = RoadHandler.BridgeAdjustment(netRecord.m_bridgePillarOffset);
+                        bridgeAI.m_middlePillarOffset = RoadHandler.BridgeAdjustment(netRecord.m_middlePillarOffset);
                     }
                 }
 
