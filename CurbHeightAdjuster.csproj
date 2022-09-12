@@ -1,286 +1,38 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
-  <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{F1F72E66-6F95-4BCE-AF85-81944DB359DD}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>CurbHeightAdjuster</RootNamespace>
-    <AssemblyName>CurbHeightAdjuster</AssemblyName>
-    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <Deterministic>true</Deterministic>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <ItemGroup>
-    <Reference Include="Assembly-CSharp">
-      <HintPath>..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Cities_Skylines\Cities_Data\Managed\Assembly-CSharp.dll</HintPath>
-    </Reference>
-    <Reference Include="CitiesHarmony.API, Version=2.1.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>packages\CitiesHarmony.API.2.1.0\lib\net35\CitiesHarmony.API.dll</HintPath>
-    </Reference>
-    <Reference Include="CitiesHarmony.Harmony, Version=2.0.4.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>packages\CitiesHarmony.Harmony.2.2.0\lib\net35\CitiesHarmony.Harmony.dll</HintPath>
-    </Reference>
-    <Reference Include="ColossalManaged">
-      <HintPath>..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Cities_Skylines\Cities_Data\Managed\ColossalManaged.dll</HintPath>
-    </Reference>
-    <Reference Include="ICities">
-      <HintPath>..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Cities_Skylines\Cities_Data\Managed\ICities.dll</HintPath>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
-    <Reference Include="UnityEngine">
-      <HintPath>..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Cities_Skylines\Cities_Data\Managed\UnityEngine.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Code\Manipulations\CustomRoadHandler.cs" />
-    <Compile Include="Code\Manipulations\ParkingLots.cs" />
-    <Compile Include="Code\Manipulations\ManipData.cs" />
-    <Compile Include="Code\Manipulations\NetHandler.cs" />
-    <Compile Include="Code\Loading.cs" />
-    <Compile Include="Code\Manipulations\PathHandler.cs" />
-    <Compile Include="Code\Manipulations\Pillars.cs" />
-    <Compile Include="Code\Manipulations\RoadHandler.cs" />
-    <Compile Include="Code\MeshHandler\MeshHandler.cs" />
-    <Compile Include="Code\MeshHandler\SerializableMeshInfo.cs" />
-    <Compile Include="Code\Notifications\DontShowAgainMessageBox.cs" />
-    <Compile Include="Code\Notifications\ListMessageBox.cs" />
-    <Compile Include="Code\Notifications\MessageBoxBase.cs" />
-    <Compile Include="Code\Notifications\WhatsNew.cs" />
-    <Compile Include="Code\Notifications\WhatsNewMessageBox.cs" />
-    <Compile Include="Code\Patches\BuildingDeserializePatch.cs" />
-    <Compile Include="Code\Patches\NetDeserializePatch.cs" />
-    <Compile Include="Code\Patches\Patcher.cs" />
-    <Compile Include="Code\Settings\ModSettings.cs" />
-    <Compile Include="Code\Settings\OptionsPanel.cs" />
-    <Compile Include="Code\Settings\OptionsPanelTabs\GeneralOptions.cs" />
-    <Compile Include="Code\Settings\OptionsPanelTabs\PathOptions.cs" />
-    <Compile Include="Code\Settings\OptionsPanelTabs\RoadOptions.cs" />
-    <Compile Include="Code\Settings\OptionsPanelUtils.cs" />
-    <Compile Include="Code\TranslationFramework\TranslationFramework.cs" />
-    <Compile Include="Code\TranslationFramework\Language.cs" />
-    <Compile Include="Code\Utils\Logging.cs" />
-    <Compile Include="Code\Utils\ModUtils.cs" />
-    <Compile Include="Code\Mod.cs" />
-    <Compile Include="Code\Utils\UIControls.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Changelog.txt" />
-    <Content Include="Images\15cm.png" />
-    <Content Include="Images\30cm.png" />
-    <Content Include="Images\7cm.png" />
-    <Content Include="Images\PreviewImage.png" />
-    <Content Include="License.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Data\Euro2Lane_basic_node01.dat" />
-    <None Include="Data\Euro2Lane_basic_node01_LOD.dat" />
-    <None Include="Data\Euro2Lane_basic_segm01.dat" />
-    <None Include="Data\Euro2Lane_basic_segm01_LOD.dat" />
-    <None Include="Data\Euro2Lane_basic_segm05.dat" />
-    <None Include="Data\Euro2Lane_basic_segm05_LOD.dat" />
-    <None Include="Data\Euro2Lane_basic_segm06.dat" />
-    <None Include="Data\Euro2Lane_basic_segm06_LOD.dat" />
-    <None Include="Data\Euro2Lane_elev_node00.dat" />
-    <None Include="Data\Euro2Lane_elev_node00_LOD.dat" />
-    <None Include="Data\Euro2Lane_elev_node01.dat" />
-    <None Include="Data\Euro2Lane_elev_node01_LOD.dat" />
-    <None Include="Data\Euro2Lane_elev_node04.dat" />
-    <None Include="Data\Euro2Lane_elev_node04_LOD.dat" />
-    <None Include="Data\Euro2Lane_elev_node05.dat" />
-    <None Include="Data\Euro2Lane_elev_node05_LOD.dat" />
-    <None Include="Data\Euro2Lane_elev_segm00.dat" />
-    <None Include="Data\Euro2Lane_elev_segm00_LOD.dat" />
-    <None Include="Data\Euro2Lane_elev_segm01.dat" />
-    <None Include="Data\Euro2Lane_elev_segm01_LOD.dat" />
-    <None Include="Data\Euro2Lane_elev_segm04.dat" />
-    <None Include="Data\Euro2Lane_elev_segm04.fbx.dat" />
-    <None Include="Data\Euro4Lane_basic_node01.dat" />
-    <None Include="Data\Euro4Lane_basic_node01_LOD.dat" />
-    <None Include="Data\Euro4Lane_basic_segm01.dat" />
-    <None Include="Data\Euro4Lane_basic_segm01_LOD.dat" />
-    <None Include="Data\Euro4Lane_basic_segm05.dat" />
-    <None Include="Data\Euro4Lane_basic_segm05_LOD.dat" />
-    <None Include="Data\Euro4Lane_basic_segm06.dat" />
-    <None Include="Data\Euro4Lane_basic_segm06_LOD.dat" />
-    <None Include="Data\Euro4Lane_elev_node00.dat" />
-    <None Include="Data\Euro4Lane_elev_node00_LOD.001.dat" />
-    <None Include="Data\Euro4Lane_elev_node00_LOD.dat" />
-    <None Include="Data\Euro4Lane_elev_node01.dat" />
-    <None Include="Data\Euro4Lane_elev_node01_LOD.dat" />
-    <None Include="Data\Euro4Lane_elev_node02.dat" />
-    <None Include="Data\Euro4Lane_elev_node02_LOD.dat" />
-    <None Include="Data\Euro4Lane_elev_node04.dat" />
-    <None Include="Data\Euro4Lane_elev_node04_LOD.dat" />
-    <None Include="Data\Euro4Lane_elev_node05.dat" />
-    <None Include="Data\Euro4Lane_elev_segm00.dat" />
-    <None Include="Data\Euro4Lane_elev_segm00_LOD.dat" />
-    <None Include="Data\Euro4Lane_elev_segm01.dat" />
-    <None Include="Data\Euro4Lane_elev_segm01_LOD.dat" />
-    <None Include="Data\Euro4Lane_elev_segm04.dat" />
-    <None Include="Data\Euro4Lane_elev_segm04_LOD.dat" />
-    <None Include="Data\Euro6Lane_basic_node01.dat" />
-    <None Include="Data\Euro6Lane_basic_node01_LOD.dat" />
-    <None Include="Data\Euro6Lane_basic_node04.dat" />
-    <None Include="Data\Euro6Lane_basic_node04_LOD.dat" />
-    <None Include="Data\Euro6Lane_basic_segm01.dat" />
-    <None Include="Data\Euro6Lane_basic_segm01_LOD.dat" />
-    <None Include="Data\Euro6Lane_basic_segm05.dat" />
-    <None Include="Data\Euro6Lane_basic_segm05_LOD.dat" />
-    <None Include="Data\Euro6Lane_basic_segm06.dat" />
-    <None Include="Data\Euro6Lane_basic_segm06_LOD.dat" />
-    <None Include="Data\Euro6Lane_elev_node00.dat" />
-    <None Include="Data\Euro6Lane_elev_node00e.dat" />
-    <None Include="Data\Euro6Lane_elev_node00e_LOD.dat" />
-    <None Include="Data\Euro6Lane_elev_node00_LOD.dat" />
-    <None Include="Data\Euro6Lane_elev_node01.dat" />
-    <None Include="Data\Euro6Lane_elev_node01_LOD.dat" />
-    <None Include="Data\Euro6Lane_elev_node02.dat" />
-    <None Include="Data\Euro6Lane_elev_node02_LOD.dat" />
-    <None Include="Data\Euro6Lane_elev_node04.dat" />
-    <None Include="Data\Euro6Lane_elev_node04_LOD.dat" />
-    <None Include="Data\Euro6Lane_elev_node05.dat" />
-    <None Include="Data\Euro6Lane_elev_node05_LOD.dat" />
-    <None Include="Data\Euro6Lane_elev_node06.dat" />
-    <None Include="Data\Euro6Lane_elev_node06e.dat" />
-    <None Include="Data\Euro6Lane_elev_node06e_LOD.dat" />
-    <None Include="Data\Euro6Lane_elev_node06_LOD.dat" />
-    <None Include="Data\Euro6Lane_elev_segm00.dat" />
-    <None Include="Data\Euro6Lane_elev_segm00e.dat" />
-    <None Include="Data\Euro6Lane_elev_segm00e_LOD.dat" />
-    <None Include="Data\Euro6Lane_elev_segm00_LOD.dat" />
-    <None Include="Data\Euro6Lane_elev_segm01.dat" />
-    <None Include="Data\Euro6Lane_elev_segm01_LOD.dat" />
-    <None Include="Data\Euro6Lane_elev_segm04.dat" />
-    <None Include="Data\Euro6Lane_elev_segm04_LOD.dat" />
-    <None Include="Data\Highway_node00.dat" />
-    <None Include="Data\Highway_node00_LOD.dat" />
-    <None Include="Data\Highway_node01.dat" />
-    <None Include="Data\Highway_node01_LOD.dat" />
-    <None Include="Data\Highway_segm00.dat" />
-    <None Include="Data\Highway_segm00_LOD.dat" />
-    <None Include="Data\NA2Lane_basic_node01.dat" />
-    <None Include="Data\NA2Lane_basic_node01_LOD.dat" />
-    <None Include="Data\NA2Lane_basic_segm01.dat" />
-    <None Include="Data\NA2Lane_basic_segm01_LOD.dat" />
-    <None Include="Data\NA2Lane_basic_segm05.dat" />
-    <None Include="Data\NA2Lane_basic_segm05_LOD.dat" />
-    <None Include="Data\NA2Lane_basic_segm06.dat" />
-    <None Include="Data\NA2Lane_basic_segm06_LOD.dat" />
-    <None Include="Data\NA2Lane_elev_node00.dat" />
-    <None Include="Data\NA2Lane_elev_node00_LOD.dat" />
-    <None Include="Data\NA2Lane_elev_node01.dat" />
-    <None Include="Data\NA2Lane_elev_node01_LOD.dat" />
-    <None Include="Data\NA2Lane_elev_node02.dat" />
-    <None Include="Data\NA2Lane_elev_node02_LOD.dat" />
-    <None Include="Data\NA2Lane_elev_segm00.dat" />
-    <None Include="Data\NA2Lane_elev_segm00_LOD.dat" />
-    <None Include="Data\NA2Lane_elev_segm01.dat" />
-    <None Include="Data\NA2Lane_elev_segm01_LOD.dat" />
-    <None Include="Data\NA2Lane_elev_segm04.dat" />
-    <None Include="Data\NA2Lane_elev_segm04_LOD.dat" />
-    <None Include="Data\NA4Lane_basic_node01.dat" />
-    <None Include="Data\NA4Lane_basic_node01_LOD.dat" />
-    <None Include="Data\NA4Lane_basic_segm01.dat" />
-    <None Include="Data\NA4Lane_basic_segm01_LOD.dat" />
-    <None Include="Data\NA4Lane_basic_segm05.dat" />
-    <None Include="Data\NA4Lane_basic_segm05_LOD.dat" />
-    <None Include="Data\NA4Lane_basic_segm06.dat" />
-    <None Include="Data\NA4Lane_basic_segm06_LOD.dat" />
-    <None Include="Data\NA4Lane_elev_node00.dat" />
-    <None Include="Data\NA4Lane_elev_node00_LOD.dat" />
-    <None Include="Data\NA4Lane_elev_node01.dat" />
-    <None Include="Data\NA4Lane_elev_node01_LOD.dat" />
-    <None Include="Data\NA4Lane_elev_node02.dat" />
-    <None Include="Data\NA4Lane_elev_node02_LOD.dat" />
-    <None Include="Data\NA4Lane_elev_node04.dat" />
-    <None Include="Data\NA4Lane_elev_node04_LOD.dat" />
-    <None Include="Data\NA4Lane_elev_node05.dat" />
-    <None Include="Data\NA4Lane_elev_node05_LOD.dat" />
-    <None Include="Data\NA4Lane_elev_segm00.dat" />
-    <None Include="Data\NA4Lane_elev_segm00_LOD.dat" />
-    <None Include="Data\NA4Lane_elev_segm01.dat" />
-    <None Include="Data\NA4Lane_elev_segm01_LOD.dat" />
-    <None Include="Data\NA4Lane_elev_segm04.dat" />
-    <None Include="Data\NA4Lane_elev_segm04_LOD.dat" />
-    <None Include="Data\NA6Lane_basic_node01.dat" />
-    <None Include="Data\NA6Lane_basic_node01_LOD.dat" />
-    <None Include="Data\NA6Lane_basic_segm01.dat" />
-    <None Include="Data\NA6Lane_basic_segm01_LOD.dat" />
-    <None Include="Data\NA6Lane_basic_segm05.dat" />
-    <None Include="Data\NA6Lane_basic_segm05_LOD.dat" />
-    <None Include="Data\NA6Lane_basic_segm06.dat" />
-    <None Include="Data\NA6Lane_basic_segm06_LOD.dat" />
-    <None Include="Data\NA6Lane_elev_node00.dat" />
-    <None Include="Data\NA6Lane_elev_node00_LOD.dat" />
-    <None Include="Data\NA6Lane_elev_node01.dat" />
-    <None Include="Data\NA6Lane_elev_node01_LOD.dat" />
-    <None Include="Data\NA6Lane_elev_node02.dat" />
-    <None Include="Data\NA6Lane_elev_node02_LOD.dat" />
-    <None Include="Data\NA6Lane_elev_node04.dat" />
-    <None Include="Data\NA6Lane_elev_node04_LOD.dat" />
-    <None Include="Data\NA6Lane_elev_node05.dat" />
-    <None Include="Data\NA6Lane_elev_node05_lod.dat" />
-    <None Include="Data\NA6Lane_elev_segm00.dat" />
-    <None Include="Data\NA6Lane_elev_segm00_LOD.dat" />
-    <None Include="Data\NA6Lane_elev_segm01.dat" />
-    <None Include="Data\NA6Lane_elev_segm01_LOD.dat" />
-    <None Include="Data\NA6Lane_elev_segm04.dat" />
-    <None Include="Data\NA6Lane_elev_segm04_LOD.dat" />
-    <None Include="packages.config" />
-    <None Include="Translations\de-DE.csv" />
-    <None Include="Translations\es-ES.csv" />
-    <None Include="Translations\fr-FR.csv" />
-    <None Include="Translations\ja-JP.csv" />
-    <None Include="Translations\ko-KR.csv" />
-    <None Include="Translations\nl-NL.csv" />
-    <None Include="Translations\pl-PL.csv" />
-    <None Include="Translations\pt-BR.csv" />
-    <None Include="Translations\ru-RU.csv" />
-    <None Include="Translations\zh-CN.csv" />
-    <None Include="Translations\en.csv" />
-    <None Include="Translations\zh-TW.csv" />
-  </ItemGroup>
-  <ItemGroup />
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup>
-    <PostBuildEvent>mkdir "%25LOCALAPPDATA%25\Colossal Order\Cities_Skylines\Addons\Mods\$(ProjectName)"
-del "%25LOCALAPPDATA%25\Colossal Order\Cities_Skylines\Addons\Mods\$(ProjectName)\*.dll"
-xcopy /y "$(TargetPath)" "%25LOCALAPPDATA%25\Colossal Order\Cities_Skylines\Addons\Mods\$(ProjectName)"
-
-xcopy /y "$(SolutionDir)packages\CitiesHarmony.API.2.1.0\lib\net35\CitiesHarmony.API.dll" "%25LOCALAPPDATA%25\Colossal Order\Cities_Skylines\Addons\Mods\$(ProjectName)"
-
-mkdir "$(LOCALAPPDATA)\Colossal Order\Cities_Skylines\Addons\Mods\$(ProjectName)\Translations"
-del "%25LOCALAPPDATA%25\Colossal Order\Cities_Skylines\Addons\Mods\$(ProjectName)\Translations\*.csv"
-xcopy /y "$(ProjectDir)\Translations\" "$(LOCALAPPDATA)\Colossal Order\Cities_Skylines\Addons\Mods\$(ProjectName)\Translations" /s /e
-
-mkdir "$(LOCALAPPDATA)\Colossal Order\Cities_Skylines\Addons\Mods\$(ProjectName)\Data"
-del "%25LOCALAPPDATA%25\Colossal Order\Cities_Skylines\Addons\Mods\$(ProjectName)\Data\*"
-xcopy /y "$(ProjectDir)\Data\" "$(LOCALAPPDATA)\Colossal Order\Cities_Skylines\Addons\Mods\$(ProjectName)\Data" /s /e</PostBuildEvent>
-  </PropertyGroup>
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<TargetFramework>net35</TargetFramework>
+		<Title>Curb Height Adjuster</Title>
+		<AssemblyTitle>$(Title)</AssemblyTitle>
+		<Description>A Cities: Skylines mod.</Description>
+		<Authors>algernon</Authors>
+		<Copyright>Copyright © 2021-2022 algernon</Copyright>
+		<Product>$(Title)</Product>
+		<Version>1.5.1</Version>
+		<ManagedDLLPath>$(MSBuildProgramFiles32)/Steam/steamapps/common/Cities_Skylines/Cities_Data/Managed</ManagedDLLPath>
+		<AssemblySearchPaths>
+			$(AssemblySearchPaths);
+			$(ManagedDLLPath)
+		</AssemblySearchPaths>
+		<GenerateDocumentationFile>True</GenerateDocumentationFile>
+	</PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="CitiesHarmony.API" Version="2.1.0" />
+		<Reference Include="Assembly-CSharp" />
+		<Reference Include="ColossalManaged" />
+		<Reference Include="ICities" />
+		<Reference Include="UnityEngine" />
+	</ItemGroup>
+	<ItemGroup>
+		<_Translations Include="$(ProjectDir)/Translations/*.csv" />
+		<_Data Include="$(ProjectDir)/Data/*.dat" />
+	</ItemGroup>
+	<Target Name="DeployToModDirectory" AfterTargets="Build">
+		<PropertyGroup>
+			<DeployDir>$(LOCALAPPDATA)/Colossal Order/Cities_Skylines/Addons/Mods/$(SolutionName)/</DeployDir>
+		</PropertyGroup>
+		<Copy SourceFiles="$(TargetPath)" DestinationFolder="$(DeployDir)" />
+		<Copy SourceFiles="$(TargetDir)/CitiesHarmony.API.dll" DestinationFolder="$(DeployDir)" />
+		<Copy SourceFiles="@(_Translations)" DestinationFolder="$(DeployDir)/Translations" />
+		<Copy SourceFiles="@(_Data)" DestinationFolder="$(DeployDir)/Data" />
+	</Target>
 </Project>
