@@ -20,7 +20,7 @@ namespace CurbHeightAdjuster
         {
             // Add tabstrip.
             // Add tabstrip.
-            UITabstrip tabstrip = UITabstrips.AddTabStrip(this, 0f, 0f, OptionsPanelManager<OptionsPanel>.PanelWidth, OptionsPanelManager<OptionsPanel>.PanelHeight, out _);
+            UITabstrip tabstrip = UITabstrips.AddTabstrip(this, 0f, 0f, OptionsPanelManager<OptionsPanel>.PanelWidth, OptionsPanelManager<OptionsPanel>.PanelHeight, out _);
 
             // Add tabs and panels.
             new GeneralOptionsPanel(tabstrip, 0);
