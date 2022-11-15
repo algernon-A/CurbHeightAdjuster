@@ -1,4 +1,9 @@
-﻿Version 1.5.2
+﻿Version 1.5.3
+
+- Update AlgernonCommons
+
+
+Version 1.5.2
 
 - Add support for Urbanist's Cobblestone Lane (1-tile wide)
 - Don't try to adjust deleted pillars (81 Tiles 2 compatibility)
