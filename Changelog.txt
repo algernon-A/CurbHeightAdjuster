@@ -1,4 +1,7 @@
-﻿Version 1.5.3
+﻿- Adjust tram catenary wire heights to match road surface
+
+
+Version 1.5.3
 
 - Update AlgernonCommons
 
