@@ -96,6 +96,9 @@ namespace CurbHeightAdjuster
         // Hashset of currently processed network meshes, with calculated adjustment offsets.
         private static readonly HashSet<Mesh> ProcessedMeshes = new HashSet<Mesh>();
 
+        // Dictionary of catenary wire meshes, with orignal vertices.
+        private static readonly Dictionary<Mesh, Vector3[]> CatenaryMeshes = new Dictionary<Mesh, Vector3[]>();
+
         // Manipulation settings.
         private static float s_newCurbHeight = DefaultNewCurbHeight;
         private static float s_bridgeHeightThreshold = DefaultBridgeThreshold;
@@ -287,6 +290,7 @@ namespace CurbHeightAdjuster
                         }
 
                         // Check lanes.
+                        bool hasTramLanes = false;
                         if (network.m_lanes != null)
                         {
                             // Iterate through each lane in network, replacing ~30cm depths with our new curb height.
@@ -301,6 +305,9 @@ namespace CurbHeightAdjuster
                                     // Apply new curb height.
                                     lane.m_verticalOffset *= s_newCurbMultiplier;
                                 }
+
+                                // Record if any tram lines in this network.
+                                hasTramLanes |= lane.m_vehicleType == VehicleInfo.VehicleType.Tram;
                             }
                         }
 
@@ -385,6 +392,13 @@ namespace CurbHeightAdjuster
                                 }
                             }
 
+                            // Handle tram wires.
+                            if (hasTramLanes)
+                            {
+                                netRecord.m_adjustWires = AdjustWires(network);
+                            }
+
+                            // Add network to list.
                             NetRecords.Add(network, netRecord);
                         }
                     }
@@ -449,6 +463,15 @@ namespace CurbHeightAdjuster
 
                 // Reset any recorded pillar offset.
                 netRecord.m_bridgePillarOffset = 0;
+
+                // Restore tram catenary wire original values.
+                foreach (KeyValuePair<Mesh, Vector3[]> catenary in CatenaryMeshes)
+                {
+                    catenary.Key.vertices = catenary.Value;
+                }
+
+                // Clear adjusted cantenary values.
+                CatenaryMeshes.Clear();
             }
 
             // Revert custom networks.
@@ -540,6 +563,15 @@ namespace CurbHeightAdjuster
 
             // Clear processed mesh list once done.
             ProcessedMeshes.Clear();
+
+            // Adjust catenary wires.
+            foreach (KeyValuePair<NetInfo, NetRecord> network in NetRecords)
+            {
+                if (network.Value.m_adjustWires)
+                {
+                    AdjustWires(network.Key);
+                }
+            }
         }
 
         /// <summary>
@@ -717,6 +749,78 @@ namespace CurbHeightAdjuster
                     }
                 }
             });
+        }
+
+        /// <summary>
+        /// Adjusts catenary wires for the given network.
+        /// </summary>
+        /// <param name="network">Network prefab.</param>
+        /// <returns>True if catenary wire meshes were changed, false otherwise.</returns>
+        private static bool AdjustWires(NetInfo network)
+        {
+            bool changed = false;
+
+            // Iterate though each segment.
+            foreach (NetInfo.Segment segment in network.m_segments)
+            {
+                changed |= AdjustCatenaryMesh(segment?.m_segmentMaterial, segment?.m_segmentMesh);
+            }
+
+            // Iterate though each node.
+            foreach (NetInfo.Node node in network.m_nodes)
+            {
+               changed |= AdjustCatenaryMesh(node?.m_nodeMaterial, node?.m_nodeMesh);
+            }
+
+            return changed;
+        }
+
+        /// <summary>
+        /// Adjusts a catenary waire mesh.
+        /// </summary>
+        /// <param name="material">Wire candidate material.</param>
+        /// <param name="mesh">Wire mesh.</param>
+        /// <returns>True if the mesh was adjusted, false otherwise.</returns>
+        private static bool AdjustCatenaryMesh(Material material, Mesh mesh)
+        {
+            // Null checks.
+            if (material?.name == null || mesh == null)
+            {
+                return false;
+            }
+
+            // Skip already-processed meshes, and only interested in materials using electricity shaders.
+            if (!CatenaryMeshes.ContainsKey(mesh) && material.shader.name.Equals("Custom/Net/Electricity"))
+            {
+                // New vertex array.
+                int vertexCount = mesh.vertices.Length;
+                Vector3[] newVertices = new Vector3[vertexCount];
+
+                // Calculate adjustment.
+                float adjustment = s_newCurbHeight - OriginalCurbHeight;
+
+                // Iterate through each vertex in mesh and adjust upwards in our new mesh.
+                for (int i = 0; i < vertexCount; ++i)
+                {
+                    // Increment vertex y position in our new array.
+                    Vector3 newVector = mesh.vertices[i];
+                    newVector.y += adjustment;
+                    newVertices[i] = newVector;
+                }
+
+                // Record original vertices.
+                CatenaryMeshes.Add(mesh, mesh.vertices);
+
+                // Apply updated vertices.
+                mesh.vertices = newVertices;
+
+                Logging.KeyMessage("adjusted catenary mesh ", mesh.name);
+
+                return true;
+            }
+
+            // If we got here, no change was made.
+            return false;
         }
     }
 }

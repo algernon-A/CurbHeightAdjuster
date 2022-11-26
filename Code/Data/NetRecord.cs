@@ -40,6 +40,11 @@ namespace CurbHeightAdjuster
         public bool m_adjustPillars = false;
 
         /// <summary>
+        /// Whether or not to adjust catenary wires.
+        /// </summary>
+        public bool m_adjustWires = false;
+
+        /// <summary>
         /// Bridge pillar vertical offsets.
         /// </summary>
         public float m_bridgePillarOffset = 0f;
