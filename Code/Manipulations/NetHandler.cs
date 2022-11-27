@@ -10,7 +10,9 @@ namespace CurbHeightAdjuster
     /// </summary>
     public static class NetHandler
     {
+        // Handler instances.
         private static RoadHandler s_roadHandler;
+        private static PathHandler s_pathHandler;
 
         /// <summary>
         /// Gets the active RoadHandler instance.
@@ -18,12 +20,17 @@ namespace CurbHeightAdjuster
         internal static RoadHandler RoadHandler => s_roadHandler;
 
         /// <summary>
+        /// Gets the active RoadHandler instance.
+        /// </summary>
+        internal static PathHandler PathHandler => s_pathHandler;
+
+        /// <summary>
         /// Called on load to scan through all loaded NetInfos, build the database, and apply network manipulations (meshes and lanes).
         /// </summary>
         public static void OnLoad()
         {
             s_roadHandler = new RoadHandler();
-            PathHandler.OnLoad();
+            s_pathHandler = new PathHandler();
         }
     }
 }

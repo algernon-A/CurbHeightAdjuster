@@ -61,7 +61,7 @@ namespace CurbHeightAdjuster
                 _curbSlider.value = PathHandler.DefaultCurbHeight;
 
                 // Apply defaults.
-                PathHandler.Apply();
+                NetHandler.PathHandler.Apply();
             };
             currentY += defaultsButton.height + OptionsPanelUtils.Margin;
 
@@ -70,12 +70,12 @@ namespace CurbHeightAdjuster
             {
                 // Apply button.
                 UIButton applyButton = UIButtons.AddButton(panel, OptionsPanelUtils.Margin, currentY, Translations.Translate("CHA_APPLY"), OptionsPanelUtils.ButtonWidth);
-                applyButton.eventClicked += (control, clickEvent) => PathHandler.Apply();
+                applyButton.eventClicked += (control, clickEvent) => NetHandler.PathHandler.Apply();
                 currentY += applyButton.height + OptionsPanelUtils.Margin;
 
                 // Undo button.
                 UIButton undoButton = UIButtons.AddButton(panel, OptionsPanelUtils.Margin, currentY, Translations.Translate("CHA_REVERT"), OptionsPanelUtils.ButtonWidth);
-                undoButton.eventClicked += (control, clickEvent) => PathHandler.Revert();
+                undoButton.eventClicked += (control, clickEvent) => NetHandler.PathHandler.Revert();
             }
 
             // Set initial control states.

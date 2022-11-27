@@ -13,7 +13,7 @@ namespace CurbHeightAdjuster
     /// <summary>
     /// Class to manage changes to pedestrian paths.
     /// </summary>
-    public static class PathHandler
+    public class PathHandler
     {
         /// <summary>
         /// Default new path base height.
@@ -64,50 +64,11 @@ namespace CurbHeightAdjuster
         // New heights to apply.
         private static float s_baseHeight = DefaultBaseHeight;
         private static float s_curbHeight = DefaultCurbHeight;
-
         /// <summary>
-        /// Gets or sets a value indicating whether custom path manipulations are enabled.
+        /// Initializes a new instance of the <see cref="PathHandler"/> class.
+        /// Scans through all loaded NetInfos, builds the database, and applies network manipulations (meshes and lanes).
         /// </summary>
-        internal static bool CustomizePaths { get; set; }
-
-        /// <summary>
-        /// Gets or sets the new base height to apply (positive figure, in cm).
-        /// </summary>
-        internal static float BaseHeight
-        {
-            get => s_baseHeight;
-
-            set
-            {
-                // Update multiplier with change in value.
-                s_baseHeight = Mathf.Clamp(value, MinBaseHeight, MaxBaseHeight);
-                baseMultiplier = s_baseHeight / OriginalBaseHeight;
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the new curb height to apply (positive figure, in cm).
-        /// </summary>
-        internal static float CurbHeight
-        {
-            get => s_curbHeight;
-
-            set
-            {
-                // Update multiplier with change in value.
-                s_curbHeight = Mathf.Clamp(value, MinCurbHeight, MaxCurbHeight);
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether lods are also adjusted.
-        /// </summary>
-        internal static bool DoLODs { get; set; } = false;
-
-        /// <summary>
-        /// Called on load to scan through all loaded NetInfos, build the database, and apply network manipulations (meshes and lanes).
-        /// </summary>
-        public static void OnLoad()
+        public PathHandler()
         {
             // List of meshes that we've already checked.
             HashSet<Mesh> checkedMeshes = new HashSet<Mesh>();
@@ -241,9 +202,48 @@ namespace CurbHeightAdjuster
         }
 
         /// <summary>
+        /// Gets or sets a value indicating whether custom path manipulations are enabled.
+        /// </summary>
+        internal static bool CustomizePaths { get; set; }
+
+        /// <summary>
+        /// Gets or sets the new base height to apply (positive figure, in cm).
+        /// </summary>
+        internal static float BaseHeight
+        {
+            get => s_baseHeight;
+
+            set
+            {
+                // Update multiplier with change in value.
+                s_baseHeight = Mathf.Clamp(value, MinBaseHeight, MaxBaseHeight);
+                baseMultiplier = s_baseHeight / OriginalBaseHeight;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the new curb height to apply (positive figure, in cm).
+        /// </summary>
+        internal static float CurbHeight
+        {
+            get => s_curbHeight;
+
+            set
+            {
+                // Update multiplier with change in value.
+                s_curbHeight = Mathf.Clamp(value, MinCurbHeight, MaxCurbHeight);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether lods are also adjusted.
+        /// </summary>
+        internal static bool DoLODs { get; set; } = false;
+
+        /// <summary>
         /// Reverts changes (back to original).
         /// </summary>
-        internal static void Revert()
+        internal void Revert()
         {
             // Iterate through all network records in dictionary.
             foreach (KeyValuePair<NetInfo, NetRecord> netEntry in NetRecords)
@@ -271,7 +271,7 @@ namespace CurbHeightAdjuster
         /// <summary>
         /// Applies updated settings.
         /// </summary>
-        internal static void Apply()
+        internal void Apply()
         {
             // Ensure processed mesh list is clear, just in case.
             ProcessedMeshes.Clear();
@@ -338,7 +338,7 @@ namespace CurbHeightAdjuster
         /// </summary>
         /// <param name="mesh">Mesh to modify.</param>
         /// <param name="raiseZero">Set to true to raise zero-level vertices to the new pavement height (typically for elevated segments to match ground pavement height).</param>
-        private static void AdjustMesh(Mesh mesh, bool raiseZero)
+        private void AdjustMesh(Mesh mesh, bool raiseZero)
         {
             // Create new vertices array (changing individual elements within the existing array won't work with locked meshes).
             Vector3[] newVertices = new Vector3[mesh.vertices.Length];
