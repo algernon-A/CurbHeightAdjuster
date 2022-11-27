@@ -105,6 +105,9 @@ namespace CurbHeightAdjuster
         // Dictionary of catenary wire meshes, with orignal vertices.
         private readonly Dictionary<Mesh, Vector3[]> _catenaryMeshes = new Dictionary<Mesh, Vector3[]>();
 
+        // Custom road handler.
+        private readonly CustomRoadHandler _customRoadHandler;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="RoadHandler"/> class.
         /// Scans through all loaded NetInfos, builds the database, and applies network manipulations (meshes and lanes).
@@ -113,6 +116,9 @@ namespace CurbHeightAdjuster
         {
             // List of meshes that we've already checked.
             HashSet<Mesh> checkedMeshes = new HashSet<Mesh>();
+
+            // Initialise custom road handler.
+            _customRoadHandler = new CustomRoadHandler();
 
             Logging.KeyMessage("starting load processing");
 
@@ -136,7 +142,7 @@ namespace CurbHeightAdjuster
                     if (isBridge || netAI is RoadAI || netAI is RoadTunnelAI || netAI is DamAI)
                     {
                         // Check for any custom roads.
-                        if (CustomRoadHandler.IsCustomNet(network))
+                        if (_customRoadHandler.IsCustomNet(network))
                         {
                             continue;
                         }
@@ -479,7 +485,7 @@ namespace CurbHeightAdjuster
             }
 
             // Revert custom networks.
-            CustomRoadHandler.Revert();
+            _customRoadHandler.Revert();
 
             // Revert parking records.
             ParkingLots.Revert();
@@ -554,7 +560,7 @@ namespace CurbHeightAdjuster
             }
 
             // Apply changes to custom roads.
-            CustomRoadHandler.Apply();
+            _customRoadHandler.Apply();
 
             // Apply changes to buildings.
             ParkingLots.Apply();

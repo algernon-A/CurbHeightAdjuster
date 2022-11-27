@@ -52,18 +52,19 @@ namespace CurbHeightAdjuster
         // Trigger threshold.
         private const float MaxBaseThreshold = 0.11f;
 
-        // Dictionary of altered nets.
-        private static readonly Dictionary<NetInfo, NetRecord> NetRecords = new Dictionary<NetInfo, NetRecord>();
-
-        // Hashset of currently processed network meshes, with calculated adjustment offsets.
-        private static readonly HashSet<Mesh> ProcessedMeshes = new HashSet<Mesh>();
-
         // Path height multiiplier.
         private static float baseMultiplier = DefaultBaseHeight / OriginalBaseHeight;
 
         // New heights to apply.
         private static float s_baseHeight = DefaultBaseHeight;
         private static float s_curbHeight = DefaultCurbHeight;
+
+        // Dictionary of altered nets.
+        private readonly Dictionary<NetInfo, NetRecord> _netRecords = new Dictionary<NetInfo, NetRecord>();
+
+        // Hashset of currently processed network meshes, with calculated adjustment offsets.
+        private readonly HashSet<Mesh> _processedMeshes = new HashSet<Mesh>();
+
         /// <summary>
         /// Initializes a new instance of the <see cref="PathHandler"/> class.
         /// Scans through all loaded NetInfos, builds the database, and applies network manipulations (meshes and lanes).
@@ -183,7 +184,7 @@ namespace CurbHeightAdjuster
                         // If the net was altered, record the created netRecord.
                         if (netAltered)
                         {
-                            NetRecords.Add(network, netRecord);
+                            _netRecords.Add(network, netRecord);
                         }
                     }
                 }
@@ -196,7 +197,7 @@ namespace CurbHeightAdjuster
             }
 
             // Clear processed mesh list once done.
-            ProcessedMeshes.Clear();
+            _processedMeshes.Clear();
 
             Logging.KeyMessage("finished load processing");
         }
@@ -246,7 +247,7 @@ namespace CurbHeightAdjuster
         internal void Revert()
         {
             // Iterate through all network records in dictionary.
-            foreach (KeyValuePair<NetInfo, NetRecord> netEntry in NetRecords)
+            foreach (KeyValuePair<NetInfo, NetRecord> netEntry in _netRecords)
             {
                 // Local references.
                 NetInfo netInfo = netEntry.Key;
@@ -274,10 +275,10 @@ namespace CurbHeightAdjuster
         internal void Apply()
         {
             // Ensure processed mesh list is clear, just in case.
-            ProcessedMeshes.Clear();
+            _processedMeshes.Clear();
 
             // Iterate through all network records in dictionary.
-            foreach (KeyValuePair<NetInfo, NetRecord> netEntry in NetRecords)
+            foreach (KeyValuePair<NetInfo, NetRecord> netEntry in _netRecords)
             {
                 // Local references.
                 NetInfo netInfo = netEntry.Key;
@@ -330,7 +331,7 @@ namespace CurbHeightAdjuster
             }
 
             // Clear processed mesh list once done.
-            ProcessedMeshes.Clear();
+            _processedMeshes.Clear();
         }
 
         /// <summary>
@@ -345,7 +346,7 @@ namespace CurbHeightAdjuster
             mesh.vertices.CopyTo(newVertices, 0);
 
             // Check if we've already done this one.
-            if (ProcessedMeshes.Contains(mesh))
+            if (_processedMeshes.Contains(mesh))
             {
                 // Already processed this mesh - do nothing.
                 return;
@@ -386,7 +387,7 @@ namespace CurbHeightAdjuster
             mesh.vertices = newVertices;
 
             // Record mesh as being altered.
-            ProcessedMeshes.Add(mesh);
+            _processedMeshes.Add(mesh);
         }
     }
 }
