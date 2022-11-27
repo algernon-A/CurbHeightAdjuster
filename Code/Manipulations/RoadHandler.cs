@@ -14,7 +14,7 @@ namespace CurbHeightAdjuster
     /// <summary>
     /// Class to manage changes to roads.
     /// </summary>
-    public static class RoadHandler
+    internal class RoadHandler
     {
         // Original script by Ronyx69 to adjust curb heights from -30cm to -15cm, adapted to mod form by krzychu124.
         // Redesigned, rewritten, optimised, and extended by algernon.
@@ -81,23 +81,12 @@ namespace CurbHeightAdjuster
         /// </summary>
         internal const float BridgeDepthCutoff = -5f;
 
-        /// <summary>
-        /// Dictionay of altered networks.
-        /// </summary>
-        internal static readonly Dictionary<NetInfo, NetRecord> NetRecords = new Dictionary<NetInfo, NetRecord>();
-
         // Depth triggers - segments/nets need to have depths within these bounds to be adjusted.
         // Vanilla tram rails have tops at -0.225.
         // LRT tram rails have bases at -0.5.
         private const float MinCurbDepthTrigger = -0.21f;
         private const float MaxCurbDepthTrigger = -0.32f;
         private const float MaxSubDepthTrigger = -0.55f;
-
-        // Hashset of currently processed network meshes, with calculated adjustment offsets.
-        private static readonly HashSet<Mesh> ProcessedMeshes = new HashSet<Mesh>();
-
-        // Dictionary of catenary wire meshes, with orignal vertices.
-        private static readonly Dictionary<Mesh, Vector3[]> CatenaryMeshes = new Dictionary<Mesh, Vector3[]>();
 
         // Manipulation settings.
         private static float s_newCurbHeight = DefaultNewCurbHeight;
@@ -107,61 +96,20 @@ namespace CurbHeightAdjuster
         // Curb height multiplier.
         private static float s_newCurbMultiplier = DefaultNewCurbHeight / OriginalCurbHeight;
 
-        /// <summary>
-        /// Gets or sets the new curb height to apply (positive figure, in cm).
-        /// </summary>
-        internal static float NewCurbHeight
-        {
-            get => -s_newCurbHeight;
+        // Dictionary of altered networks.
+        private readonly Dictionary<NetInfo, NetRecord> _netRecords = new Dictionary<NetInfo, NetRecord>();
 
-            set
-            {
-                // Update multiplier with change in value.
-                s_newCurbHeight = -Mathf.Clamp(value, MinCurbHeight, MaxCurbHeight);
-                s_newCurbMultiplier = s_newCurbHeight / OriginalCurbHeight;
-            }
-        }
+        // Hashset of currently processed network meshes, with calculated adjustment offsets.
+        private readonly HashSet<Mesh> _processedMeshes = new HashSet<Mesh>();
+
+        // Dictionary of catenary wire meshes, with orignal vertices.
+        private readonly Dictionary<Mesh, Vector3[]> _catenaryMeshes = new Dictionary<Mesh, Vector3[]>();
 
         /// <summary>
-        /// Gets or sets the bridge height threshold to apply (positive figure, in cm).
+        /// Initializes a new instance of the <see cref="RoadHandler"/> class.
+        /// Scans through all loaded NetInfos, builds the database, and applies network manipulations (meshes and lanes).
         /// </summary>
-        internal static float BridgeHeightThreshold
-        {
-            get => -s_bridgeHeightThreshold;
-
-            set
-            {
-                s_bridgeHeightThreshold = -Mathf.Clamp(value, MinBridgeThreshold, MaxBridgeThreshold);
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the bridge deck thickness multiplier.
-        /// </summary>
-        internal static float BridgeHeightScale
-        {
-            get => s_bridgeHeightScale;
-
-            set
-            {
-                s_bridgeHeightScale = Mathf.Clamp(value, MinBridgeScale, MaxBridgeScale);
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether bridge deck manipulation is active.
-        /// </summary>
-        internal static bool EnableBridges { get; set; } = true;
-
-        /// <summary>
-        /// Gets or sets a value indicating whether lods are also adjusted.
-        /// </summary>
-        internal static bool DoLODs { get; set; } = false;
-
-        /// <summary>
-        /// Called on load to scan through all loaded NetInfos, build the database, and apply network manipulations (meshes and lanes).
-        /// </summary>
-        public static void OnLoad()
+        internal RoadHandler()
         {
             // List of meshes that we've already checked.
             HashSet<Mesh> checkedMeshes = new HashSet<Mesh>();
@@ -399,7 +347,7 @@ namespace CurbHeightAdjuster
                             }
 
                             // Add network to list.
-                            NetRecords.Add(network, netRecord);
+                            _netRecords.Add(network, netRecord);
                         }
                     }
                 }
@@ -412,18 +360,74 @@ namespace CurbHeightAdjuster
             }
 
             // Clear processed mesh list once done.
-            ProcessedMeshes.Clear();
+            _processedMeshes.Clear();
 
             Logging.KeyMessage("finished load processing");
         }
 
         /// <summary>
+        /// Gets or sets the new curb height to apply (positive figure, in cm).
+        /// </summary>
+        internal static float NewCurbHeight
+        {
+            get => -s_newCurbHeight;
+
+            set
+            {
+                // Update multiplier with change in value.
+                s_newCurbHeight = -Mathf.Clamp(value, MinCurbHeight, MaxCurbHeight);
+                s_newCurbMultiplier = s_newCurbHeight / OriginalCurbHeight;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the bridge height threshold to apply (positive figure, in cm).
+        /// </summary>
+        internal static float BridgeHeightThreshold
+        {
+            get => -s_bridgeHeightThreshold;
+
+            set
+            {
+                s_bridgeHeightThreshold = -Mathf.Clamp(value, MinBridgeThreshold, MaxBridgeThreshold);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the bridge deck thickness multiplier.
+        /// </summary>
+        internal static float BridgeHeightScale
+        {
+            get => s_bridgeHeightScale;
+
+            set
+            {
+                s_bridgeHeightScale = Mathf.Clamp(value, MinBridgeScale, MaxBridgeScale);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether bridge deck manipulation is active.
+        /// </summary>
+        internal static bool EnableBridges { get; set; } = true;
+
+        /// <summary>
+        /// Gets or sets a value indicating whether lods are also adjusted.
+        /// </summary>
+        internal static bool DoLODs { get; set; } = false;
+
+        /// <summary>
+        /// Gets the dictionary of altered networks.
+        /// </summary>
+        internal Dictionary<NetInfo, NetRecord> NetRecords => _netRecords;
+
+        /// <summary>
         /// Reverts changes (back to original).
         /// </summary>
-        internal static void Revert()
+        internal void Revert()
         {
             // Iterate through all network records in dictionary.
-            foreach (KeyValuePair<NetInfo, NetRecord> netEntry in NetRecords)
+            foreach (KeyValuePair<NetInfo, NetRecord> netEntry in _netRecords)
             {
                 Logging.Message("reverting ", netEntry.Key.name);
 
@@ -465,13 +469,13 @@ namespace CurbHeightAdjuster
                 netRecord.m_bridgePillarOffset = 0;
 
                 // Restore tram catenary wire original values.
-                foreach (KeyValuePair<Mesh, Vector3[]> catenary in CatenaryMeshes)
+                foreach (KeyValuePair<Mesh, Vector3[]> catenary in _catenaryMeshes)
                 {
                     catenary.Key.vertices = catenary.Value;
                 }
 
                 // Clear adjusted cantenary values.
-                CatenaryMeshes.Clear();
+                _catenaryMeshes.Clear();
             }
 
             // Revert custom networks.
@@ -490,13 +494,13 @@ namespace CurbHeightAdjuster
         /// <summary>
         /// Applies updated settings.
         /// </summary>
-        internal static void Apply()
+        internal void Apply()
         {
             // Ensure processed mesh list is clear, just in case.
-            ProcessedMeshes.Clear();
+            _processedMeshes.Clear();
 
             // Iterate through all network records in dictionary.
-            foreach (KeyValuePair<NetInfo, NetRecord> netEntry in NetRecords)
+            foreach (KeyValuePair<NetInfo, NetRecord> netEntry in _netRecords)
             {
                 // Local references.
                 NetInfo netInfo = netEntry.Key;
@@ -562,10 +566,10 @@ namespace CurbHeightAdjuster
             RecalculateLanes();
 
             // Clear processed mesh list once done.
-            ProcessedMeshes.Clear();
+            _processedMeshes.Clear();
 
             // Adjust catenary wires.
-            foreach (KeyValuePair<NetInfo, NetRecord> network in NetRecords)
+            foreach (KeyValuePair<NetInfo, NetRecord> network in _netRecords)
             {
                 if (network.Value.m_adjustWires)
                 {
@@ -579,7 +583,7 @@ namespace CurbHeightAdjuster
         /// </summary>
         /// <param name="originalHeight">Original vertex height.</param>
         /// <returns>Adjusted vertex height.</returns>
-        internal static float BridgeAdjustment(float originalHeight)
+        internal float BridgeAdjustment(float originalHeight)
         {
             // Check for threshold trigger.
             if (originalHeight < s_bridgeHeightThreshold)
@@ -598,10 +602,10 @@ namespace CurbHeightAdjuster
         /// </summary>
         /// <param name="mesh">Mesh to modify.</param>
         /// <param name="isBridge">True if this is an eligible bridge mesh, false otherwise.</param>
-        private static void AdjustMesh(Mesh mesh, bool isBridge)
+        private void AdjustMesh(Mesh mesh, bool isBridge)
         {
             // Check if we've already done this one.
-            if (ProcessedMeshes.Contains(mesh))
+            if (_processedMeshes.Contains(mesh))
             {
                 // Already processed this mesh - do nothing.
                 return;
@@ -657,7 +661,7 @@ namespace CurbHeightAdjuster
                 mesh.vertices = newVertices;
 
                 // Record mesh as being altered.
-                ProcessedMeshes.Add(mesh);
+                _processedMeshes.Add(mesh);
             }
         }
 
@@ -671,7 +675,7 @@ namespace CurbHeightAdjuster
         /// <param name="eligibleBridge">Set to true if this mesh is eligbile for bridge deck adjustment, false otherwise.</param>
         /// <param name="eligbleSub">Set to true if this mesh has eligible vertices below road surface height (e.g. LRT tracks), false otherwise.</param>
         /// <returns>True if the mesh is eligible for adjustment (brigde or curb), false otherwise.</returns>
-        private static bool IsEligibleMesh(Vector3[] vertices, int minVertices, bool isBridge, out bool eligibleCurbs, out bool eligibleBridge, out bool eligbleSub)
+        private bool IsEligibleMesh(Vector3[] vertices, int minVertices, bool isBridge, out bool eligibleCurbs, out bool eligibleBridge, out bool eligbleSub)
         {
             // Status flags.
             int curbVertices = 0, bridgeVertices = 0, subVertices = 0;
@@ -716,13 +720,13 @@ namespace CurbHeightAdjuster
         /// <summary>
         /// Recalculates network segment lanes after a height change (via simulation thread action).
         /// </summary>
-        private static void RecalculateLanes() => Singleton<SimulationManager>.instance.AddAction(RecalculateLaneAction);
+        private void RecalculateLanes() => Singleton<SimulationManager>.instance.AddAction(RecalculateLaneAction);
 
         /// <summary>
         /// Recalculates network segment lanes after a height change.
         /// Should only be called via simulation thread action.
         /// </summary>
-        private static void RecalculateLaneAction()
+        private void RecalculateLaneAction()
         {
             // Local references.
             NetManager netManager = Singleton<NetManager>.instance;
@@ -742,7 +746,7 @@ namespace CurbHeightAdjuster
 
                     // Only look at nets that we've altered.
                     NetInfo netInfo = segments[i].Info;
-                    if (netInfo != null && NetRecords.ContainsKey(netInfo))
+                    if (netInfo != null && _netRecords.ContainsKey(netInfo))
                     {
                         // Update lanes in this segment.
                         segments[i].Info.m_netAI.UpdateLanes(i, ref segments[i], loading: false);
@@ -756,7 +760,7 @@ namespace CurbHeightAdjuster
         /// </summary>
         /// <param name="network">Network prefab.</param>
         /// <returns>True if catenary wire meshes were changed, false otherwise.</returns>
-        private static bool AdjustWires(NetInfo network)
+        private bool AdjustWires(NetInfo network)
         {
             bool changed = false;
 
@@ -781,7 +785,7 @@ namespace CurbHeightAdjuster
         /// <param name="material">Wire candidate material.</param>
         /// <param name="mesh">Wire mesh.</param>
         /// <returns>True if the mesh was adjusted, false otherwise.</returns>
-        private static bool AdjustCatenaryMesh(Material material, Mesh mesh)
+        private bool AdjustCatenaryMesh(Material material, Mesh mesh)
         {
             // Null checks.
             if (material?.name == null || mesh == null)
@@ -790,7 +794,7 @@ namespace CurbHeightAdjuster
             }
 
             // Skip already-processed meshes, and only interested in materials using electricity shaders.
-            if (!CatenaryMeshes.ContainsKey(mesh) && material.shader.name.Equals("Custom/Net/Electricity"))
+            if (!_catenaryMeshes.ContainsKey(mesh) && material.shader.name.Equals("Custom/Net/Electricity"))
             {
                 // New vertex array.
                 int vertexCount = mesh.vertices.Length;
@@ -809,7 +813,7 @@ namespace CurbHeightAdjuster
                 }
 
                 // Record original vertices.
-                CatenaryMeshes.Add(mesh, mesh.vertices);
+                _catenaryMeshes.Add(mesh, mesh.vertices);
 
                 // Apply updated vertices.
                 mesh.vertices = newVertices;

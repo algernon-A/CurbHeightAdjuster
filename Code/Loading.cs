@@ -22,11 +22,14 @@ namespace CurbHeightAdjuster
         {
             base.LoadedActions(mode);
 
+            // Local reference.
+            RoadHandler roadHandler = NetHandler.RoadHandler;
+
             // Adjust existing pillars, if we're doing so.
             if (RoadHandler.EnableBridges)
             {
                 // Iterate through all network records in dictionary.
-                foreach (KeyValuePair<NetInfo, NetRecord> netEntry in RoadHandler.NetRecords)
+                foreach (KeyValuePair<NetInfo, NetRecord> netEntry in roadHandler.NetRecords)
                 {
                     // Local references.
                     NetInfo netInfo = netEntry.Key;
@@ -38,8 +41,8 @@ namespace CurbHeightAdjuster
                     // Adjust pillar heights to match net adjustment.
                     if (netRecord.m_adjustPillars && netInfo.m_netAI is RoadBridgeAI bridgeAI)
                     {
-                        bridgeAI.m_bridgePillarOffset = RoadHandler.BridgeAdjustment(netRecord.m_bridgePillarOffset);
-                        bridgeAI.m_middlePillarOffset = RoadHandler.BridgeAdjustment(netRecord.m_middlePillarOffset);
+                        bridgeAI.m_bridgePillarOffset = roadHandler.BridgeAdjustment(netRecord.m_bridgePillarOffset);
+                        bridgeAI.m_middlePillarOffset = roadHandler.BridgeAdjustment(netRecord.m_middlePillarOffset);
                     }
                 }
 
