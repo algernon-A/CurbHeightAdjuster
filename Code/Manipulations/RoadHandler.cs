@@ -261,7 +261,7 @@ namespace CurbHeightAdjuster
                                 }
 
                                 // Record if any tram lines in this network.
-                                hasTramLanes |= lane.m_vehicleType == VehicleInfo.VehicleType.Tram;
+                                hasTramLanes |= (lane.m_vehicleType & VehicleInfo.VehicleType.Tram) != 0;
                             }
                         }
 
