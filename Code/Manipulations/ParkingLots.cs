@@ -95,10 +95,14 @@ namespace CurbHeightAdjuster
                             // Raise props in building.
                             foreach (BuildingInfo.Prop prop in building.m_props)
                             {
-                                parkingRecord.m_propHeights.Add(prop, prop.m_position.y);
-                                if (prop.m_position.y < 0)
+                                // Just in case.
+                                if (prop?.m_prop != null)
                                 {
-                                    prop.m_position.y -= HeightAdjustment;
+                                    parkingRecord.m_propHeights.Add(prop, prop.m_position.y);
+                                    if (prop.m_position.y < 0)
+                                    {
+                                        prop.m_position.y -= HeightAdjustment;
+                                    }
                                 }
                             }
 
@@ -118,10 +122,14 @@ namespace CurbHeightAdjuster
                             // Raise invisible parking space markers in building.
                             foreach (BuildingInfo.Prop prop in building.m_props)
                             {
-                                if (prop.m_prop.name.Equals("Invisible Parking Space"))
+                                // Just in case.
+                                if (prop?.m_prop?.name != null)
                                 {
-                                    parkingRecord.m_propHeights.Add(prop, prop.m_position.y);
-                                    prop.m_position.y -= HeightAdjustment;
+                                    if (prop.m_prop.name.Equals("Invisible Parking Space"))
+                                    {
+                                        parkingRecord.m_propHeights.Add(prop, prop.m_position.y);
+                                        prop.m_position.y -= HeightAdjustment;
+                                    }
                                 }
                             }
 
