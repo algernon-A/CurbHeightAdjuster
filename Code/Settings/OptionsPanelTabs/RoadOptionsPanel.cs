@@ -63,7 +63,13 @@ namespace CurbHeightAdjuster
             UICheckBox lodCheck = UICheckBoxes.AddPlainCheckBox(panel, OptionsPanelUtils.Margin, currentY, Translations.Translate("CHA_LOD"));
             lodCheck.isChecked = RoadHandler.DoLODs;
             lodCheck.eventCheckChanged += (c, isChecked) => { RoadHandler.DoLODs = isChecked; };
-            currentY += lodCheck.height + OptionsPanelUtils.GroupMargin;
+            currentY += lodCheck.height + OptionsPanelUtils.Margin;
+
+            // Catenary checkbox.
+            UICheckBox tramCatCheck = UICheckBoxes.AddPlainCheckBox(panel, OptionsPanelUtils.Margin, currentY, Translations.Translate("DO_TRAM_WIRES"));
+            tramCatCheck.isChecked = RoadHandler.DoTramCatenaries;
+            tramCatCheck.eventCheckChanged += (c, isChecked) => { RoadHandler.DoTramCatenaries = isChecked; };
+            currentY += tramCatCheck.height + OptionsPanelUtils.GroupMargin;
 
             // Reset to defaults button.
             UIButton defaultsButton = UIButtons.AddButton(panel, OptionsPanelUtils.Margin, currentY, Translations.Translate("CHA_DEFAULT"), OptionsPanelUtils.ButtonWidth);

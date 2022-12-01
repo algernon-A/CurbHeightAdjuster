@@ -19,6 +19,7 @@
 "CHA_BRI_ENA","Enable bridge deck thickness reduction"
 "CHA_BRI_THR","Scaling threshold start"
 "CHA_BRI_SCA","Depth scaling factor"
+"DO_TRAM_WIRES","Adjust tram catenary wire heights"
 "TRN_CHOICE","Set language"
 "LANGUAGE_GAME","Use game language"
 "NOTE_CLOSE","Close"

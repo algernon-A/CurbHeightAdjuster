@@ -53,6 +53,12 @@ namespace CurbHeightAdjuster
         public bool XMLUpdateRoadLods { get => RoadHandler.DoLODs; set => RoadHandler.DoLODs = value; }
 
         /// <summary>
+        /// Gets or sets a value indicating whether tram catenary heights are changed as well.
+        /// </summary>
+        [XmlElement("UpdateTramWires")]
+        public bool XMLUpdateTramCatenaries { get => RoadHandler.DoTramCatenaries; set => RoadHandler.DoTramCatenaries = value; }
+
+        /// <summary>
         /// Gets or sets a value indicating whether bridge manipulations are applied.
         /// </summary>
         [XmlElement("EnableBridges")]

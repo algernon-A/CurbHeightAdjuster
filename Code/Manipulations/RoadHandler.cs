@@ -347,7 +347,7 @@ namespace CurbHeightAdjuster
                             }
 
                             // Handle tram wires.
-                            if (hasTramLanes)
+                            if (hasTramLanes && DoTramCatenaries)
                             {
                                 netRecord.m_adjustWires = AdjustWires(network);
                             }
@@ -421,6 +421,11 @@ namespace CurbHeightAdjuster
         /// Gets or sets a value indicating whether lods are also adjusted.
         /// </summary>
         internal static bool DoLODs { get; set; } = false;
+
+        /// <summary>
+        /// Gets or sets a value indicating whether tram catenary wires are also adjusted.
+        /// </summary>
+        internal static bool DoTramCatenaries { get; set; } = true;
 
         /// <summary>
         /// Gets the dictionary of altered networks.
@@ -575,11 +580,14 @@ namespace CurbHeightAdjuster
             _processedMeshes.Clear();
 
             // Adjust catenary wires.
-            foreach (KeyValuePair<NetInfo, NetRecord> network in _netRecords)
+            if (DoTramCatenaries)
             {
-                if (network.Value.m_adjustWires)
+                foreach (KeyValuePair<NetInfo, NetRecord> network in _netRecords)
                 {
-                    AdjustWires(network.Key);
+                    if (network.Value.m_adjustWires)
+                    {
+                        AdjustWires(network.Key);
+                    }
                 }
             }
         }
