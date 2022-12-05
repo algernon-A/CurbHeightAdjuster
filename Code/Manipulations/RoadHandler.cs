@@ -263,6 +263,9 @@ namespace CurbHeightAdjuster
                                 // Record if any tram lines in this network.
                                 hasTramLanes |= (lane.m_vehicleType & VehicleInfo.VehicleType.Tram) != 0;
                             }
+
+                            // Record tram lanes
+                            netRecord.m_hasWires = hasTramLanes;
                         }
 
                         // Update nodes.
@@ -349,7 +352,7 @@ namespace CurbHeightAdjuster
                             // Handle tram wires.
                             if (hasTramLanes && DoTramCatenaries)
                             {
-                                netRecord.m_adjustWires = AdjustWires(network);
+                                AdjustWires(network);
                             }
 
                             // Add network to list.
@@ -584,7 +587,7 @@ namespace CurbHeightAdjuster
             {
                 foreach (KeyValuePair<NetInfo, NetRecord> network in _netRecords)
                 {
-                    if (network.Value.m_adjustWires)
+                    if (network.Value.m_hasWires)
                     {
                         AdjustWires(network.Key);
                     }
@@ -773,24 +776,19 @@ namespace CurbHeightAdjuster
         /// Adjusts catenary wires for the given network.
         /// </summary>
         /// <param name="network">Network prefab.</param>
-        /// <returns>True if catenary wire meshes were changed, false otherwise.</returns>
-        private bool AdjustWires(NetInfo network)
+        private void AdjustWires(NetInfo network)
         {
-            bool changed = false;
-
             // Iterate though each segment.
             foreach (NetInfo.Segment segment in network.m_segments)
             {
-                changed |= AdjustCatenaryMesh(segment?.m_segmentMaterial, segment?.m_segmentMesh);
+                AdjustCatenaryMesh(segment?.m_segmentMaterial, segment?.m_segmentMesh);
             }
 
             // Iterate though each node.
             foreach (NetInfo.Node node in network.m_nodes)
             {
-               changed |= AdjustCatenaryMesh(node?.m_nodeMaterial, node?.m_nodeMesh);
+               AdjustCatenaryMesh(node?.m_nodeMaterial, node?.m_nodeMesh);
             }
-
-            return changed;
         }
 
         /// <summary>
@@ -798,13 +796,12 @@ namespace CurbHeightAdjuster
         /// </summary>
         /// <param name="material">Wire candidate material.</param>
         /// <param name="mesh">Wire mesh.</param>
-        /// <returns>True if the mesh was adjusted, false otherwise.</returns>
-        private bool AdjustCatenaryMesh(Material material, Mesh mesh)
+        private void AdjustCatenaryMesh(Material material, Mesh mesh)
         {
             // Null checks.
             if (material?.name == null || mesh == null)
             {
-                return false;
+                return;
             }
 
             // Skip already-processed meshes, and only interested in materials using electricity shaders.
@@ -834,11 +831,8 @@ namespace CurbHeightAdjuster
 
                 Logging.KeyMessage("adjusted catenary mesh ", mesh.name);
 
-                return true;
+                return;
             }
-
-            // If we got here, no change was made.
-            return false;
         }
     }
 }
