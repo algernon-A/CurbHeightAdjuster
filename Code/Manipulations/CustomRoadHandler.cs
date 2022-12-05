@@ -53,6 +53,20 @@ namespace CurbHeightAdjuster
             "2270053832",
         };
 
+        // List of networks excluded from bridge manipulation.
+        private readonly HashSet<string> _noBridges = new HashSet<string>
+        {
+            // Hangang expressways.
+            "2016980476",
+            "2016980968",
+            "2016981478",
+            "2016982822",
+            "2017103558",
+            "2017105341",
+            "2017106185",
+            "2017107492",
+        };
+
         /*
         private static readonly HashSet<string> Curbs15cm = new HashSet<string>
         {
@@ -93,6 +107,12 @@ namespace CurbHeightAdjuster
                 {
                     Logging.KeyMessage("processing 10cm curb road ", network.name, " with Steam ID ", steamID);
                     CustomNetManipulation(network, new CustomRoadParams { SurfaceLevel = -0.10f, SurfaceTopBound = -0.06f, SurfaceBottomBound = -0.31f });
+                    return true;
+                }
+                else if (_noBridges.Contains(steamID))
+                {
+                    Logging.KeyMessage("excluding road ", network.name, " with Steam ID ", steamID, " from bridge manipulation");
+                    CustomNetManipulation(network, new CustomRoadParams { SurfaceLevel = -0.30f, SurfaceTopBound = -0.06f, SurfaceBottomBound = -0.31f });
                     return true;
                 }
             }
