@@ -27,33 +27,33 @@ namespace CurbHeightAdjuster
         internal PathOptionsPanel(UITabstrip tabStrip, int tabIndex)
         {
             // Add tab and helper.
-            UIPanel panel = UITabstrips.AddTextTab(tabStrip, Translations.Translate("CHA_OPT_PAT"), tabIndex, out UIButton _);
+            UIPanel panel = UITabstrips.AddTextTab(tabStrip, Translations.Translate("OPTIONS_PATHS"), tabIndex, out UIButton _);
 
             // Y position indicator.
             float currentY = OptionsPanelUtils.GroupMargin;
 
             // Enable path manipulations checkbox.
-            UICheckBox pathCheck = UICheckBoxes.AddPlainCheckBox(panel, OptionsPanelUtils.Margin, currentY, Translations.Translate("CHA_PAT_ENA"));
+            UICheckBox pathCheck = UICheckBoxes.AddPlainCheckBox(panel, OptionsPanelUtils.Margin, currentY, Translations.Translate("DO_PATHS"));
             pathCheck.isChecked = PathHandler.CustomizePaths;
             pathCheck.eventCheckChanged += PathCheckChanged;
             currentY += pathCheck.height + OptionsPanelUtils.GroupMargin;
 
             // Base level slider slider.
-            _baseSlider = OptionsPanelUtils.AddDepthSlider(panel, ref currentY, "CHA_PAT_BAS", PathHandler.MinBaseHeight, PathHandler.MaxBaseHeight, PathHandler.BaseHeight);
+            _baseSlider = OptionsPanelUtils.AddDepthSlider(panel, ref currentY, "PATH_HEIGHT", PathHandler.MinBaseHeight, PathHandler.MaxBaseHeight, PathHandler.BaseHeight);
             _baseSlider.eventValueChanged += (c, value) => PathHandler.BaseHeight = value;
 
             // Curb height slider.
-            _curbSlider = OptionsPanelUtils.AddDepthSlider(panel, ref currentY, "CHA_PAT_CUR", PathHandler.MinCurbHeight, PathHandler.MaxCurbHeight, PathHandler.CurbHeight);
+            _curbSlider = OptionsPanelUtils.AddDepthSlider(panel, ref currentY, "PATH_CURB_HEIGHT", PathHandler.MinCurbHeight, PathHandler.MaxCurbHeight, PathHandler.CurbHeight);
             _curbSlider.eventValueChanged += (c, value) => PathHandler.CurbHeight = value;
 
             // LOD checkbox.
-            _lodCheck = UICheckBoxes.AddPlainCheckBox(panel, OptionsPanelUtils.Margin, currentY, Translations.Translate("CHA_LOD"));
+            _lodCheck = UICheckBoxes.AddPlainCheckBox(panel, OptionsPanelUtils.Margin, currentY, Translations.Translate("DO_LODS"));
             _lodCheck.isChecked = PathHandler.DoLODs;
             _lodCheck.eventCheckChanged += (c, isChecked) => { PathHandler.DoLODs = isChecked; };
             currentY += _lodCheck.height + OptionsPanelUtils.GroupMargin;
 
             // Reset to deafults button.
-            UIButton defaultsButton = UIButtons.AddButton(panel, OptionsPanelUtils.Margin, currentY, Translations.Translate("CHA_DEFAULT"), OptionsPanelUtils.ButtonWidth);
+            UIButton defaultsButton = UIButtons.AddButton(panel, OptionsPanelUtils.Margin, currentY, Translations.Translate("DEFAULTS"), OptionsPanelUtils.ButtonWidth);
             defaultsButton.eventClicked += (c, clickEvent) =>
             {
                 // Set controls to default settings.
@@ -69,12 +69,12 @@ namespace CurbHeightAdjuster
             if (ColossalFramework.Singleton<LoadingManager>.instance.m_loadingComplete)
             {
                 // Apply button.
-                UIButton applyButton = UIButtons.AddButton(panel, OptionsPanelUtils.Margin, currentY, Translations.Translate("CHA_APPLY"), OptionsPanelUtils.ButtonWidth);
+                UIButton applyButton = UIButtons.AddButton(panel, OptionsPanelUtils.Margin, currentY, Translations.Translate("APPLY"), OptionsPanelUtils.ButtonWidth);
                 applyButton.eventClicked += (control, clickEvent) => NetHandler.PathHandler.Apply();
                 currentY += applyButton.height + OptionsPanelUtils.Margin;
 
                 // Undo button.
-                UIButton undoButton = UIButtons.AddButton(panel, OptionsPanelUtils.Margin, currentY, Translations.Translate("CHA_REVERT"), OptionsPanelUtils.ButtonWidth);
+                UIButton undoButton = UIButtons.AddButton(panel, OptionsPanelUtils.Margin, currentY, Translations.Translate("REVERT"), OptionsPanelUtils.ButtonWidth);
                 undoButton.eventClicked += (control, clickEvent) => NetHandler.PathHandler.Revert();
             }
 

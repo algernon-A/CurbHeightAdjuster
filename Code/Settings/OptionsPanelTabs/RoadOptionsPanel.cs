@@ -26,13 +26,13 @@ namespace CurbHeightAdjuster
         internal RoadOptionsPanel(UITabstrip tabStrip, int tabIndex)
         {
             // Add tab and helper.
-            UIPanel panel = UITabstrips.AddTextTab(tabStrip, Translations.Translate("CHA_OPT_ROA"), tabIndex, out UIButton _);
+            UIPanel panel = UITabstrips.AddTextTab(tabStrip, Translations.Translate("OPTIONS_ROADS"), tabIndex, out UIButton _);
 
             // Y position indicator.
             float currentY = OptionsPanelUtils.GroupMargin;
 
             // Curb depth slider.
-            UISlider depthSlider = OptionsPanelUtils.AddDepthSlider(panel, ref currentY, "CHA_HEIGHT", RoadHandler.MinCurbHeight, RoadHandler.MaxCurbHeight, RoadHandler.NewCurbHeight);
+            UISlider depthSlider = OptionsPanelUtils.AddDepthSlider(panel, ref currentY, "CURB_HEIGHT", RoadHandler.MinCurbHeight, RoadHandler.MaxCurbHeight, RoadHandler.NewCurbHeight);
             depthSlider.eventValueChanged += (control, value) => RoadHandler.NewCurbHeight = value;
 
             // Spacer.
@@ -40,27 +40,27 @@ namespace CurbHeightAdjuster
             currentY += OptionsPanelUtils.GroupMargin;
 
             // Enable bridge mesh checkbox.
-            UICheckBox bridgeCheck = UICheckBoxes.AddPlainCheckBox(panel, OptionsPanelUtils.Margin, currentY, Translations.Translate("CHA_BRI_ENA"));
+            UICheckBox bridgeCheck = UICheckBoxes.AddPlainCheckBox(panel, OptionsPanelUtils.Margin, currentY, Translations.Translate("DO_BRIDGES"));
             bridgeCheck.isChecked = RoadHandler.EnableBridges;
             bridgeCheck.eventCheckChanged += BridgeCheckChanged;
             currentY += bridgeCheck.height + OptionsPanelUtils.Margin;
 
             // Adjust exiting bridge pillars checkbox.
-            UICheckBox pillarCheck = UICheckBoxes.AddPlainCheckBox(panel, OptionsPanelUtils.Margin, currentY, Translations.Translate("CHA_OPT_PIL"));
+            UICheckBox pillarCheck = UICheckBoxes.AddPlainCheckBox(panel, OptionsPanelUtils.Margin, currentY, Translations.Translate("ADJUST_PILLARS"));
             pillarCheck.isChecked = Pillars.AutoUpdate;
             pillarCheck.eventCheckChanged += (c, isChecked) => { Pillars.AutoUpdate = isChecked; };
             currentY += pillarCheck.height + OptionsPanelUtils.GroupMargin;
 
             // Brige min threshold slider.
-            _thresholdSlider = OptionsPanelUtils.AddDepthSlider(panel, ref currentY, "CHA_BRI_THR", RoadHandler.MinBridgeThreshold, RoadHandler.MaxBridgeThreshold, RoadHandler.BridgeHeightThreshold);
+            _thresholdSlider = OptionsPanelUtils.AddDepthSlider(panel, ref currentY, "BRIDGE_THRESHOLD", RoadHandler.MinBridgeThreshold, RoadHandler.MaxBridgeThreshold, RoadHandler.BridgeHeightThreshold);
             _thresholdSlider.eventValueChanged += (c, value) => RoadHandler.BridgeHeightThreshold = value;
 
             // Bridge depth multiplier slider.
-            _multiplierSlider = OptionsPanelUtils.AddPercentageSlider(panel, ref currentY, "CHA_BRI_SCA", RoadHandler.MinBridgeScale, RoadHandler.MaxBridgeScale, RoadHandler.BridgeHeightScale);
+            _multiplierSlider = OptionsPanelUtils.AddPercentageSlider(panel, ref currentY, "BRIDGE_SCALE", RoadHandler.MinBridgeScale, RoadHandler.MaxBridgeScale, RoadHandler.BridgeHeightScale);
             _multiplierSlider.eventValueChanged += (c, value) => RoadHandler.BridgeHeightScale = value;
 
             // LOD checkbox.
-            UICheckBox lodCheck = UICheckBoxes.AddPlainCheckBox(panel, OptionsPanelUtils.Margin, currentY, Translations.Translate("CHA_LOD"));
+            UICheckBox lodCheck = UICheckBoxes.AddPlainCheckBox(panel, OptionsPanelUtils.Margin, currentY, Translations.Translate("DO_LODS"));
             lodCheck.isChecked = RoadHandler.DoLODs;
             lodCheck.eventCheckChanged += (c, isChecked) => { RoadHandler.DoLODs = isChecked; };
             currentY += lodCheck.height + OptionsPanelUtils.Margin;
@@ -72,7 +72,7 @@ namespace CurbHeightAdjuster
             currentY += tramCatCheck.height + OptionsPanelUtils.GroupMargin;
 
             // Reset to defaults button.
-            UIButton defaultsButton = UIButtons.AddButton(panel, OptionsPanelUtils.Margin, currentY, Translations.Translate("CHA_DEFAULT"), OptionsPanelUtils.ButtonWidth);
+            UIButton defaultsButton = UIButtons.AddButton(panel, OptionsPanelUtils.Margin, currentY, Translations.Translate("DEFAULTS"), OptionsPanelUtils.ButtonWidth);
             defaultsButton.eventClicked += (c, p) =>
             {
                 // Set controls to default settings.
@@ -89,12 +89,12 @@ namespace CurbHeightAdjuster
             if (ColossalFramework.Singleton<LoadingManager>.instance.m_loadingComplete)
             {
                 // Apply button.
-                UIButton applyButton = UIButtons.AddButton(panel, OptionsPanelUtils.Margin, currentY, Translations.Translate("CHA_APPLY"), OptionsPanelUtils.ButtonWidth);
+                UIButton applyButton = UIButtons.AddButton(panel, OptionsPanelUtils.Margin, currentY, Translations.Translate("APPLY"), OptionsPanelUtils.ButtonWidth);
                 applyButton.eventClicked += (c, p) => NetHandler.RoadHandler.Apply();
                 currentY += applyButton.height + OptionsPanelUtils.Margin;
 
                 // Undo button.
-                UIButton undoButton = UIButtons.AddButton(panel, OptionsPanelUtils.Margin, currentY, Translations.Translate("CHA_REVERT"), OptionsPanelUtils.ButtonWidth);
+                UIButton undoButton = UIButtons.AddButton(panel, OptionsPanelUtils.Margin, currentY, Translations.Translate("REVERT"), OptionsPanelUtils.ButtonWidth);
                 undoButton.eventClicked += (c, p) => NetHandler.RoadHandler.Revert();
             }
         }

@@ -23,7 +23,7 @@ namespace CurbHeightAdjuster
         internal GeneralOptionsPanel(UITabstrip tabStrip, int tabIndex)
         {
             // Add tab and helper.
-            UIPanel panel = UITabstrips.AddTextTab(tabStrip, Translations.Translate("CHA_OPT_GEN"), tabIndex, out UIButton _);
+            UIPanel panel = UITabstrips.AddTextTab(tabStrip, Translations.Translate("OPTIONS_GENERAL"), tabIndex, out UIButton _);
 
             // Y position indicator.
             float currentY = OptionsPanelUtils.GroupMargin;
