@@ -38,7 +38,7 @@ namespace CurbHeightAdjuster
             currentY += languageDropDown.parent.height + OptionsPanelUtils.GroupMargin;
 
             // LOD checkbox.
-            UICheckBox logCheck = UICheckBoxes.AddPlainCheckBox(panel, OptionsPanelUtils.Margin, currentY, Translations.Translate("CHA_OPT_LOG"));
+            UICheckBox logCheck = UICheckBoxes.AddPlainCheckBox(panel, OptionsPanelUtils.Margin, currentY, Translations.Translate("DETAIL_LOGGING"));
             logCheck.isChecked = Logging.DetailLogging;
             logCheck.eventCheckChanged += (c, isChecked) => { Logging.DetailLogging = isChecked; };
         }

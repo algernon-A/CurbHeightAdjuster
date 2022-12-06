@@ -7,7 +7,6 @@ namespace CurbHeightAdjuster
 {
     using System.IO;
     using System.Xml.Serialization;
-    using AlgernonCommons;
     using AlgernonCommons.XML;
 
     /// <summary>
@@ -33,12 +32,6 @@ namespace CurbHeightAdjuster
         /// </summary>
         [XmlAttribute("Version")]
         public int Version { get; set; }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether detailed logging is enabled.
-        /// </summary>
-        [XmlElement("DetailedLogging")]
-        public bool XMDetailedLogging { get => Logging.DetailLogging; set => Logging.DetailLogging = value; }
 
         /// <summary>
         /// Gets or sets the new curb height to apply (positive figure, in cm).

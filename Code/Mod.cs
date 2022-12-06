@@ -28,7 +28,7 @@ namespace CurbHeightAdjuster
         /// <summary>
         /// Gets the mod's description for display in the content manager.
         /// </summary>
-        public string Description => Translations.Translate("CHA_DESC");
+        public string Description => Translations.Translate("MOD_DESCRIPTION");
 
         /// <summary>
         /// Gets the mod's what's new message array.

@@ -4,7 +4,6 @@
 "OPTIONS_GENERAL","General","Options panel tab - general options."
 "OPTIONS_ROADS","Roads","Options panel tab - road options."
 "OPTIONS_PATHS","Paths","Options panel tab - path options."
-"CHA_OPT_LOG","Enabled detailed degbugging logging"
 "CURBS","Curbs","Options panel section - curb settings."
 "BRIDGES","Bridges","Options panel section - bridge settings."
 "ADJUST_PILLARS","Automatically adjust height of existing bridge pillars","Options panel checkbox."
