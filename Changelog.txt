@@ -2,6 +2,7 @@
 
 - Adjust tram catenary wire heights to match road surface
 - Exclude Hangang Expressway from bridge deck manipulations
+- Implement common translations
 
 
 Version 1.5.3

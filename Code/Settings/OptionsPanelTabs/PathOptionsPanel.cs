@@ -40,21 +40,21 @@ namespace CurbHeightAdjuster
 
             // Base level slider slider.
             _baseSlider = OptionsPanelUtils.AddDepthSlider(panel, ref currentY, "CHA_PAT_BAS", PathHandler.MinBaseHeight, PathHandler.MaxBaseHeight, PathHandler.BaseHeight);
-            _baseSlider.eventValueChanged += (control, value) => PathHandler.BaseHeight = value;
+            _baseSlider.eventValueChanged += (c, value) => PathHandler.BaseHeight = value;
 
             // Curb height slider.
             _curbSlider = OptionsPanelUtils.AddDepthSlider(panel, ref currentY, "CHA_PAT_CUR", PathHandler.MinCurbHeight, PathHandler.MaxCurbHeight, PathHandler.CurbHeight);
-            _curbSlider.eventValueChanged += (control, value) => PathHandler.CurbHeight = value;
+            _curbSlider.eventValueChanged += (c, value) => PathHandler.CurbHeight = value;
 
             // LOD checkbox.
             _lodCheck = UICheckBoxes.AddPlainCheckBox(panel, OptionsPanelUtils.Margin, currentY, Translations.Translate("CHA_LOD"));
             _lodCheck.isChecked = PathHandler.DoLODs;
-            _lodCheck.eventCheckChanged += (control, isChecked) => { PathHandler.DoLODs = isChecked; };
+            _lodCheck.eventCheckChanged += (c, isChecked) => { PathHandler.DoLODs = isChecked; };
             currentY += _lodCheck.height + OptionsPanelUtils.GroupMargin;
 
             // Reset to deafults button.
             UIButton defaultsButton = UIButtons.AddButton(panel, OptionsPanelUtils.Margin, currentY, Translations.Translate("CHA_DEFAULT"), OptionsPanelUtils.ButtonWidth);
-            defaultsButton.eventClicked += (control, clickEvent) =>
+            defaultsButton.eventClicked += (c, clickEvent) =>
             {
                 // Set controls to default settings.
                 _baseSlider.value = PathHandler.DefaultBaseHeight;

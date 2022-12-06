@@ -29,8 +29,8 @@ namespace CurbHeightAdjuster
             float currentY = OptionsPanelUtils.GroupMargin;
 
             // Language choice.
-            UIDropDown languageDropDown = UIDropDowns.AddPlainDropDown(panel, OptionsPanelUtils.LeftMargin, currentY, Translations.Translate("TRN_CHOICE"), Translations.LanguageList, Translations.Index);
-            languageDropDown.eventSelectedIndexChanged += (control, index) =>
+            UIDropDown languageDropDown = UIDropDowns.AddPlainDropDown(panel, OptionsPanelUtils.LeftMargin, currentY, Translations.Translate("LANGUAGE_CHOICE"), Translations.LanguageList, Translations.Index);
+            languageDropDown.eventSelectedIndexChanged += (c, index) =>
             {
                 Translations.Index = index;
                 OptionsPanelManager<OptionsPanel>.LocaleChanged();
@@ -40,7 +40,7 @@ namespace CurbHeightAdjuster
             // LOD checkbox.
             UICheckBox logCheck = UICheckBoxes.AddPlainCheckBox(panel, OptionsPanelUtils.Margin, currentY, Translations.Translate("CHA_OPT_LOG"));
             logCheck.isChecked = Logging.DetailLogging;
-            logCheck.eventCheckChanged += (control, isChecked) => { Logging.DetailLogging = isChecked; };
+            logCheck.eventCheckChanged += (c, isChecked) => { Logging.DetailLogging = isChecked; };
         }
     }
 }
