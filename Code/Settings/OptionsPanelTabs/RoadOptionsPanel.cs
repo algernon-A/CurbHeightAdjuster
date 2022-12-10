@@ -76,7 +76,7 @@ namespace CurbHeightAdjuster
             defaultsButton.eventClicked += (c, p) =>
             {
                 // Set controls to default settings.
-                depthSlider.value = RoadHandler.DefaultNewCurbHeight;
+                depthSlider.value = -RoadHandler.DefaultNewCurbHeight;
                 _thresholdSlider.value = -RoadHandler.DefaultBridgeThreshold;
                 _multiplierSlider.value = RoadHandler.DefaultBridgeMultiplier;
 

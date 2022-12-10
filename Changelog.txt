@@ -1,4 +1,7 @@
-﻿Version 1.6 -
+﻿- Fix 'revert to default' applying default of 7cm instead of 15cm
+
+
+Version 1.6 -
 
 - Adjust tram catenary wire heights to match road surface
 - Exclude Hangang Expressway from bridge deck manipulations
