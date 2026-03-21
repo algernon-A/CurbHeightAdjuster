@@ -11,12 +11,12 @@ namespace CurbHeightAdjuster
     /// <summary>
     /// The mod's settings options panel.
     /// </summary>
-    public class OptionsPanel : UIPanel
+    public class OptionsPanel : OptionsPanelBase
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="OptionsPanel"/> class.
+        /// Performs on-demand panel setup.
         /// </summary>
-        internal OptionsPanel()
+        protected override void Setup()
         {
             // Add tabstrip.
             // Add tabstrip.
