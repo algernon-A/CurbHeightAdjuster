@@ -1,4 +1,7 @@
-﻿- Fix 'revert to default' applying default of 7cm instead of 15cm
+﻿Version 1.7 -
+
+- Add support for event roads
+- Fix 'revert to default' applying default of 7cm instead of 15cm
 
 
 Version 1.6 -
