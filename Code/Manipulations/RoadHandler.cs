@@ -185,7 +185,11 @@ namespace CurbHeightAdjuster
 
                             // Only interested in segments using road shaders.
                             string shaderName = segment.m_segmentMaterial.shader.name;
-                            if (shaderName != "Custom/Net/Road" && shaderName != "Custom/Net/RoadBridge" && shaderName != "Custom/Net/TrainBridge")
+                            if (shaderName != "Custom/Net/Road" &&
+                                shaderName != "Custom/Net/RoadBridge" &&
+                                shaderName != "Custom/Net/TrainBridge" &&
+                                shaderName != "Custom/Net/EventRoad" &&
+                                shaderName != "Custom/Net/EventRoadBridge")
                             {
                                 continue;
                             }
@@ -279,7 +283,11 @@ namespace CurbHeightAdjuster
 
                             // Only interested in nodes using road shaders.
                             string shaderName = node.m_nodeMaterial.shader.name;
-                            if (shaderName != "Custom/Net/Road" && shaderName != "Custom/Net/RoadBridge" && shaderName != "Custom/Net/TrainBridge")
+                            if (shaderName != "Custom/Net/Road" &&
+                                shaderName != "Custom/Net/RoadBridge" &&
+                                shaderName != "Custom/Net/TrainBridge" &&
+                                shaderName != "Custom/Net/EventRoad" &&
+                                shaderName != "Custom/Net/EventRoadBridge")
                             {
                                 continue;
                             }
